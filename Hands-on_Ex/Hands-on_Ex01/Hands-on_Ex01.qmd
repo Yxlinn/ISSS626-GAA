@@ -1,0 +1,64 @@
+---
+title: "Hands-on Exercise 1(A): Geospatial Data Science with R"
+---
+
+Geospatial Data Science is a process of importing, wrangling, integrating, and processing geographically referenced data sets. 
+
+In this hands-on exercise, you will learn how to perform geospatial data science tasks in R by using **sf** package.
+
+## 1.1 Learning Outcome
+
+This is my first hands-on exercise.
+
+### Loading the necessary R packages
+
+We will load both sf and tidyverse R packages onto RStudio environment.
+
+```{r}
+pacman::p_load(sf, tidyverse)
+```
+
+## 1.4 Importing Geospatial Data
+
+In this section, three geospatial datasets are imported into R using `st_read()` of the **sf** package:
+
+- `MP14_SUBZONE_NO_SEA_PL`, a polygon feature layer representing Singapore's planning subzones (Master Plan 2014, No Sea variant)
+- `CyclingPathGazette`, a line feature layer representing Singapore's cycling paths
+- `PreSchoolsLocation`, a point feature layer representing pre-school locations
+
+### 1.4.1 Importing polyline feature data in GeoJSON format (Master Plan 2024 Subzone Boundary)
+
+The code chunk below uses *st_read()* function of **sf** package to import `MP14_SUBZONE_NO_SEA_PL` into R as a polygon feature data frame. Since the input data is in **GeoJSON** format, only a single `dsn` (data source name) argument is needed to define the file path.
+
+````{r}
+mpsz = st_read(dsn = "data/geospatial/MasterPlan2014SubzoneBoundaryNoSea.geojson")
+````
+
+The message above reveals that the geospatial objects are multipolygon features. There are a total of 323 multipolygon features and 13 fields in `mpsz` simple feature data frame. `mpsz` is in **wgs84** geodetic coordinates system — a geographic coordinate system using latitude/longitude in degrees. The bounding box provides the x extent and y extent of the data.
+
+### 1.4.2 Importing polyline feature data in shapefile format (Cycling Path)
+
+The code chunk below uses *st_read()* function of **sf** package to import `CyclingPath` shapefile into R as a line feature data frame.
+
+```{r}
+cyclingpath = st_read(dsn = "data/geospatial",
+                       layer = "CyclingPathGazette")
+```
+
+The message above reveals that the geospatial objects are multilinestring features. There are a total of 4,830 multilinestring features and 7 fields in `cyclingpath` simple feature data frame. This data set is in **svy21** projected coordinates system, where its coordinates are expressed in metres.
+
+### 1.4.3 Importing GIS data in GeoJSON format (Pre-school Locations)
+
+The `PreSchoolsLocation` is in **GeoJSON** format. The code chunk below will be used to import `PreSchoolsLocation` into R.
+
+```{r}
+preschool = st_read(dsn = "data/geospatial/PreSchoolsLocation.geojson") %>%
+  st_transform(crs = 3414)
+```
+
+::: {.callout-note}
+## Code Explanation:
+Read the `preschoolslocation` GeoJSON file into R, then take that result and convert its coordinates from WGS84 (degrees) into SVY21 (metres), and store the final output in a variable called preschool.
+:::
+
+The message above reveals that `preschool` is a point feature data frame. There are a total of 2290 features and 2 fields. Similar to `mpsz`, `preschool` is also in **wgs84** coordinates system.
