@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "ISSS626 Geospatial Analytics & Applications",
     "section": "",
-    "text": "This is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2"
+    "text": "This site documents my coursework for ISSS626 Geospatial Analytics and Applications, including hands-on exercises, in-class exercises, and take-home exercises using R.\nTopics covered in this course:\n\nIntroduction to Geospatial Analytics\nSpatial Point Patterns Analysis (SPPA)\nAdvanced Spatial Point Patterns Analysis\nSpatial Weights and Applications\nGlobal and Local Measures of Spatial Association\nGeographic Segmentation\nGeographically Weighted Explanatory Models\nGeographically Weighted Predictive Models\nModelling Geographic Accessibility\nSpatial Interaction Models"
   },
   {
     "objectID": "about.html",
@@ -74,6 +74,13 @@
     "href": "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html#checking-the-content-of-a-simple-feature-data-frame",
     "title": "Hands-on Exercise 1(A): Geospatial Data Science with R",
     "section": "1.5 Checking the Content of A Simple Feature Data Frame",
-    "text": "1.5 Checking the Content of A Simple Feature Data Frame\n\n1.5.1 Working with st_geometry()\nThe column in the sf data.frame that contains the geometries is a list of class sfc. We can retrieve the geometry list-column in this case by mpsz$geom or mpsz[[1]], but the more general way uses st_geometry() as shown in the code chunk below.\n\nst_geometry(mpsz, n=0)\n\nGeometry set for 323 features \nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 103.6057 ymin: 1.158699 xmax: 104.0885 ymax: 1.470775\nGeodetic CRS:  WGS 84\nFirst 5 geometries:\n\n\nMULTIPOLYGON (((103.8432 1.284328, 103.8428 1.2...\n\n\nMULTIPOLYGON (((103.8221 1.280494, 103.8221 1.2...\n\n\nMULTIPOLYGON (((103.8438 1.285079, 103.8436 1.2...\n\n\nMULTIPOLYGON (((103.8496 1.284119, 103.8496 1.2...\n\n\nMULTIPOLYGON (((103.8525 1.286166, 103.8524 1.2..."
+    "text": "1.5 Checking the Content of A Simple Feature Data Frame\n\n1.5.1 Working with st_geometry()\nThe column in the sf data.frame that contains the geometries is a list of class sfc. We can retrieve the geometry list-column in this case by mpsz$geom or mpsz[[1]], but the more general way uses st_geometry() as shown in the code chunk below.\n\nst_geometry(mpsz)\n\nGeometry set for 323 features \nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 103.6057 ymin: 1.158699 xmax: 104.0885 ymax: 1.470775\nGeodetic CRS:  WGS 84\nFirst 5 geometries:\n\n\nMULTIPOLYGON (((103.8432 1.284328, 103.8428 1.2...\n\n\nMULTIPOLYGON (((103.8221 1.280494, 103.8221 1.2...\n\n\nMULTIPOLYGON (((103.8438 1.285079, 103.8436 1.2...\n\n\nMULTIPOLYGON (((103.8496 1.284119, 103.8496 1.2...\n\n\nMULTIPOLYGON (((103.8525 1.286166, 103.8524 1.2..."
+  },
+  {
+    "objectID": "index.html#about-this-site",
+    "href": "index.html#about-this-site",
+    "title": "ISSS626 Geospatial Analytics & Applications",
+    "section": "About this site",
+    "text": "About this site\nThis site documents my coursework for ISSS626 Geospatial Analytics and Applications, including hands-on exercises, in-class exercises, and take-home exercises using R.\nTopics covered in this course:\n\nIntroduction to Geospatial Analytics\nSpatial Point Patterns Analysis (SPPA)\nAdvanced Spatial Point Patterns Analysis\nSpatial Weights and Applications\nGlobal and Local Measures of Spatial Association\nGeographic Segmentation\nGeographically Weighted Explanatory Models\nGeographically Weighted Predictive Models\nModelling Geographic Accessibility\nSpatial Interaction Models :::"
   }
 ]

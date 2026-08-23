@@ -1,1 +1,55 @@
-/* css styles */
+/* ===== Navbar background ===== */
+.navbar {
+  background-color: #2c5f8a !important;   /* deep, professional blue */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+
+/* ===== Brand/title text (top-left site title) ===== */
+.navbar-brand {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* ===== Top-level nav links (Hands-on Exercises, In-class Exercises, Home, About) ===== */
+.navbar-nav .nav-link {
+  color: #e8f1fa !important;   /* soft white-blue, readable on dark blue */
+  transition: color 0.15s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #ffffff !important;
+  font-weight: 500;
+}
+
+/* Active/current page link */
+.navbar-nav .nav-link.active {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* ===== Dropdown menu (Hands-on Exercise 1, 2, etc.) ===== */
+.dropdown-menu {
+  background-color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.dropdown-menu .dropdown-item {
+  color: #2c3e50;
+}
+
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+  background-color: #eaf3fb;
+  color: #2c5f8a;
+}
+
+/* ===== Search icon ===== */
+.navbar .quarto-search-icon,
+.navbar-nav .nav-link[aria-label="Search"] {
+  color: #e8f1fa !important;
+}
+
+.navbar .quarto-search-icon:hover {
+  color: #ffffff !important;
+}

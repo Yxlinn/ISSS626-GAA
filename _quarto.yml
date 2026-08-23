@@ -2,7 +2,7 @@ project:
   type: website
 
 website:
-  title: "ISSS626 Geospatial Analytics & Applications"
+  title: "ISSS626 Geospatial Analytics"
   navbar:
     left:
       - text: "Hands-on Exercises"
@@ -26,7 +26,6 @@ format:
   html:
     theme:
       - cosmo
-      - brand
     css: styles.css
     toc: true
 
