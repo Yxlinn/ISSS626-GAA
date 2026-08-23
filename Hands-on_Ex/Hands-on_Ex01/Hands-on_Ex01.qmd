@@ -64,7 +64,7 @@ pacman::p_load(sf, tidyverse)
 
 ## 1.4 Importing Geospatial Data
 
-In this section, three geospatial datasets are imported into R using `st_read()` of the **sf** package:
+In this section, three geospatial datasets are imported into R using [st_read()](https://r-spatial.github.io/sf/reference/st_read.html) of the **sf** package:
 
 - `MP14_SUBZONE_NO_SEA_PL`, a polygon feature layer representing Singapore's planning subzones (Master Plan 2014, No Sea variant)
 - `CyclingPathGazette`, a line feature layer representing Singapore's cycling paths
@@ -110,9 +110,33 @@ The message above reveals that `preschool` is a point feature data frame. There 
 
 ### 1.5.1 Working with st_geometry()
 
-The column in the sf data.frame that contains the geometries is a list of class sfc. We can retrieve the geometry list-column in this case by mpsz$geom or mpsz[[1]], but the more general way uses [st_geometry()](https://r-spatial.github.io/sf/reference/st_geometry.html) as shown in the code chunk below.
+The column in the sf data.frame that contains the geometries is a list of class `sfc`. We can retrieve the geometry list-column in this case by mpsz$geom or mpsz[[1]], but the more general way uses [st_geometry()](https://r-spatial.github.io/sf/reference/st_geometry.html) as shown in the code chunk below.
 
 ```{r}
-st_geometry(mpsz, n=0)
+st_geometry(mpsz)
 ```
+
+### 1.5.2 Working with glimpse()
+
+Beyond the basic geospatial feature information, an sf data frame also holds associated attribute information. The code chunk below uses [glimpse()](https://dplyr.tidyverse.org/reference/glimpse.html) function of **dplyr** package to inspect this attribute data.
+
+```{r}
+glimpse(mpsz)
+```
+
+`glimpse()` report reveals the data type of each fields. For example, `SHAPE_1.AREA` and `SHAPE_1.LEN` fields are in **double-precision values**.
+
+### 1.5.3 Working with head()
+
+While `glimpse()` gives a quick overview of all fields, sometimes it's useful to view the complete information of individual features in full. This can be done using [head()](https://www.rdocumentation.org/packages/utils/versions/3.6.2/topics/head) function of Base R, as shown in the code chunk below.
+
+```{r}
+head(mpsz, n=5)
+```
+
+::: callout-note
+One of the useful arguments of head() is that it allows the user to select the number of records to display (i.e. the n argument).
+:::
+
+
 
