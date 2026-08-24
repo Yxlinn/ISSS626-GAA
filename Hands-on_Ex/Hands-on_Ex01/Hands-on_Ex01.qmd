@@ -222,5 +222,61 @@ plot(st_geometry(preschool), add = TRUE)
 
 ## 1.8 Importing and Converting An Aspatial Data
 
+In practice, it is not unusual to come across data such as `listings` from Inside Airbnb. This kind of data is referred to as aspatial data — it is not geospatial data, but among the data fields, there are two fields that capture the x- and y-coordinates of the data points.
 
+This section covers how to import aspatial data into R and save it as a tibble data frame, before converting it into a simple feature data frame.
+
+### 1.8.1 Importing the aspatial data
+
+Since the `listings` data set is in csv file format, [read_csv()](https://readr.tidyverse.org/reference/read_delim.html) function of **readr** package is used to import `listings.csv`, as shown in the code chunk below. The output R object is called `listings`, and it is a [tibble data frame](https://r4ds.had.co.nz/tibbles.html).
+
+```{r}
+#| message: false
+listings <- read_csv("data/aspatial/listings.csv")
+```
+
+After importing the data file into R, it is important to examine if the file has been imported correctly.
+
+The code chunk below uses `list()` of Base R, instead of `glimpse()`, to examine the imported data.
+
+```{r}
+list(listings)
+```
+
+The output reveals that the `listings` tibble data frame consists of **3,247 rows** and **19 columns**. Two useful fields to be used in the next phase are `latitude` and `longitude`, which are in decimal degree format. As a best guess, this data is assumed to be in the **wgs84** geographic coordinate system.
+
+### 1.8.2 Creating a simple feature data frame from an aspatial data frame
+
+The code chunk below converts listing data frame into a simple feature data frame by using [st_as_sf()](https://r-spatial.github.io/sf/reference/st_as_sf.html) of **sf** packages.
+
+```{r}
+listings_sf <- st_as_sf(listings, 
+                       coords = c("longitude", "latitude"),
+                       crs=4326) %>%
+  st_transform(crs = 3414)
+```
+
+A few things to note about the arguments above:
+
+- coords argument requires you to provide the column name of the x-coordinates first then followed by the column name of the y-coordinates.
+- crs argument requires you to provide the coordinates system in epsg format. [EPSG](https://epsg.io/4326): 4326 is wgs84 Geographic Coordinate System and [EPSG](https://epsg.io/3414): 3414 is Singapore SVY21 Projected Coordinate System. You can search for other country’s epsg code by referring to [epsg.io](https://epsg.io/).
+- %>% is used to nest `st_transform()` to transform the newly created simple feature data frame into svy21 projected coordinates system.
+
+The content of this newly created simple feature data frame can be examined below.
+
+```{r}
+glimpse(listings_sf)
+```
+
+The table above shows the content of `listings_sf`. A new `geometry` column has been added to the data frame, while the original `longitude` and `latitude` columns have been dropped.
+
+The map below shows the listings_sf layer plotted on top of mpsz, with each point representing an Airbnb listing across Singapore.
+
+```{r}
+#| warning: false
+plot(st_geometry(mpsz))
+plot(st_geometry(listings_sf), add = TRUE)
+```
+
+## 1.9 Geoprocessing with sf package
 
