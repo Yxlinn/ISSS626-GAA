@@ -202,6 +202,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#working-with-glimpse" id="toc-working-with-glimpse" class="nav-link" data-scroll-target="#working-with-glimpse">1.5.2 Working with glimpse()</a></li>
   <li><a href="#working-with-head" id="toc-working-with-head" class="nav-link" data-scroll-target="#working-with-head">1.5.3 Working with head()</a></li>
   </ul></li>
+  <li><a href="#plotting-the-geospatial-data" id="toc-plotting-the-geospatial-data" class="nav-link" data-scroll-target="#plotting-the-geospatial-data">1.6 Plotting the Geospatial Data</a></li>
+  <li><a href="#working-with-projection" id="toc-working-with-projection" class="nav-link" data-scroll-target="#working-with-projection">1.7 Working with Projection</a>
+  <ul class="collapse">
+  <li><a href="#transforming-the-projection-of-mpsz-from-wgs84-to-svy21" id="toc-transforming-the-projection-of-mpsz-from-wgs84-to-svy21" class="nav-link" data-scroll-target="#transforming-the-projection-of-mpsz-from-wgs84-to-svy21">1.7.1 Transforming the projection of mpsz from wgs84 to svy21</a></li>
+  <li><a href="#transforming-the-projection-of-preschool-from-wgs84-to-svy21" id="toc-transforming-the-projection-of-preschool-from-wgs84-to-svy21" class="nav-link" data-scroll-target="#transforming-the-projection-of-preschool-from-wgs84-to-svy21">1.7.2 Transforming the projection of preschool from wgs84 to svy21</a></li>
+  </ul></li>
+  <li><a href="#importing-and-converting-an-aspatial-data" id="toc-importing-and-converting-an-aspatial-data" class="nav-link" data-scroll-target="#importing-and-converting-an-aspatial-data">1.8 Importing and Converting An Aspatial Data</a></li>
   </ul>
 </nav>
     </div>
@@ -364,8 +371,7 @@ Projected CRS: SVY21</code></pre>
 <h3 class="anchored" data-anchor-id="importing-gis-data-in-geojson-format-pre-school-locations">1.4.3 Importing GIS data in GeoJSON format (Pre-school Locations)</h3>
 <p>The <code>PreSchoolsLocation</code> is in <strong>GeoJSON</strong> format. The code chunk below will be used to import <code>PreSchoolsLocation</code> into R.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>preschool <span class="ot">=</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial/PreSchoolsLocation.geojson"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>preschool <span class="ot">=</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial/PreSchoolsLocation.geojson"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Reading layer `PreSchoolsLocation' from data source 
   `C:\yxlinn\ISSS626-GAA\Hands-on_Ex\Hands-on_Ex01\data\geospatial\PreSchoolsLocation.geojson' 
@@ -378,20 +384,7 @@ z_range:       zmin: 0 zmax: 0
 Geodetic CRS:  WGS 84</code></pre>
 </div>
 </div>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><strong>Code Explanation:</strong> Read the <code>preschoolslocation</code> GeoJSON file into R, then take that result and convert its coordinates from WGS84 (degrees) into SVY21 (metres), and store the final output in a variable called preschool.</p>
-</div>
-</div>
-<p>The message above reveals that <code>preschool</code> is a point feature data frame. There are a total of 2290 features and 2 fields. Similar to <code>mpsz</code>, <code>preschool</code> is also in <strong>wgs84</strong> coordinates system.</p>
+<p>The message above reveals that <code>preschool</code> is a point feature data frame. There are a total of 2290 features and 2 fields. Similar to <code>mpsz</code>, <code>preschool</code> is in <strong>wgs84</strong> coordinates system.</p>
 </section>
 </section>
 <section id="checking-the-content-of-a-simple-feature-data-frame" class="level2">
@@ -496,9 +489,199 @@ Note
 <p>One of the useful arguments of head() is that it allows the user to select the number of records to display (i.e.&nbsp;the n argument).</p>
 </div>
 </div>
-
-
 </section>
+</section>
+<section id="plotting-the-geospatial-data" class="level2">
+<h2 class="anchored" data-anchor-id="plotting-the-geospatial-data">1.6 Plotting the Geospatial Data</h2>
+<p>Beyond reviewing feature information, visualising the geospatial features is equally important in geospatial data science. The code chunk below uses <code>plot()</code> function of Base R Graphics to do so.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mpsz)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex01_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The default <code>plot()</code> of an sf object is a multi-plot of all attributes, up to a reasonable maximum as shown above.</p>
+</div>
+</div>
+<p>We can also plot only the geometry by using the code chunk below.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(mpsz))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex01_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Alternatively, a specific attribute of the <code>sf</code> object can also be plotted on its own, as shown in the code chunk below.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mpsz[<span class="st">"PLN_AREA_N"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex01_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>plot()</code> is appropriate for a quick, exploratory look at geospatial data. For higher cartographic-quality maps, other R packages such as <strong>tmap</strong> should be used.</p>
+</div>
+</div>
+<p>Next, to see how two data sets relate spatially, the <code>preschool</code> layer can be plotted on top of the <code>mpsz</code> layer, as shown in the code chunk below.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(mpsz))</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(preschool, <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex01_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="working-with-projection" class="level2">
+<h2 class="anchored" data-anchor-id="working-with-projection">1.7 Working with Projection</h2>
+<p>Map projection is an important property of a geospatial data. In order to perform geoprocessing using two geospatial data, we need to ensure that both geospatial data are projected using similar coordinate system.</p>
+<p>This section covers how to convert a simple feature data frame from one coordinate system to another — a process known as <strong>projection transformation</strong>.</p>
+<section id="transforming-the-projection-of-mpsz-from-wgs84-to-svy21" class="level3">
+<h3 class="anchored" data-anchor-id="transforming-the-projection-of-mpsz-from-wgs84-to-svy21">1.7.1 Transforming the projection of mpsz from wgs84 to svy21</h3>
+<p>In geospatial analytics, it is common to transform data from a geographic coordinate system to a projected coordinate system, since geographic coordinate systems are not appropriate when analysis requires distance and/or area measurements.</p>
+<p>The code chunk below performs the projection transformation on <code>mpsz</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>mpsz <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(mpsz,</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">crs =</span> <span class="dv">3414</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_geometry</span>(mpsz)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Geometry set for 323 features 
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 2667.538 ymin: 15748.72 xmax: 56396.44 ymax: 50256.33
+Projected CRS: SVY21 / Singapore TM
+First 5 geometries:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>MULTIPOLYGON (((29099.02 29640.03, 29058.14 296...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>MULTIPOLYGON (((26750.09 29216.1, 26750.09 2922...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>MULTIPOLYGON (((29161.2 29723.07, 29147.2 29734...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>MULTIPOLYGON (((29814.11 29616.89, 29814.87 296...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>MULTIPOLYGON (((30137.77 29843.19, 30118.74 298...</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The output confirms that <code>mpsz</code> is in svy21 projected coordinate system. Furthermore, referring to the Bounding box, the values are greater than the 0–360 decimal degree range commonly used by most of the geographic coordinate systems.</p>
+</div>
+</div>
+</section>
+<section id="transforming-the-projection-of-preschool-from-wgs84-to-svy21" class="level3">
+<h3 class="anchored" data-anchor-id="transforming-the-projection-of-preschool-from-wgs84-to-svy21">1.7.2 Transforming the projection of preschool from wgs84 to svy21</h3>
+<p>The code chunk below performs the projection transformation on <code>preschool</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>preschool <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(preschool,</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">crs =</span> <span class="dv">3414</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_geometry</span>(preschool)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Geometry set for 2290 features 
+Geometry type: POINT
+Dimension:     XYZ
+Bounding box:  xmin: 11810.03 ymin: 25596.33 xmax: 45404.24 ymax: 49300.88
+z_range:       zmin: 0 zmax: 0
+Projected CRS: SVY21 / Singapore TM
+First 5 geometries:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>POINT Z (25089.46 31299.16 0)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>POINT Z (27189.07 32792.54 0)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>POINT Z (28844.56 36773.76 0)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>POINT Z (24821.92 46303.16 0)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>POINT Z (28637.82 35038.49 0)</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The output confirms that <code>preschool</code> is now in svy21 projected coordinate system.</p>
+</div>
+</div>
+<p>With both <code>mpsz</code> and <code>preschool</code> now in the same svy21 coordinate system, the <code>preschool</code> layer can be plotted on top of the <code>mpsz</code> layer once again.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(mpsz))</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(preschool), <span class="at">add =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex01_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="importing-and-converting-an-aspatial-data" class="level2">
+<h2 class="anchored" data-anchor-id="importing-and-converting-an-aspatial-data">1.8 Importing and Converting An Aspatial Data</h2>
+
+
 </section>
 
 </main> <!-- /main -->

@@ -96,15 +96,10 @@ The message above reveals that the geospatial objects are multilinestring featur
 The `PreSchoolsLocation` is in **GeoJSON** format. The code chunk below will be used to import `PreSchoolsLocation` into R.
 
 ```{r}
-preschool = st_read(dsn = "data/geospatial/PreSchoolsLocation.geojson") %>%
-  st_transform(crs = 3414)
+preschool = st_read(dsn = "data/geospatial/PreSchoolsLocation.geojson")
 ```
 
-::: callout-note
-**Code Explanation:** Read the `preschoolslocation` GeoJSON file into R, then take that result and convert its coordinates from WGS84 (degrees) into SVY21 (metres), and store the final output in a variable called preschool.
-:::
-
-The message above reveals that `preschool` is a point feature data frame. There are a total of 2290 features and 2 fields. Similar to `mpsz`, `preschool` is also in **wgs84** coordinates system.
+The message above reveals that `preschool` is a point feature data frame. There are a total of 2290 features and 2 fields. Similar to `mpsz`, `preschool` is in **wgs84** coordinates system.
 
 ## 1.5 Checking the Content of A Simple Feature Data Frame
 
@@ -137,6 +132,95 @@ head(mpsz, n=5)
 ::: callout-note
 One of the useful arguments of head() is that it allows the user to select the number of records to display (i.e. the n argument).
 :::
+
+## 1.6 Plotting the Geospatial Data
+
+Beyond reviewing feature information, visualising the geospatial features is equally important in geospatial data science. The code chunk below uses `plot()` function of Base R Graphics to do so.
+
+```{r}
+#| warning: false
+plot(mpsz)
+```
+
+::: callout-note
+The default `plot()` of an sf object is a multi-plot of all attributes, up to a reasonable maximum as shown above. 
+:::
+
+We can also plot only the geometry by using the code chunk below.
+
+```{r}
+plot(st_geometry(mpsz))
+```
+
+Alternatively, a specific attribute of the `sf` object can also be plotted on its own, as shown in the code chunk below.
+
+```{r}
+plot(mpsz["PLN_AREA_N"])
+```
+
+::: {.callout-tip}
+`plot()` is appropriate for a quick, exploratory look at geospatial data. For higher cartographic-quality maps, other R packages such as **tmap** should be used.
+:::
+
+Next, to see how two data sets relate spatially, the `preschool` layer can be plotted on top of the `mpsz` layer, as shown in the code chunk below.
+
+```{r}
+#| warning: false
+plot(st_geometry(mpsz))
+plot(preschool, add = TRUE)
+```
+
+## 1.7 Working with Projection
+
+Map projection is an important property of a geospatial data. In order to perform geoprocessing using two geospatial data, we need to ensure that both geospatial data are projected using similar coordinate system.
+
+This section covers how to convert a simple feature data frame from one coordinate system to another — a process known as **projection transformation**.
+
+### 1.7.1 Transforming the projection of mpsz from wgs84 to svy21
+
+In geospatial analytics, it is common to transform data from a geographic coordinate system to a projected coordinate system, since geographic coordinate systems are not appropriate when analysis requires distance and/or area measurements.
+
+The code chunk below performs the projection transformation on `mpsz`.
+
+```{r}
+mpsz <- st_transform(mpsz,
+                     crs = 3414)
+```
+
+```{r}
+st_geometry(mpsz)
+```
+
+::: callout-note
+The output confirms that `mpsz` is in svy21 projected coordinate system. Furthermore, referring to the Bounding box, the values are greater than the 0–360 decimal degree range commonly used by most of the geographic coordinate systems.
+:::
+
+### 1.7.2 Transforming the projection of preschool from wgs84 to svy21
+
+The code chunk below performs the projection transformation on `preschool`.
+
+```{r}
+preschool <- st_transform(preschool,
+                          crs = 3414)
+```
+
+```{r}
+st_geometry(preschool)
+```
+
+::: callout-note
+The output confirms that `preschool` is now in svy21 projected coordinate system.
+:::
+
+With both `mpsz` and `preschool` now in the same svy21 coordinate system, the `preschool` layer can be plotted on top of the `mpsz` layer once again.
+
+```{r}
+#| warning: false
+plot(st_geometry(mpsz))
+plot(st_geometry(preschool), add = TRUE)
+```
+
+## 1.8 Importing and Converting An Aspatial Data
 
 
 
