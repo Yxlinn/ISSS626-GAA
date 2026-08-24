@@ -176,7 +176,34 @@ Map projection is an important property of a geospatial data. In order to perfor
 
 This section covers how to convert a simple feature data frame from one coordinate system to another — a process known as **projection transformation**.
 
-### 1.7.1 Transforming the projection of mpsz from wgs84 to svy21
+### 1.7.1 Assigning EPSG code to a simple feature data frame
+
+One common issue that can happen during importing geospatial data into R is that the coordinate system of the source data is either missing (such as due to missing .proj for ESRI shapefile) or wrongly assigned during the import process.
+
+This is an example of the coordinate system of `cyclingpath` simple feature data frame, examined using `st_crs()` of sf package, as shown in the code chunk below.
+
+```{r}
+st_crs(cyclingpath)
+```
+
+Although `cyclingpath` data frame is projected in svy21, reading to the end of the print reveals that the EPSG is 9001. This is a wrong EPSG code, because the correct EPSG code for svy21 should be **3414**.
+
+In order to assign the correct EPSG code to `cyclingpath` data frame, `st_set_crs()` of sf package is used as shown in the code chunk below.
+
+```{r}
+#| warning: false
+cyclingpath <- st_set_crs(cyclingpath, 3414)
+```
+
+```{r}
+st_crs(cyclingpath)
+```
+
+::: callout-note
+Notice that the EPSG code is now 3414.
+:::
+
+### 1.7.2 Transforming the projection of mpsz from wgs84 to svy21
 
 In geospatial analytics, it is common to transform data from a geographic coordinate system to a projected coordinate system, since geographic coordinate systems are not appropriate when analysis requires distance and/or area measurements.
 
@@ -195,7 +222,7 @@ st_geometry(mpsz)
 The output confirms that `mpsz` is in svy21 projected coordinate system. Furthermore, referring to the Bounding box, the values are greater than the 0–360 decimal degree range commonly used by most of the geographic coordinate systems.
 :::
 
-### 1.7.2 Transforming the projection of preschool from wgs84 to svy21
+### 1.7.3 Transforming the projection of preschool from wgs84 to svy21
 
 The code chunk below performs the projection transformation on `preschool`.
 
@@ -279,4 +306,61 @@ plot(st_geometry(listings_sf), add = TRUE)
 ```
 
 ## 1.9 Geoprocessing with sf package
+
+Besides providing functions to handling (i.e. importing, exporting, assigning projection, transforming projection etc) geospatial data, sf package also offers a wide range of geoprocessing (also known as GIS analysis) functions.
+
+This section covers how to answer real-world GIS questions using geoprocessing functions of sf package.
+
+### 1.9.1 Use Case 1: Land Acquisition Analysis
+
+**Scenario:**
+
+The authority is planning to upgrade the existing cycling path. To do so, 5 metres of reserved land on both sides of the existing cycling path needs to be acquired. The task is to determine the extent of the land that needs to be acquired and its total area.
+
+**Solution:**
+
+Firstly, [st_buffer()](https://r-spatial.github.io/sf/reference/geos_unary.html) of sf package is used to compute the 5-meter buffers around cycling paths.
+
+```{r}
+buffer_cycling <- st_buffer(
+  cyclingpath, dist = 5, nQuadSegs = 30)
+```
+
+This is followed by calculating the area of the buffers as shown in the code chunk below.
+
+```{r}
+buffer_cycling$AREA <- st_area(buffer_cycling)
+```
+
+Lastly, `sum()` of Base R will be used to derive the total land involved.
+
+```{r}
+sum(buffer_cycling$AREA)
+```
+
+A plot can also be created showing the buffer for a selected planning subzone - Tampines West is used as an example here.
+
+Firstly, `filter()` of dplyr package will be used to extract polygon feature of Tampines West by using the code chunk below.
+
+```{r}
+mpsz_selected <- mpsz %>%
+  filter(SUBZONE_N == "TAMPINES WEST") 
+```
+
+Next, `st_intersection()` of sf package will be used to clip cycling buffers within Tampines West planning subzone.
+
+```{r}
+#| warning: false
+buffer_cycling_selected <- st_intersection(
+  buffer_cycling, mpsz_selected)
+```
+
+Finally, `plot()` of R Graphics is used to visualise the buffer clipped to the Tampines West subzone.
+
+```{r}
+plot(st_geometry(buffer_cycling_selected))
+```
+
+
+
 
