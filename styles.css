@@ -44,12 +44,20 @@
   color: #2c5f8a;
 }
 
-/* ===== Search icon ===== */
-.navbar .quarto-search-icon,
-.navbar-nav .nav-link[aria-label="Search"] {
+/* ===== Search icon (collapsed magnifying glass, default "overlay" search) ===== */
+.navbar #quarto-search.type-overlay .aa-Autocomplete svg {
   color: #e8f1fa !important;
 }
 
-.navbar .quarto-search-icon:hover {
+.navbar #quarto-search.type-overlay .aa-Autocomplete:hover svg {
+  color: #ffffff !important;
+}
+
+/* ===== Search icon (detached search button, used at narrow widths) ===== */
+.navbar #quarto-search .aa-DetachedSearchButtonIcon {
+  color: #e8f1fa !important;
+}
+
+.navbar #quarto-search .aa-DetachedSearchButton:hover .aa-DetachedSearchButtonIcon {
   color: #ffffff !important;
 }
