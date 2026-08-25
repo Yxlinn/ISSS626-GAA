@@ -37,7 +37,7 @@ The Master Plan 2014 Subzone Boundary and Pre-Schools Location data sets were do
 
 To get started, create a new folder called *Hands-on_Ex* in a working directory.
 
-Next, create a new sub-folder called **Hands-on_Ex01A** in the newly created *Hands-on_Ex* folder.
+Next, create a new sub-folder called **Hands-on_Ex01A** in the *Hands-on_Ex* folder.
 
 In the `Hands-on_Ex01A` folder, create a sub-folder called `data`. Then, inside the `data` sub-folder, create two sub-folders and name them `geospatial` and `aspatial` respectively.
 
@@ -45,11 +45,11 @@ Place `Master Plan 2014 Subzone Boundary (No Sea)`, `Pre-Schools Location` and `
 
 ### 1.2.2 Extracting the aspatial data set
 
-Extract the downloaded `listings.csv.gz` file, and move the resulting `listings.csv` into the `aspatial` sub-folder.
+Extract the downloaded `listings` file, and move `listings.csv` into the `aspatial` sub-folder.
 
 ## 1.3 Getting Started
 
-In this hands-on exercise, two R packages will be used. They are:
+Two R packages will be used for this exercise. They are:
 
 - **sf** for importing, managing, and processing geospatial data, and
 - **tidyverse** for performing data science tasks such as importing, wrangling and visualising data.
