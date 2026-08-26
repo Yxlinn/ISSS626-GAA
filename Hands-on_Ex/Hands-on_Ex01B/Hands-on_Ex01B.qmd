@@ -12,14 +12,43 @@ This exercise explores how to create functional and truthful choropleth maps usi
 
 ## 2 Getting Started
 
+The key R package used for this exercise is [**tmap**](https://cran.r-project.org/web/packages/tmap/).
 
-## Importing Data into R
+Beside **tmap**, five other R packages are used:
 
-### The Data
+- [**readr**](https://readr.tidyverse.org/) for importing delimited text file,
+- [**tidyr**](https://tidyr.tidyverse.org/) for tidying data,
+- [**dplyr**](https://dplyr.tidyverse.org/) for wrangling data and
+- [**sf**](https://cran.r-project.org/web/packages/sf/index.html) for handling geospatial data.
 
-### Importing Geospatial Data into R
+::: callout-note
+Among these, **readr**, **tidyr**, and **dplyr** are part of the **tidyverse package.**
 
-### Importing Attribute Data into R
+Hence, only **tidyverse** needs to be installed, instead of **readr**, **tidyr**, and **dplyr** individually.
+:::
+
+The code chunk below installs and loads these packages in RStudio.
+
+```{r}
+pacman::p_load(sf, tmap, tidyverse)
+```
+
+## 3 Importing Data into R
+
+### 3.1 The Data
+
+Two datasets are used to create the choropleth map:
+
+| Dataset | Format | Source | Description |
+|------------------|------------------|------------------|------------------|
+| Master Plan 2019 Subzone Boundary (No Sea) | GeoJSON | [data.gov.sg](https://data.gov.sg) | Geospatial data consisting of Singapore's geographical boundary at the planning subzone level, based on URA Master Plan 2019 |
+| Singapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling, June 2024 (`respopagesextod2024.csv`) | CSV | [Department of Statistics, Singapore](https://www.singstat.gov.sg) | Aspatial data. Contains no coordinate values, but the `PA` and `SZ` fields serve as unique identifiers for georeferencing to the Master Plan 2019 Subzone Boundary |
+
+### 3.2 Importing Geospatial Data into R
+
+
+
+
+### 3.3 Importing Attribute Data into R
 
 ## Choropleth Mapping Geospatial Data Using tmap
-

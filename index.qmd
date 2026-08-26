@@ -2,7 +2,7 @@
 title: "ISSS626 Geospatial Analytics & Applications"
 ---
 
-![](images/geospatial.jpg){fig-align="center" width=100%}
+![](images/geospatial.jpg){fig-align="center" width="100%"}
 
 ## About this site
 
@@ -20,4 +20,3 @@ This site documents my coursework for ISSS626 Geospatial Analytics and Applicati
 - Geographically Weighted Predictive Models
 - Modelling Geographic Accessibility
 - Spatial Interaction Models
-

@@ -200,14 +200,14 @@
     "href": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html#getting-started",
     "title": "Hands-on Exercise 1B: Thematic Mapping and GeoVisualisation with R",
     "section": "2 Getting Started",
-    "text": "2 Getting Started"
+    "text": "2 Getting Started\nThe key R package used for this exercise is tmap.\nBeside tmap, five other R packages are used:\n\nreadr for importing delimited text file,\ntidyr for tidying data,\ndplyr for wrangling data and\nsf for handling geospatial data.\n\n\n\n\n\n\n\nNote\n\n\n\nAmong these, readr, tidyr, and dplyr are part of the tidyverse package.\nHence, only tidyverse needs to be installed, instead of readr, tidyr, and dplyr individually.\n\n\nThe code chunk below installs and loads these packages in RStudio.\n\npacman::p_load(sf, tmap, tidyverse)"
   },
   {
     "objectID": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html#importing-data-into-r",
     "href": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html#importing-data-into-r",
     "title": "Hands-on Exercise 1B: Thematic Mapping and GeoVisualisation with R",
-    "section": "Importing Data into R",
-    "text": "Importing Data into R\n\nThe Data\n\n\nImporting Geospatial Data into R\n\n\nImporting Attribute Data into R"
+    "section": "3 Importing Data into R",
+    "text": "3 Importing Data into R\n\n3.1 The Data\nTwo datasets are used to create the choropleth map:\n\n\n\nDataset\nFormat\nSource\nDescription\n\n\n\n\nMaster Plan 2019 Subzone Boundary (No Sea)\nGeoJSON\ndata.gov.sg\nGeospatial data consisting of Singapore’s geographical boundary at the planning subzone level, based on URA Master Plan 2019\n\n\nSingapore Residents by Planning Area / Subzone, Age Group, Sex and Type of Dwelling, June 2024 (respopagesextod2024.csv)\nCSV\nDepartment of Statistics, Singapore\nAspatial data. Contains no coordinate values, but the PA and SZ fields serve as unique identifiers for georeferencing to the Master Plan 2019 Subzone Boundary\n\n\n\n\n\n3.2 Importing Geospatial Data into R\n\n\n3.3 Importing Attribute Data into R"
   },
   {
     "objectID": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html#choropleth-mapping-geospatial-data-using-tmap",
