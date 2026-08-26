@@ -201,7 +201,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#importing-attribute-data-into-r" id="toc-importing-attribute-data-into-r" class="nav-link" data-scroll-target="#importing-attribute-data-into-r">3.3 Importing Attribute Data into R</a></li>
   <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation">3.4 Data Preparation</a></li>
   </ul></li>
-  <li><a href="#choropleth-mapping-geospatial-data-using-tmap" id="toc-choropleth-mapping-geospatial-data-using-tmap" class="nav-link" data-scroll-target="#choropleth-mapping-geospatial-data-using-tmap">4 Choropleth Mapping Geospatial Data Using tmap</a></li>
+  <li><a href="#choropleth-mapping-geospatial-data-using-tmap" id="toc-choropleth-mapping-geospatial-data-using-tmap" class="nav-link" data-scroll-target="#choropleth-mapping-geospatial-data-using-tmap">4 Choropleth Mapping Geospatial Data Using tmap</a>
+  <ul class="collapse">
+  <li><a href="#plotting-a-choropleth-map-quickly-using-qtm" id="toc-plotting-a-choropleth-map-quickly-using-qtm" class="nav-link" data-scroll-target="#plotting-a-choropleth-map-quickly-using-qtm">4.1 Plotting a choropleth map quickly using qtm()</a></li>
+  <li><a href="#creating-a-choropleth-map-by-using-tmaps-elements" id="toc-creating-a-choropleth-map-by-using-tmaps-elements" class="nav-link" data-scroll-target="#creating-a-choropleth-map-by-using-tmaps-elements">4.2 Creating a choropleth map by using tmap’s elements</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -358,7 +362,7 @@ Note
 </div>
 <div class="callout-body-container callout-body">
 <p><strong>Why only the first 10 records are displayed?</strong></p>
-<p><strong>sf</strong> objects print only the first 10 records by default to avoid flooding the console with all 332 records.</p>
+<p><strong>sf</strong> objects print only the first 10 records by default to avoid flooding the console with all records.</p>
 </div>
 </div>
 </section>
@@ -460,8 +464,107 @@ Note
 </section>
 <section id="choropleth-mapping-geospatial-data-using-tmap" class="level2">
 <h2 class="anchored" data-anchor-id="choropleth-mapping-geospatial-data-using-tmap">4 Choropleth Mapping Geospatial Data Using tmap</h2>
+<p>Choropleth mapping involves the symbolisation of enumeration units, such as countries, provinces, states, counties or census units, using area patterns or graduated colors. For example, a social scientist may need to use a choropleth map to portray the spatial distribution of aged population of Singapore by Master Plan 2014 Subzone Boundary.</p>
+<p>Two approaches can be used to prepare thematic map using <strong>tmap</strong>, they are:</p>
+<ul>
+<li>Plotting a thematic map quickly by using <code>qtm()</code>.</li>
+<li>Plotting highly customisable thematic map by using tmap elements.</li>
+</ul>
+<section id="plotting-a-choropleth-map-quickly-using-qtm" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-a-choropleth-map-quickly-using-qtm">4.1 Plotting a choropleth map quickly using qtm()</h3>
+<p>The easiest and quickest to draw a choropleth map using <strong>tmap</strong> is using <code>qtm()</code>. It is concise and provides a good default visualisation in many cases.</p>
+<p>The following code draws a cartographic standard choropleth map.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">qtm</span>(<span class="at">shp =</span> mpsz_pop2024, </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex01B_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Code Explanation:</strong></p>
+<ul>
+<li><code>tmap_mode()</code> with “plot” option is used to produce a static map. To enable interactive mode, “view” option should be used.</li>
+<li><em>fill</em> argument is used to map the attribute (i.e.&nbsp;DEPENDENCY).</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="creating-a-choropleth-map-by-using-tmaps-elements" class="level3">
+<h3 class="anchored" data-anchor-id="creating-a-choropleth-map-by-using-tmaps-elements">4.2 Creating a choropleth map by using tmap’s elements</h3>
+<p>Despite the usefulness of <code>qtm()</code> in drawing a choropleth map quickly and easily, the disadvantage is that it makes aesthetics of individual layers harder to control. To draw a high quality cartographic choropleth map as shown in the figure below, <strong>tmap</strong>’s drawing elements should be used.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.scale =</span> <span class="fu">tm_scale_intervals</span>(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">style =</span> <span class="st">"quantile"</span>, </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">n =</span> <span class="dv">5</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">values =</span> <span class="st">"brewer.blues"</span>),</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>(</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">title =</span> <span class="st">"Dependency ratio"</span>)) <span class="sc">+</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"Distribution of Dependency Ratio by planning subzone"</span>) <span class="sc">+</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">frame =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">fill_alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_compass</span>(<span class="at">type=</span><span class="st">"8star"</span>, <span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_scalebar</span>() <span class="sc">+</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_grid</span>(<span class="at">alpha =</span><span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_credits</span>(<span class="st">"Source: Planning Sub-zone boundary from Urban Redevelopment Authority (URA)</span><span class="sc">\n</span><span class="st"> and Population data from Department of Statistics (DOS)"</span>, </span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>             <span class="at">position =</span> <span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex01B_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The following sub-sections cover the <strong>tmap</strong> functions used to plot these elements.</p>
+<section id="drawing-a-base-map" class="level4">
+<h4 class="anchored" data-anchor-id="drawing-a-base-map">4.2.1 Drawing a base map</h4>
+<p>The basic building block of <strong>tmap</strong> is <code>tm_shape()</code> followed by one or more layer elemments such as <code>tm_polygons()</code>, <code>tm_symbols()</code>, <code>tm_lines()</code>, <code>tm_raster()</code>, and <code>tm_text()</code>.</p>
+<p>In the code chunk below, <code>tm_shape()</code> defines the input data (i.e <em>mpsz_pop2024</em>) and <code>tm_polygons()</code> draws the planning subzone polygons.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex01B_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>By default, polygon areas are shaded light gray (gray85) and polygon borders are drawn in slightly darker gray (gray25).</p>
+</div>
+</div>
 
 
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
