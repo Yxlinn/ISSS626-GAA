@@ -160,11 +160,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">In-class Exercise 1</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex01/In-class_Ex02.qmd">
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex02/In-class_Ex02.qmd">
  <span class="dropdown-text">In-class Exercise 2</span></a>
   </li>  
     </ul>
   </li>
+  <li class="nav-item">
+    <span class="nav-link">
+<span class="menu-text">Take-home Exercises</span>
+    </span>
+  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
@@ -194,8 +199,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">3.1 The Data</a></li>
   <li><a href="#importing-geospatial-data-into-r" id="toc-importing-geospatial-data-into-r" class="nav-link" data-scroll-target="#importing-geospatial-data-into-r">3.2 Importing Geospatial Data into R</a></li>
   <li><a href="#importing-attribute-data-into-r" id="toc-importing-attribute-data-into-r" class="nav-link" data-scroll-target="#importing-attribute-data-into-r">3.3 Importing Attribute Data into R</a></li>
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation">3.4 Data Preparation</a></li>
   </ul></li>
-  <li><a href="#choropleth-mapping-geospatial-data-using-tmap" id="toc-choropleth-mapping-geospatial-data-using-tmap" class="nav-link" data-scroll-target="#choropleth-mapping-geospatial-data-using-tmap">Choropleth Mapping Geospatial Data Using tmap</a></li>
+  <li><a href="#choropleth-mapping-geospatial-data-using-tmap" id="toc-choropleth-mapping-geospatial-data-using-tmap" class="nav-link" data-scroll-target="#choropleth-mapping-geospatial-data-using-tmap">4 Choropleth Mapping Geospatial Data Using tmap</a></li>
   </ul>
 </nav>
     </div>
@@ -288,13 +294,172 @@ Note
 </section>
 <section id="importing-geospatial-data-into-r" class="level3">
 <h3 class="anchored" data-anchor-id="importing-geospatial-data-into-r">3.2 Importing Geospatial Data into R</h3>
+<p>The code chunk below uses the <code>st_read()</code> function of <strong>sf</strong> package to import Master Plan 2019 Subzone Boundary (No Sea) into R as a simple feature data frame called <code>mpsz</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mpsz <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `URA_MP19_SUBZONE_NO_SEA_PL' from data source 
+  `C:\yxlinn\ISSS626-GAA\Hands-on_Ex\Hands-on_Ex01B\data\geospatial\MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson' 
+  using driver `GeoJSON'
+Simple feature collection with 332 features and 13 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 103.6057 ymin: 1.158699 xmax: 104.0885 ymax: 1.470775
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+</div>
+<p>The imported <code>mpsz</code> contains 13 fields. This exercise will focus on four attribute fields: <code>REGION_N</code>, <code>PLN_AREA_N</code>, <code>SUBZONE_N</code>, and <code>SUBZONE_C</code>, along with the geometry column.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>mpsz <span class="ot">&lt;-</span> mpsz <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(REGION_N, PLN_AREA_N, SUBZONE_N, SUBZONE_C, geometry)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>mpsz</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 332 features and 4 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 2667.538 ymin: 15748.72 xmax: 56396.44 ymax: 50256.33
+Projected CRS: SVY21 / Singapore TM
+First 10 features:
+         REGION_N    PLN_AREA_N           SUBZONE_N SUBZONE_C
+1  CENTRAL REGION   BUKIT MERAH          DEPOT ROAD    BMSZ12
+2  CENTRAL REGION   BUKIT MERAH         BUKIT MERAH    BMSZ02
+3  CENTRAL REGION        OUTRAM           CHINATOWN    OTSZ03
+4  CENTRAL REGION DOWNTOWN CORE             PHILLIP    DTSZ04
+5  CENTRAL REGION DOWNTOWN CORE       RAFFLES PLACE    DTSZ05
+6  CENTRAL REGION        OUTRAM        CHINA SQUARE    OTSZ04
+7  CENTRAL REGION   BUKIT MERAH         TIONG BAHRU    BMSZ10
+8  CENTRAL REGION DOWNTOWN CORE    BAYFRONT SUBZONE    DTSZ12
+9  CENTRAL REGION   BUKIT MERAH TIONG BAHRU STATION    BMSZ04
+10 CENTRAL REGION DOWNTOWN CORE       CLIFFORD PIER    DTSZ06
+                         geometry
+1  MULTIPOLYGON (((25910.34 29...
+2  MULTIPOLYGON (((26750.09 29...
+3  MULTIPOLYGON (((29161.2 297...
+4  MULTIPOLYGON (((29814.11 29...
+5  MULTIPOLYGON (((30137.77 29...
+6  MULTIPOLYGON (((29699.44 29...
+7  MULTIPOLYGON (((27748.04 29...
+8  MULTIPOLYGON (((30844.87 29...
+9  MULTIPOLYGON (((27444.04 29...
+10 MULTIPOLYGON (((30436.73 29...</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Why only the first 10 records are displayed?</strong></p>
+<p><strong>sf</strong> objects print only the first 10 records by default to avoid flooding the console with all 332 records.</p>
+</div>
+</div>
 </section>
 <section id="importing-attribute-data-into-r" class="level3">
 <h3 class="anchored" data-anchor-id="importing-attribute-data-into-r">3.3 Importing Attribute Data into R</h3>
+<p>The <code>respopagesextod2024.csv</code> file is imported into a tibble dataframe called <code>popdata</code>, using <code>read_csv()</code> of the <strong>readr</strong> package.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>popdata <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/respopagesextod2024.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="data-preparation" class="level3">
+<h3 class="anchored" data-anchor-id="data-preparation">3.4 Data Preparation</h3>
+<p>Before a thematic map can be prepared, a data table with year 2024 values is required. The data table includes the variables PA, SZ, YOUNG, ECONOMY ACTIVE, AGED, TOTAL, and DEPENDENCY.</p>
+<ul>
+<li><strong>YOUNG:</strong> age group 0 to 4 until age group 20 to 24</li>
+<li><strong>ECONOMY ACTIVE:</strong> age group 25-29 until age group 60-64</li>
+<li><strong>AGED:</strong> age group 65 and above</li>
+<li><strong>TOTAL:</strong> all age groups</li>
+<li><strong>DEPENDENCY:</strong> the ratio between young and aged against the economy active group</li>
+</ul>
+<section id="data-wrangling" class="level4">
+<h4 class="anchored" data-anchor-id="data-wrangling">3.4.1 Data Wrangling</h4>
+<p>The following data wrangling and transformation functions are used:</p>
+<ul>
+<li><em>pivot_wider()</em> of the <strong>tidyr</strong> package, and</li>
+<li><em>mutate()</em>, <em>filter()</em>, <em>group_by()</em>, and <em>select()</em> of the <strong>dplyr</strong> package</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Group the data by PA (Planning Area), SZ (Subzone), and AG (Age Group)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>popdata2024 <span class="ot">&lt;-</span> popdata <span class="sc">%&gt;%</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(PA, SZ, AG)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Summarise the data by calculating the total population (POP) for each group</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>popdata2024 <span class="ot">&lt;-</span> popdata2024 <span class="sc">%&gt;%</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">POP =</span> <span class="fu">sum</span>(Pop)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Reshape the data from long to wide format, with age groups as column names</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>popdata2024 <span class="ot">&lt;-</span> popdata2024 <span class="sc">%&gt;%</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> AG, <span class="at">values_from =</span> POP)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 4: Calculate the YOUNG population (sum of selected age groups)</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>popdata2024 <span class="ot">&lt;-</span> popdata2024 <span class="sc">%&gt;%</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">YOUNG =</span> <span class="fu">rowSums</span>(.[<span class="dv">3</span><span class="sc">:</span><span class="dv">6</span>]) <span class="sc">+</span> <span class="fu">rowSums</span>(.[<span class="dv">14</span>]))</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 5: Calculate the ECONOMY ACTIVE population (sum of selected age groups)</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>popdata2024 <span class="ot">&lt;-</span> popdata2024 <span class="sc">%&gt;%</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">ECONOMY ACTIVE</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">rowSums</span>(.[<span class="dv">7</span><span class="sc">:</span><span class="dv">13</span>]) <span class="sc">+</span> <span class="fu">rowSums</span>(.[<span class="dv">15</span>]))</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 6: Calculate the AGED population (sum of selected age groups)</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>popdata2024 <span class="ot">&lt;-</span> popdata2024 <span class="sc">%&gt;%</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">AGED =</span> <span class="fu">rowSums</span>(.[<span class="dv">16</span><span class="sc">:</span><span class="dv">21</span>]))</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 7: Calculate the TOTAL population (sum of all age groups)</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>popdata2024 <span class="ot">&lt;-</span> popdata2024 <span class="sc">%&gt;%</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">TOTAL =</span> <span class="fu">rowSums</span>(.[<span class="dv">3</span><span class="sc">:</span><span class="dv">21</span>]))</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 8: Calculate the DEPENDENCY ratio (ratio of YOUNG and AGED to ECONOMY ACTIVE)</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>popdata2024 <span class="ot">&lt;-</span> popdata2024 <span class="sc">%&gt;%</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">DEPENDENCY =</span> (YOUNG <span class="sc">+</span> AGED) <span class="sc">/</span> <span class="st">`</span><span class="at">ECONOMY ACTIVE</span><span class="st">`</span>)</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 9: Select the relevant columns to be retained in the final dataset</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>popdata2024 <span class="ot">&lt;-</span> popdata2024 <span class="sc">%&gt;%</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(PA, SZ, YOUNG, <span class="st">`</span><span class="at">ECONOMY ACTIVE</span><span class="st">`</span>, AGED, TOTAL, DEPENDENCY)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="joining-the-attribute-data-and-geospatial-data" class="level4">
+<h4 class="anchored" data-anchor-id="joining-the-attribute-data-and-geospatial-data">3.4.2 Joining the attribute data and geospatial data</h4>
+<p>Before the georelational join, an extra step is required to convert the values in the PA and SZ fields to uppercase. This is necessary because the PA and SZ fields contain a mix of upper- and lowercase, while SUBZONE_N and PLN_AREA_N are entirely uppercase.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>popdata2024 <span class="ot">&lt;-</span> popdata2024 <span class="sc">%&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="at">.vars =</span> <span class="fu">vars</span>(PA, SZ),</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">.funs =</span> <span class="fu">list</span>(toupper)) <span class="sc">%&gt;%</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="st">`</span><span class="at">ECONOMY ACTIVE</span><span class="st">`</span> <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Next, <code>left_join()</code> of <strong>dplyr</strong> is used to join the geographical data and attribute table using planning subzone name, e.g.&nbsp;<em>SUBZONE_N</em> and <em>SZ</em> as the common identifier.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mpsz_pop2024 <span class="ot">&lt;-</span> <span class="fu">left_join</span>(mpsz, popdata2024,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                           <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"SUBZONE_N"</span> <span class="ot">=</span> <span class="st">"SZ"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>left_join()</code> of <strong>dplyr</strong> is used with <code>mpsz</code> as the left data table, to ensure that the output will be a simple features data frame.</p>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(mpsz_pop2024, <span class="st">"data/rds/mpsz_pop2024.rds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
 </section>
 </section>
 <section id="choropleth-mapping-geospatial-data-using-tmap" class="level2">
-<h2 class="anchored" data-anchor-id="choropleth-mapping-geospatial-data-using-tmap">Choropleth Mapping Geospatial Data Using tmap</h2>
+<h2 class="anchored" data-anchor-id="choropleth-mapping-geospatial-data-using-tmap">4 Choropleth Mapping Geospatial Data Using tmap</h2>
 
 
 </section>

@@ -46,9 +46,121 @@ Two datasets are used to create the choropleth map:
 
 ### 3.2 Importing Geospatial Data into R
 
+The code chunk below uses the `st_read()` function of **sf** package to import Master Plan 2019 Subzone Boundary (No Sea) into R as a simple feature data frame called `mpsz`.
 
+```{r}
+mpsz <- st_read("data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson") %>%
+  st_transform(crs = 3414)
+```
 
+The imported `mpsz` contains 13 fields. This exercise will focus on four attribute fields: `REGION_N`, `PLN_AREA_N`, `SUBZONE_N`, and `SUBZONE_C`, along with the geometry column.
+
+```{r}
+mpsz <- mpsz %>%
+  select(REGION_N, PLN_AREA_N, SUBZONE_N, SUBZONE_C, geometry)
+```
+
+```{r}
+mpsz
+```
+
+::: callout-note
+**Why only the first 10 records are displayed?**
+
+**sf** objects print only the first 10 records by default to avoid flooding the console with all records.
+:::
 
 ### 3.3 Importing Attribute Data into R
 
-## Choropleth Mapping Geospatial Data Using tmap
+The `respopagesextod2024.csv` file is imported into a tibble dataframe called `popdata`, using `read_csv()` of the **readr** package.
+
+```{r}
+#| message: false
+popdata <- read_csv("data/aspatial/respopagesextod2024.csv")
+```
+
+### 3.4 Data Preparation
+
+Before a thematic map can be prepared, a data table with year 2024 values is required. The data table includes the variables PA, SZ, YOUNG, ECONOMY ACTIVE, AGED, TOTAL, and DEPENDENCY.
+
+- **YOUNG:** age group 0 to 4 until age group 20 to 24
+- **ECONOMY ACTIVE:** age group 25-29 until age group 60-64
+- **AGED:** age group 65 and above
+- **TOTAL:** all age groups
+- **DEPENDENCY:** the ratio between young and aged against the economy active group
+
+#### 3.4.1 Data Wrangling
+
+The following data wrangling and transformation functions are used:
+
+- *pivot_wider()* of the **tidyr** package, and
+- *mutate()*, *filter()*, *group_by()*, and *select()* of the **dplyr** package
+
+```{r}
+#| message: false
+
+# Step 1: Group the data by PA (Planning Area), SZ (Subzone), and AG (Age Group)
+popdata2024 <- popdata %>%
+  group_by(PA, SZ, AG)
+
+# Step 2: Summarise the data by calculating the total population (POP) for each group
+popdata2024 <- popdata2024 %>%
+  summarise(POP = sum(Pop)) %>%
+  ungroup()
+
+# Step 3: Reshape the data from long to wide format, with age groups as column names
+popdata2024 <- popdata2024 %>%
+  pivot_wider(names_from = AG, values_from = POP)
+
+# Step 4: Calculate the YOUNG population (sum of selected age groups)
+popdata2024 <- popdata2024 %>%
+  mutate(YOUNG = rowSums(.[3:6]) + rowSums(.[14]))
+
+# Step 5: Calculate the ECONOMY ACTIVE population (sum of selected age groups)
+popdata2024 <- popdata2024 %>%
+  mutate(`ECONOMY ACTIVE` = rowSums(.[7:13]) + rowSums(.[15]))
+
+# Step 6: Calculate the AGED population (sum of selected age groups)
+popdata2024 <- popdata2024 %>%
+  mutate(AGED = rowSums(.[16:21]))
+
+# Step 7: Calculate the TOTAL population (sum of all age groups)
+popdata2024 <- popdata2024 %>%
+  mutate(TOTAL = rowSums(.[3:21]))
+
+# Step 8: Calculate the DEPENDENCY ratio (ratio of YOUNG and AGED to ECONOMY ACTIVE)
+popdata2024 <- popdata2024 %>%
+  mutate(DEPENDENCY = (YOUNG + AGED) / `ECONOMY ACTIVE`)
+
+# Step 9: Select the relevant columns to be retained in the final dataset
+popdata2024 <- popdata2024 %>%
+  select(PA, SZ, YOUNG, `ECONOMY ACTIVE`, AGED, TOTAL, DEPENDENCY)
+```
+
+#### 3.4.2 Joining the attribute data and geospatial data
+
+Before the georelational join, an extra step is required to convert the values in the PA and SZ fields to uppercase. This is necessary because the PA and SZ fields contain a mix of upper- and lowercase, while SUBZONE_N and PLN_AREA_N are entirely uppercase.
+
+```{r}
+popdata2024 <- popdata2024 %>%
+  mutate_at(.vars = vars(PA, SZ),
+            .funs = list(toupper)) %>%
+  filter(`ECONOMY ACTIVE` > 0)
+```
+
+Next, `left_join()` of **dplyr** is used to join the geographical data and attribute table using planning subzone name, e.g. *SUBZONE_N* and *SZ* as the common identifier.
+
+```{r}
+mpsz_pop2024 <- left_join(mpsz, popdata2024,
+                           by = c("SUBZONE_N" = "SZ"))
+```
+
+::: callout-note
+`left_join()` of **dplyr** is used with `mpsz` as the left data table, to ensure that the output will be a simple features data frame.
+:::
+
+```{r}
+write_rds(mpsz_pop2024, "data/rds/mpsz_pop2024.rds")
+```
+
+## 4 Choropleth Mapping Geospatial Data Using tmap
