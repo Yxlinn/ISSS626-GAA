@@ -81,7 +81,7 @@
     "href": "index.html#about-this-site",
     "title": "ISSS626 Geospatial Analytics & Applications",
     "section": "About this site",
-    "text": "About this site\nThis site documents my coursework for ISSS626 Geospatial Analytics and Applications, including hands-on exercises, in-class exercises, and take-home exercises using R.\nTopics covered in this course:\n\nIntroduction to Geospatial Analytics\nSpatial Point Patterns Analysis (SPPA)\nAdvanced Spatial Point Patterns Analysis\nSpatial Weights and Applications\nGlobal and Local Measures of Spatial Association\nGeographic Segmentation\nGeographically Weighted Explanatory Models\nGeographically Weighted Predictive Models\nModelling Geographic Accessibility\nSpatial Interaction Models :::"
+    "text": "About this site\nThis site documents my coursework for ISSS626 Geospatial Analytics and Applications, including hands-on exercises, in-class exercises, and take-home exercises using R.\nTopics covered in this course:\n\nIntroduction to Geospatial Analytics\nSpatial Point Patterns Analysis (SPPA)\nAdvanced Spatial Point Patterns Analysis\nSpatial Weights and Applications\nGlobal and Local Measures of Spatial Association\nGeographic Segmentation\nGeographically Weighted Explanatory Models\nGeographically Weighted Predictive Models\nModelling Geographic Accessibility\nSpatial Interaction Models"
   },
   {
     "objectID": "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html#plotting-the-geospatial-data",
@@ -137,14 +137,14 @@
     "href": "Hands-on_Ex/Hands-on_Ex01A/Hands-on_Ex01A.html#data-acquisition",
     "title": "Hands-on Exercise 1A: Geospatial Data Science with R",
     "section": "1.2 Data Acquisition",
-    "text": "1.2 Data Acquisition\nThe following data sets will be used:\n\n\n\nDataset\nSource\nDescription\n\n\n\n\nMaster Plan 2014 Subzone Boundary (No Sea)\ndata.gov.sg\nGeospatial boundaries for Singapore’s planning subzones\n\n\nPre-Schools Location\ndata.gov.sg\nLocation data for pre-schools in Singapore\n\n\nCycling Path\nLTA DataMall\nGeospatial data for cycling paths in Singapore\n\n\nSingapore Airbnb Listings\nInside Airbnb\nListing data for Airbnb properties in Singapore\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nThe Master Plan 2014 Subzone Boundary and Pre-Schools Location data sets were downloaded in GeoJSON format, as data.gov.sg no longer offers these particular data sets in Shapefile or KML format respectively.\n\n\n\n1.2.1 Extracting the geospatial data sets\nTo get started, create a new folder called Hands-on_Ex in a working directory.\nNext, create a new sub-folder called Hands-on_Ex01A in the newly created Hands-on_Ex folder.\nIn the Hands-on_Ex01A folder, create a sub-folder called data. Then, inside the data sub-folder, create two sub-folders and name them geospatial and aspatial respectively.\nPlace Master Plan 2014 Subzone Boundary (No Sea), Pre-Schools Location and Cycling Path zipped files into geospatial sub-folder and unzipped them. Copy the unzipped files from their respective sub-folders and place them inside geospatial sub-folder.\n\n\n1.2.2 Extracting the aspatial data set\nExtract the downloaded listings.csv.gz file, and move the resulting listings.csv into the aspatial sub-folder."
+    "text": "1.2 Data Acquisition\nThe following data sets will be used:\n\n\n\nDataset\nSource\nDescription\n\n\n\n\nMaster Plan 2014 Subzone Boundary (No Sea)\ndata.gov.sg\nGeospatial boundaries for Singapore’s planning subzones\n\n\nPre-Schools Location\ndata.gov.sg\nLocation data for pre-schools in Singapore\n\n\nCycling Path\nLTA DataMall\nGeospatial data for cycling paths in Singapore\n\n\nSingapore Airbnb Listings\nInside Airbnb\nListing data for Airbnb properties in Singapore\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nThe Master Plan 2014 Subzone Boundary and Pre-Schools Location data sets were downloaded in GeoJSON format, as data.gov.sg no longer offers these particular data sets in Shapefile or KML format respectively.\n\n\n\n1.2.1 Extracting the geospatial data sets\nTo get started, create a new folder called Hands-on_Ex in a working directory.\nNext, create a new sub-folder called Hands-on_Ex01A in the Hands-on_Ex folder.\nIn the Hands-on_Ex01A folder, create a sub-folder called data. Then, inside the data sub-folder, create two sub-folders and name them geospatial and aspatial respectively.\nPlace Master Plan 2014 Subzone Boundary (No Sea), Pre-Schools Location and Cycling Path zipped files into geospatial sub-folder and unzipped them. Copy the unzipped files from their respective sub-folders and place them inside geospatial sub-folder.\n\n\n1.2.2 Extracting the aspatial data set\nExtract the downloaded listings file, and move listings.csv into the aspatial sub-folder."
   },
   {
     "objectID": "Hands-on_Ex/Hands-on_Ex01A/Hands-on_Ex01A.html#getting-started",
     "href": "Hands-on_Ex/Hands-on_Ex01A/Hands-on_Ex01A.html#getting-started",
     "title": "Hands-on Exercise 1A: Geospatial Data Science with R",
     "section": "1.3 Getting Started",
-    "text": "1.3 Getting Started\nIn this hands-on exercise, two R packages will be used. They are:\n\nsf for importing, managing, and processing geospatial data, and\ntidyverse for performing data science tasks such as importing, wrangling and visualising data.\n\nUse the code chunk below to load the necessary R packages into R.\n\npacman::p_load(sf, tidyverse)"
+    "text": "1.3 Getting Started\nTwo R packages will be used for this exercise. They are:\n\nsf for importing, managing, and processing geospatial data, and\ntidyverse for performing data science tasks such as importing, wrangling and visualising data.\n\nUse the code chunk below to load the necessary R packages into R.\n\npacman::p_load(sf, tidyverse)"
   },
   {
     "objectID": "Hands-on_Ex/Hands-on_Ex01A/Hands-on_Ex01A.html#importing-geospatial-data",
@@ -194,5 +194,40 @@
     "title": "Hands-on Exercise 1A: Geospatial Data Science with R",
     "section": "1.10 Exploratory Data Analysis (EDA)",
     "text": "1.10 Exploratory Data Analysis (EDA)\nThis section covers how to visualise the derived variables using appropriate exploratory data analysis methods of ggplot2.\n\n1.10.1 Distribution of pre-school density\nA histogram can be used to reveal the distribution of PreSch Density. hist() of R Graphics is used:\n\nhist(mpsz$`PreSch Density`)\n\n\n\n\n\n\n\n\nAlthough the syntax is easy to use, the output falls short of publication quality. Furthermore, the function offers limited room for further customisation.\nIn the code chunk below, appropriate ggplot2 functions will be used.\n\nggplot(data = mpsz,\n       aes(x = as.numeric(`PreSch Density`))) +\n  geom_histogram(bins = 20,\n                 color = \"black\",\n                 fill = \"light blue\") +\n  labs(title = \"Are pre-school evenly distributed in Singapore?\",\n       subtitle = \"There are many planning subzones with a single pre-school, on the other hand, \\nthere are nine planning subzones with at least 30 or more pre-schools\",\n       x = \"Pre-school density (per km sq)\",\n       y = \"Frequency\")\n\n\n\n\n\n\n\n\nIn the code chunk below, a scatterplot is used to show the relationship between Pre-school Density and Pre-school Count.\n\nggplot(data=mpsz, \n       aes(y = `PreSch Count`, \n           x= as.numeric(`PreSch Density`)))+\n  geom_point(color=\"black\", \n             fill=\"light blue\") +\n  xlim(0, 40) +\n  ylim(0, 40) +\n  labs(title = \"\",\n      x = \"Pre-school density (per km sq)\",\n      y = \"Pre-school count\")\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\nThe scatterplot reveals a general positive relationship between pre-school density and pre-school count, where subzones with more pre-schools tend to have higher density.\nHowever, the relationship is not strictly linear, particularly at lower density values, where subzones show a wide range of pre-school counts. This suggests that density alone does not fully capture how many pre-schools a subzone has, since it is also influenced by the subzone’s physical area."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html#getting-started",
+    "href": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html#getting-started",
+    "title": "Hands-on Exercise 1B: Thematic Mapping and GeoVisualisation with R",
+    "section": "2 Getting Started",
+    "text": "2 Getting Started"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html#importing-data-into-r",
+    "href": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html#importing-data-into-r",
+    "title": "Hands-on Exercise 1B: Thematic Mapping and GeoVisualisation with R",
+    "section": "Importing Data into R",
+    "text": "Importing Data into R\n\nThe Data\n\n\nImporting Geospatial Data into R\n\n\nImporting Attribute Data into R"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html#choropleth-mapping-geospatial-data-using-tmap",
+    "href": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html#choropleth-mapping-geospatial-data-using-tmap",
+    "title": "Hands-on Exercise 1B: Thematic Mapping and GeoVisualisation with R",
+    "section": "Choropleth Mapping Geospatial Data Using tmap",
+    "text": "Choropleth Mapping Geospatial Data Using tmap"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html",
+    "href": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html",
+    "title": "Hands-on Exercise 1B: Thematic Mapping and GeoVisualisation with R",
+    "section": "",
+    "text": "Thematic mapping involves the use of map symbols to visualize selected properties of geographic features that are not naturally visible, such as population, temperature, crime rate, and property prices.\nGeovisualisation, on the other hand, is the process of using visual representations and cartographic techniques to explore, analyze, and communicate geospatial data. It combines elements of cartography, computer science, and information visualization to enhance spatial understanding and knowledge discovery.\nThis exercise explores how to create functional and truthful choropleth maps using the tmap package."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html#overview",
+    "href": "Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html#overview",
+    "title": "Hands-on Exercise 1B: Thematic Mapping and GeoVisualisation with R",
+    "section": "",
+    "text": "Thematic mapping involves the use of map symbols to visualize selected properties of geographic features that are not naturally visible, such as population, temperature, crime rate, and property prices.\nGeovisualisation, on the other hand, is the process of using visual representations and cartographic techniques to explore, analyze, and communicate geospatial data. It combines elements of cartography, computer science, and information visualization to enhance spatial understanding and knowledge discovery.\nThis exercise explores how to create functional and truthful choropleth maps using the tmap package."
   }
 ]

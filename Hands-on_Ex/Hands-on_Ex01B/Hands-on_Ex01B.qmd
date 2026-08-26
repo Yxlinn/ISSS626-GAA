@@ -1,3 +1,25 @@
 ---
-title: "Hands-on Exercise 1B"
+title: "Hands-on Exercise 1B: Thematic Mapping and GeoVisualisation with R"
 ---
+
+## 1 Overview
+
+Thematic mapping involves the use of map symbols to visualize selected properties of geographic features that are not naturally visible, such as population, temperature, crime rate, and property prices.
+
+Geovisualisation, on the other hand, is the process of using visual representations and cartographic techniques to explore, analyze, and communicate geospatial data. It combines elements of cartography, computer science, and information visualization to enhance spatial understanding and knowledge discovery.
+
+This exercise explores how to create functional and truthful choropleth maps using the **tmap** package.
+
+## 2 Getting Started
+
+
+## Importing Data into R
+
+### The Data
+
+### Importing Geospatial Data into R
+
+### Importing Attribute Data into R
+
+## Choropleth Mapping Geospatial Data Using tmap
+

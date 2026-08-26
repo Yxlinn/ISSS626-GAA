@@ -8,7 +8,7 @@ title: "ISSS626 Geospatial Analytics & Applications"
 
 This site documents my coursework for ISSS626 Geospatial Analytics and Applications, including hands-on exercises, in-class exercises, and take-home exercises using R.
 
-Topics covered in this course:
+**Topics covered in this course:**
 
 - Introduction to Geospatial Analytics
 - Spatial Point Patterns Analysis (SPPA)
@@ -20,4 +20,4 @@ Topics covered in this course:
 - Geographically Weighted Predictive Models
 - Modelling Geographic Accessibility
 - Spatial Interaction Models
-:::
+
