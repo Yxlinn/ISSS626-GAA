@@ -457,7 +457,89 @@ Different classification methods produce noticeably different color patterns. Me
 
 **Comparing number of classes:**
 
-The following choropleth maps use the same classification method with different numbers of classes (2, 6, 10, and 20), to compare differences in output.
+The following choropleth maps use the same classification method (`kmeans`) with different numbers of classes (2, 6, 10, and 20), to compare differences in output.
+
+::: {.panel-tabset}
+
+## n = 2
+
+```{r}
+#| fig-width: 11
+#| fig-height: 7
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "kmeans", 
+                n = 2)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+## n = 6
+
+```{r}
+#| fig-width: 11
+#| fig-height: 7
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "kmeans", 
+                n = 6)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+## n = 10
+
+```{r}
+#| fig-width: 11
+#| fig-height: 7
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "kmeans", 
+                n = 10)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+## n = 20
+
+```{r}
+#| fig-width: 11
+#| fig-height: 7
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "kmeans", 
+                n = 20)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+:::
+
+::: callout-note
+**Observation:**
+
+Using different number of classes within the same classification method affects how much detail the map reveals. With n=2, the outlier dominates the classification, splitting subzones into just two broad groups with almost no visible variation among the majority. As the number of classes increases, finer distinctions emerge, revealing spatial clusters that were hidden at lower values of n. However, at very high values of n, adjacent shades become difficult to tell apart, and the added precision offers diminishing returns for visual interpretation.
+:::
+
+#### 4.3.2 Plotting choropleth map with custom breaks
+
+For all built-in styles, category breaks are computed internally. To override these defaults, breakpoints can be set explicitly using the `breaks` argument of `tm_scale_intervals()`. In **tmap**, breaks include a minimum and maximum. As a result, n+1 elements must be specified in `breaks` to end up with n categories, with values in increasing order.
+
+Before setting break points, it is good practice to check descriptive statistics on the variable.
+
+```{r}
+summary(mpsz_pop2024$DEPENDENCY)
+```
+
+With reference to the results above, break points are set at 0.60, 0.70, 0.80, 0.90. In addition, a minimum and maximum are also required in the breaks vector, which are set at 0 and 100 respectively. The resulting breaks vector is c(0, 0.60, 0.70, 0.80, 0.90, 1.00).
+
+```{r}
+tm_shape(mpsz_pop2024)+
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                breaks = c(0, 0.60, 0.70, 0.80, 0.90, 1.00))) +
+  tm_borders(fill_alpha = 0.5)
+```
 
 
 
