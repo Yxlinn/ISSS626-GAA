@@ -729,5 +729,21 @@ tm_shape(mpsz_pop2024) +
   tm_borders(fill_alpha = 0.5)
 ```
 
+## 6 Mapping Spatial Objects Meeting a Selection Criterion
+
+Instead of creating small multiple choropleth map, `filter()` of **dplyr** can be used to select a geographical area of interest, and plot a choropleth map focused only on the selected region.
+
+```{r}
+mpsz_pop2024 %>%
+  filter(REGION_N == "CENTRAL REGION") %>%
+  tm_shape() +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile", 
+                values = "brewer.greens"),
+              fill.legend = tm_legend()) +
+  tm_borders(fill_alpha = 0.5)
+```
+
 
 

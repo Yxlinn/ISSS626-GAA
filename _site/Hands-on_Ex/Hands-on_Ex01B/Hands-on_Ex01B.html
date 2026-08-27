@@ -236,6 +236,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#arranging-multiple-choropleth-maps-in-a-grid-layout" id="toc-arranging-multiple-choropleth-maps-in-a-grid-layout" class="nav-link" data-scroll-target="#arranging-multiple-choropleth-maps-in-a-grid-layout">5.2 Arranging multiple choropleth maps in a grid layout</a></li>
   <li><a href="#defining-a-group-by-variable-with-tm_facets" id="toc-defining-a-group-by-variable-with-tm_facets" class="nav-link" data-scroll-target="#defining-a-group-by-variable-with-tm_facets">5.3 Defining a group-by variable with tm_facets()</a></li>
   </ul></li>
+  <li><a href="#mapping-spatial-objects-meeting-a-selection-criterion" id="toc-mapping-spatial-objects-meeting-a-selection-criterion" class="nav-link" data-scroll-target="#mapping-spatial-objects-meeting-a-selection-criterion">6 Mapping Spatial Objects Meeting a Selection Criterion</a></li>
   </ul>
 </nav>
     </div>
@@ -1234,9 +1235,31 @@ Note
 </div>
 </div>
 </div>
-
-
 </section>
+</section>
+<section id="mapping-spatial-objects-meeting-a-selection-criterion" class="level2">
+<h2 class="anchored" data-anchor-id="mapping-spatial-objects-meeting-a-selection-criterion">6 Mapping Spatial Objects Meeting a Selection Criterion</h2>
+<p>Instead of creating small multiple choropleth map, <code>filter()</code> of <strong>dplyr</strong> can be used to select a geographical area of interest, and plot a choropleth map focused only on the selected region.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>mpsz_pop2024 <span class="sc">%&gt;%</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(REGION_N <span class="sc">==</span> <span class="st">"CENTRAL REGION"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>() <span class="sc">+</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.scale =</span> <span class="fu">tm_scale_intervals</span>(</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">style =</span> <span class="st">"quantile"</span>, </span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">values =</span> <span class="st">"brewer.greens"</span>),</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>()) <span class="sc">+</span></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">fill_alpha =</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex01B_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
 </section>
 
 </main> <!-- /main -->
