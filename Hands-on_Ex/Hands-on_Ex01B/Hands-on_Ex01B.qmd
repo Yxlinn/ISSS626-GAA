@@ -194,7 +194,7 @@ qtm(shp = mpsz_pop2024,
 
 ### 4.2 Creating a choropleth map by using tmap's elements
 
-Despite the usefulness of `qtm()` in drawing a choropleth map quickly and easily, the disadvantage is that it makes aesthetics of individual layers harder to control.  To draw a high quality cartographic choropleth map as shown in the figure below, **tmap**’s drawing elements should be used.
+Despite the usefulness of `qtm()` in drawing a choropleth map quickly and easily, the disadvantage is that it makes aesthetics of individual layers harder to control. To draw a high quality cartographic choropleth map as shown in the figure below, **tmap**’s drawing elements should be used.
 
 ```{r}
 #| fig-width: 12
@@ -230,7 +230,7 @@ tm_shape(mpsz_pop2024) +
   tm_polygons()
 ```
 
-::: {.callout-note}
+::: callout-note
 By default, polygon areas are shaded light gray (gray85) and polygon borders are drawn in slightly darker gray (gray25).
 :::
 
@@ -270,7 +270,7 @@ tm_shape(mpsz_pop2024)+
   tm_borders()
 ```
 
-Notice that light-gray border lines have been added onto the choropleth map. 
+Notice that light-gray border lines have been added onto the choropleth map.
 
 The `fill_alpha` argument is used to define transparency number between 0 (totally transparent) and 1 (not transparent). By default, the alpha value of the `col` is used (normally 1).
 
@@ -326,8 +326,7 @@ Notice that the distribution of **quantile** data classification method are more
 
 The following choropleth maps use different classification methods supported by tmap, to compare their differences.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ## SD
 
 ```{r}
@@ -445,11 +444,9 @@ tm_shape(mpsz_pop2024) +
                 n = 5)) +
   tm_borders(fill_alpha = 0.5)
 ```
-
 :::
 
-::: {.callout-note}
-
+::: callout-note
 **Observation:**
 
 Different classification methods produce noticeably different color patterns. Methods like *equal* and *sd* are heavily skewed by the outlier, compressing nearly all subzones into a single pale class. In contrast, methods like *quantile* and *jenks* adapt to the data's actual spread, revealing much clearer spatial variation across subzones. Choosing the right classification method based on the data's distribution is therefore crucial to avoid misleading choropleth maps.
@@ -459,8 +456,7 @@ Different classification methods produce noticeably different color patterns. Me
 
 The following choropleth maps use the same classification method (`kmeans`) with different numbers of classes (2, 6, 10, and 20), to compare differences in output.
 
-::: {.panel-tabset}
-
+::: panel-tabset
 ## n = 2
 
 ```{r}
@@ -512,7 +508,6 @@ tm_shape(mpsz_pop2024) +
                 n = 20)) +
   tm_borders(fill_alpha = 0.5)
 ```
-
 :::
 
 ::: callout-note
@@ -534,12 +529,120 @@ summary(mpsz_pop2024$DEPENDENCY)
 With reference to the results above, break points are set at 0.60, 0.70, 0.80, 0.90. In addition, a minimum and maximum are also required in the breaks vector, which are set at 0 and 100 respectively. The resulting breaks vector is c(0, 0.60, 0.70, 0.80, 0.90, 1.00).
 
 ```{r}
+#| warning: false
 tm_shape(mpsz_pop2024)+
   tm_polygons(fill = "DEPENDENCY",
               fill.scale = tm_scale_intervals(
                 breaks = c(0, 0.60, 0.70, 0.80, 0.90, 1.00))) +
   tm_borders(fill_alpha = 0.5)
 ```
+
+### 4.4 Colour Scheme
+
+**tmap** supports colour ramps either defined by the user or a set of predefined colour ramps from the **RColorBrewer** package.
+
+#### 4.4.1 Using ColourBrewer Palette
+
+To change the colour, the preferred palette is assigned to the `values` argument.
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "brewer.greens")) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+Notice that the choropleth map is shaded in green.
+
+To reverse the colour shading, add a "-" prefix.
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "-brewer.greens")) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+Notice that the colour scheme has been reversed.
+
+#### 4.4.2 Cartographic Furniture
+
+Beside map style, **tmap** also provides arguments to draw other map furniture such as compass, scale bar and grid lines.
+
+In the code chunk below, `tm_compass()`, `tm_scale_bar()`, `tm_grid()`, and `tm_credit()` are used to add compass, scale bar, grid lines and data sources onto the choropleth map.
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_compass(type="8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(lwd = 0.1, alpha = 0.2) +
+  tm_credits("Source: data.gov.sg & singstat",
+             position = c("left", "bottom"))
+```
+
+### 4.5 Map Layout
+
+Map layout refers to the combination of all map elements into a cohensive map. It includes the map background, frame, typography, scale, aspect ratio, margins, and more.
+
+The map layout can be customized using the `tm_layout()` function. This section covers the most often used arguments of this function, using the dependency choropleth map as an example.
+
+#### 4.5.1 Map Legend
+
+In **tmap**, several legend options are provided to change the placement, format and appearance of the legend.
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5),
+              fill.legend = tm_legend(
+                title = "Dependency Ratio")) +
+  tm_pos_auto_in() +
+  tm_borders(fill_alpha = 0.5) +
+  tm_compass(type="8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(lwd = 0.1, alpha = 0.2) +
+  tm_credits("Source: data.gov.sg & singstat",
+             position = c("left", "bottom"))
+```
+
+#### 4.5.2 Map Style
+
+**tmap** allows a wide variety of layout settings to be changed. They can be called by using `tmap_style()`.
+
+The code chunk below shows the *natural* style is used.
+
+```{r}
+#| message: false
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "-brewer.greens")) + 
+  tm_borders(fill_alpha = 0.5) + 
+  tmap_style("natural")
+```
+
+To restore the default style, the following code is used:
+
+```{r}
+#| message: false
+tmap_style("white")
+```
+
 
 
 
