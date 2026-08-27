@@ -195,19 +195,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">1 Overview</a></li>
   <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started">2 Getting Started</a></li>
   <li><a href="#importing-data-into-r" id="toc-importing-data-into-r" class="nav-link" data-scroll-target="#importing-data-into-r">3 Importing Data into R</a>
-  <ul class="collapse">
+  <ul>
   <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">3.1 The Data</a></li>
   <li><a href="#importing-geospatial-data-into-r" id="toc-importing-geospatial-data-into-r" class="nav-link" data-scroll-target="#importing-geospatial-data-into-r">3.2 Importing Geospatial Data into R</a></li>
   <li><a href="#importing-attribute-data-into-r" id="toc-importing-attribute-data-into-r" class="nav-link" data-scroll-target="#importing-attribute-data-into-r">3.3 Importing Attribute Data into R</a></li>
-  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation">3.4 Data Preparation</a></li>
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation">3.4 Data Preparation</a>
+  <ul class="collapse">
+  <li><a href="#data-wrangling" id="toc-data-wrangling" class="nav-link" data-scroll-target="#data-wrangling">3.4.1 Data Wrangling</a></li>
+  <li><a href="#joining-the-attribute-data-and-geospatial-data" id="toc-joining-the-attribute-data-and-geospatial-data" class="nav-link" data-scroll-target="#joining-the-attribute-data-and-geospatial-data">3.4.2 Joining the attribute data and geospatial data</a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#choropleth-mapping-geospatial-data-using-tmap" id="toc-choropleth-mapping-geospatial-data-using-tmap" class="nav-link" data-scroll-target="#choropleth-mapping-geospatial-data-using-tmap">4 Choropleth Mapping Geospatial Data Using tmap</a>
-  <ul class="collapse">
+  <ul>
   <li><a href="#plotting-a-choropleth-map-quickly-using-qtm" id="toc-plotting-a-choropleth-map-quickly-using-qtm" class="nav-link" data-scroll-target="#plotting-a-choropleth-map-quickly-using-qtm">4.1 Plotting a choropleth map quickly using qtm()</a></li>
-  <li><a href="#creating-a-choropleth-map-by-using-tmaps-elements" id="toc-creating-a-choropleth-map-by-using-tmaps-elements" class="nav-link" data-scroll-target="#creating-a-choropleth-map-by-using-tmaps-elements">4.2 Creating a choropleth map by using tmap’s elements</a></li>
-  <li><a href="#data-classification-methods-of-tmap" id="toc-data-classification-methods-of-tmap" class="nav-link" data-scroll-target="#data-classification-methods-of-tmap">4.3 Data classification methods of tmap</a></li>
-  <li><a href="#colour-scheme" id="toc-colour-scheme" class="nav-link" data-scroll-target="#colour-scheme">4.4 Colour Scheme</a></li>
-  <li><a href="#map-layout" id="toc-map-layout" class="nav-link" data-scroll-target="#map-layout">4.5 Map Layout</a></li>
+  <li><a href="#creating-a-choropleth-map-by-using-tmaps-elements" id="toc-creating-a-choropleth-map-by-using-tmaps-elements" class="nav-link" data-scroll-target="#creating-a-choropleth-map-by-using-tmaps-elements">4.2 Creating a choropleth map by using tmap’s elements</a>
+  <ul class="collapse">
+  <li><a href="#drawing-a-base-map" id="toc-drawing-a-base-map" class="nav-link" data-scroll-target="#drawing-a-base-map">4.2.1 Drawing a base map</a></li>
+  <li><a href="#drawing-a-choropleth-map-using-tm_polygons" id="toc-drawing-a-choropleth-map-using-tm_polygons" class="nav-link" data-scroll-target="#drawing-a-choropleth-map-using-tm_polygons">4.2.2 Drawing a choropleth map using tm_polygons()</a></li>
+  <li><a href="#drawing-a-choropleth-map-using-tm_fill-and-tm_border" id="toc-drawing-a-choropleth-map-using-tm_fill-and-tm_border" class="nav-link" data-scroll-target="#drawing-a-choropleth-map-using-tm_fill-and-tm_border">4.2.3 Drawing a choropleth map using tm_fill() and tm_border()</a></li>
+  </ul></li>
+  <li><a href="#data-classification-methods-of-tmap" id="toc-data-classification-methods-of-tmap" class="nav-link" data-scroll-target="#data-classification-methods-of-tmap">4.3 Data classification methods of tmap</a>
+  <ul class="collapse">
+  <li><a href="#plotting-choropleth-maps-with-built-in-classification-methods" id="toc-plotting-choropleth-maps-with-built-in-classification-methods" class="nav-link" data-scroll-target="#plotting-choropleth-maps-with-built-in-classification-methods">4.3.1 Plotting choropleth maps with built-in classification methods</a></li>
+  <li><a href="#plotting-choropleth-map-with-custom-breaks" id="toc-plotting-choropleth-map-with-custom-breaks" class="nav-link" data-scroll-target="#plotting-choropleth-map-with-custom-breaks">4.3.2 Plotting choropleth map with custom breaks</a></li>
+  </ul></li>
+  <li><a href="#colour-scheme" id="toc-colour-scheme" class="nav-link" data-scroll-target="#colour-scheme">4.4 Colour Scheme</a>
+  <ul class="collapse">
+  <li><a href="#using-colourbrewer-palette" id="toc-using-colourbrewer-palette" class="nav-link" data-scroll-target="#using-colourbrewer-palette">4.4.1 Using ColourBrewer Palette</a></li>
+  <li><a href="#cartographic-furniture" id="toc-cartographic-furniture" class="nav-link" data-scroll-target="#cartographic-furniture">4.4.2 Cartographic Furniture</a></li>
+  </ul></li>
+  <li><a href="#map-layout" id="toc-map-layout" class="nav-link" data-scroll-target="#map-layout">4.5 Map Layout</a>
+  <ul class="collapse">
+  <li><a href="#map-legend" id="toc-map-legend" class="nav-link" data-scroll-target="#map-legend">4.5.1 Map Legend</a></li>
+  <li><a href="#map-style" id="toc-map-style" class="nav-link" data-scroll-target="#map-style">4.5.2 Map Style</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
