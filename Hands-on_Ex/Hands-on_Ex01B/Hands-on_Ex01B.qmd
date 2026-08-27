@@ -791,5 +791,74 @@ tm_shape(outlier_sf) +
   tm_layout(asp = 0.8)
 ```
 
+## 8 Creating Interactive Map
+
+Interactive maps let users actively explore and interact with the data they display. Unlike static maps, they support zooming in and out, panning across areas, clicking on locations for more information, and working with data overlays or visualisations, making the experience more dynamic and informative. **tmap** allows easy switching between static and interactive maps using `tmap_mode()`, enabling the view most suited to a given analysis.
+
+Building on the code from section 7, the following code creates an interactive map.
+
+```{r}
+#| message: false
+region_selected <- mpsz_pop2024 %>%
+  filter(REGION_N == "CENTRAL REGION")
+region_bbox <- st_bbox(region_selected)
+
+stats <- boxplot.stats(region_selected$DEPENDENCY)
+outlier_vals <- stats$out
+outlier_sf <- region_selected[region_selected$DEPENDENCY %in% outlier_vals, ]
+
+tmap_mode("view")
+tm_shape(region_selected, 
+         bbox = region_bbox) +
+  tm_fill("DEPENDENCY",
+          id = "SUBZONE_N",
+          popup.vars = c(
+            "Name" = "SUBZONE_N", 
+            "Dependency" = "DEPENDENCY")) +
+  tm_borders() +
+  tm_shape(outlier_sf) +
+  tm_borders(col = "red", lwd = 2)
+```
+
+```{r}
+#| echo: false
+#| message: false
+tmap_mode("plot")
+```
+
+The interactive map above is far from satisfactory. While free zooming encourages exploration, too much freedom can leave users disoriented within the map.
+
+To address this, the `set.zoom.limits` argument can be used to limit how far users can zoom in or out, as shown below.
+
+```{r}
+#| message: false
+region_selected <- mpsz_pop2024 %>%
+  filter(REGION_N == "CENTRAL REGION")
+region_bbox <- st_bbox(region_selected)
+
+stats <- boxplot.stats(region_selected$DEPENDENCY)
+outlier_vals <- stats$out
+outlier_sf <- region_selected[region_selected$DEPENDENCY %in% outlier_vals, ]
+
+tmap_mode("view")
+
+tm_shape(region_selected, 
+         bbox = region_bbox) +
+  tm_fill("DEPENDENCY",
+          id = "SUBZONE_N",
+          popup.vars = c(
+            "Name" = "SUBZONE_N", 
+            "Dependency" = "DEPENDENCY")) +
+  tm_borders() +
+  tm_shape(outlier_sf) +
+  tm_borders(col = "red", lwd = 2) +
+  tm_view(set_zoom_limits = c(12,14))
+```
+
+```{r}
+#| echo: false
+#| message: false
+tmap_mode("plot")
+```
 
 
