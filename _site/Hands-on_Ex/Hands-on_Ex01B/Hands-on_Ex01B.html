@@ -237,6 +237,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#defining-a-group-by-variable-with-tm_facets" id="toc-defining-a-group-by-variable-with-tm_facets" class="nav-link" data-scroll-target="#defining-a-group-by-variable-with-tm_facets">5.3 Defining a group-by variable with tm_facets()</a></li>
   </ul></li>
   <li><a href="#mapping-spatial-objects-meeting-a-selection-criterion" id="toc-mapping-spatial-objects-meeting-a-selection-criterion" class="nav-link" data-scroll-target="#mapping-spatial-objects-meeting-a-selection-criterion">6 Mapping Spatial Objects Meeting a Selection Criterion</a></li>
+  <li><a href="#complementing-thematic-map-with-statistical-chart" id="toc-complementing-thematic-map-with-statistical-chart" class="nav-link" data-scroll-target="#complementing-thematic-map-with-statistical-chart">7 Complementing Thematic Map with Statistical Chart</a></li>
   </ul>
 </nav>
     </div>
@@ -1254,6 +1255,62 @@ Note
 <div>
 <figure class="figure">
 <p><img src="Hands-on_Ex01B_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="complementing-thematic-map-with-statistical-chart" class="level2">
+<h2 class="anchored" data-anchor-id="complementing-thematic-map-with-statistical-chart">7 Complementing Thematic Map with Statistical Chart</h2>
+<p>Maps and statistical charts complement each other by visually representing different aspects of the same data, offering a more comprehensive understanding. Maps excel at showing spatial relationships and geographical patterns, while charts effectively display numerical data, trends, and comparisons. Combining both allows for a more insightful and engaging data narrative, especially when dealing with spatial data that also has quantifiable characteristics.</p>
+<p>With <strong>tmap</strong>, a statistical chart can be incorporated into the map visualisation using the <code>fill.chart</code> argument of map layers and <a href="https://r-tmap.github.io/tmap/reference/tm_chart.html">legend chart</a> feature, as shown in the code chunk below.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>mpsz_pop2024 <span class="sc">%&gt;%</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(REGION_N <span class="sc">==</span> <span class="st">"CENTRAL REGION"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>() <span class="sc">+</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.scale =</span> <span class="fu">tm_scale_intervals</span>(</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">style =</span> <span class="st">"quantile"</span>, </span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">values =</span> <span class="st">"brewer.greens"</span>),</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>(),</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.chart =</span> <span class="fu">tm_chart_box</span>()) <span class="sc">+</span></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>() <span class="sc">+</span></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">asp =</span> <span class="fl">0.8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex01B_files/figure-html/unnamed-chunk-44-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The following code further improves the visual representation by highlighting and labelling outliers on the choropleth map.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>mpsz_selected <span class="ot">&lt;-</span> mpsz_pop2024 <span class="sc">%&gt;%</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(REGION_N <span class="sc">==</span> <span class="st">"CENTRAL REGION"</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>stats <span class="ot">&lt;-</span> <span class="fu">boxplot.stats</span>(mpsz_selected<span class="sc">$</span>DEPENDENCY)</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>outlier_vals <span class="ot">&lt;-</span> stats<span class="sc">$</span>out</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>outlier_sf <span class="ot">&lt;-</span> mpsz_selected[mpsz_selected<span class="sc">$</span>DEPENDENCY <span class="sc">%in%</span> outlier_vals, ]</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_selected) <span class="sc">+</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>          <span class="at">fill.scale =</span> <span class="fu">tm_scale_intervals</span>(</span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">style =</span> <span class="st">"quantile"</span>, </span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">values =</span> <span class="st">"brewer.blues"</span>),</span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>          <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>(),</span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>          <span class="at">fill.chart =</span> <span class="fu">tm_chart_box</span>()) <span class="sc">+</span></span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">fill_alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(outlier_sf) <span class="sc">+</span></span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"red"</span>, <span class="at">lwd =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_labels</span>(<span class="st">"SUBZONE_N"</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">size =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">asp =</span> <span class="fl">0.8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex01B_files/figure-html/unnamed-chunk-45-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>

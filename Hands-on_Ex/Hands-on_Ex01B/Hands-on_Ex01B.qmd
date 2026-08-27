@@ -745,5 +745,51 @@ mpsz_pop2024 %>%
   tm_borders(fill_alpha = 0.5)
 ```
 
+## 7 Complementing Thematic Map with Statistical Chart
+
+Maps and statistical charts complement each other by visually representing different aspects of the same data, offering a more comprehensive understanding. Maps excel at showing spatial relationships and geographical patterns, while charts effectively display numerical data, trends, and comparisons. Combining both allows for a more insightful and engaging data narrative, especially when dealing with spatial data that also has quantifiable characteristics.
+
+With **tmap**, a statistical chart can be incorporated into the map visualisation using the `fill.chart` argument of map layers and [legend chart](https://r-tmap.github.io/tmap/reference/tm_chart.html) feature, as shown in the code chunk below.
+
+```{r}
+mpsz_pop2024 %>%
+  filter(REGION_N == "CENTRAL REGION") %>%
+  tm_shape() +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile", 
+                values = "brewer.greens"),
+              fill.legend = tm_legend(),
+              fill.chart = tm_chart_box()) +
+  tm_borders() +
+  tm_layout(asp = 0.8)
+```
+
+The following code further improves the visual representation by highlighting and labelling outliers on the choropleth map.
+
+```{r}
+mpsz_selected <- mpsz_pop2024 %>%
+  filter(REGION_N == "CENTRAL REGION")
+
+stats <- boxplot.stats(mpsz_selected$DEPENDENCY)
+
+outlier_vals <- stats$out
+
+outlier_sf <- mpsz_selected[mpsz_selected$DEPENDENCY %in% outlier_vals, ]
+
+tm_shape(mpsz_selected) +
+  tm_polygons(fill = "DEPENDENCY",
+          fill.scale = tm_scale_intervals(
+            style = "quantile", 
+            values = "brewer.blues"),
+          fill.legend = tm_legend(),
+          fill.chart = tm_chart_box()) +
+  tm_borders(fill_alpha = 0.5) +
+tm_shape(outlier_sf) +
+  tm_borders(col = "red", lwd = 2) +
+  tm_labels("SUBZONE_N", col = "red", size = 0.5) +
+  tm_layout(asp = 0.8)
+```
+
 
 
