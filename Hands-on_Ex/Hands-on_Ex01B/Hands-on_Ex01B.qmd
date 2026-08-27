@@ -234,7 +234,92 @@ tm_shape(mpsz_pop2024) +
 By default, polygon areas are shaded light gray (gray85) and polygon borders are drawn in slightly darker gray (gray25).
 :::
 
+#### 4.2.2 Drawing a choropleth map using tm_polygons()
 
+To draw a choropleth map showing the geographical distribution of a selected variable by planning subzone, the target variable, such as *DEPENDENCY*, is assigned to `tm_polygons()`.
 
+```{r}
+tm_shape(mpsz_pop2024)+
+  tm_polygons(fill = "DEPENDENCY")
+```
+
+::: callout-note
+- The default interval binning used to draw the choropleth map is called “pretty”. A detailed discussion of the data classification methods supported by **tmap** is provided under sub-section 4.3.
+- The default colour scheme used is `blues3` of ColorBrewer (covered in more detail under sub-section 4.4).
+- By default, missing values are shaded in grey.
+:::
+
+#### 4.2.3 Drawing a choropleth map using tm_fill() and tm_border()
+
+`tm_polygons()` is a wrapper of `tm_fill()` and `tm_borders()`. `tm_fill()` shades the polygons using the default colour scheme, and `tm_borders()` adds the boundaries of the polygon features onto the choropleth map.
+
+The following code draws a choropleth map using `tm_fill()` alone.
+
+```{r}
+tm_shape(mpsz_pop2024)+
+  tm_fill("DEPENDENCY")
+```
+
+Notice that the planning subzones are shaded according to their respective *DEPENDENCY* values.
+
+`tm_borders()` adds the boundaries of the planning subzones, as shown below.
+
+```{r}
+tm_shape(mpsz_pop2024)+
+  tm_fill("DEPENDENCY") +
+  tm_borders()
+```
+
+Notice that light-gray border lines have been added onto the choropleth map. 
+
+The `fill_alpha` argument is used to define transparency number between 0 (totally transparent) and 1 (not transparent). By default, the alpha value of the `col` is used (normally 1).
+
+Beside `fill_alpha`, `tm_borders()` takes three other arguments:
+
+- `col` = border colour,
+- `lwd` = border line width. The default is 1, and
+- `lty` = border line type. The default is “solid”.
+
+```{r}
+tm_shape(mpsz_pop2024)+
+  tm_fill("DEPENDENCY") +
+  tm_borders(col = "grey60",
+             lwd = 0.1,
+             lty = "dashed")
+```
+
+### 4.3 Data classification methods of tmap
+
+Most choropleth maps employ some methods of data classification. The point of classification is to take a large number of observations and group them into data ranges or classes.
+
+**tmap** provides a total ten data classification methods, namely: *fixed*, *sd*, *equal*, *pretty* (default), *quantile*, *kmeans*, *hclust*, *bclust*, *fisher*, and *jenks*.
+
+To define a data classification method, the `style` argument of `tm_fill()` or `tm_polygons()` is used.
+
+#### 4.3.1 Plotting choropleth maps with built-in classification methods
+
+The code chunk below shows a **quantile** data classification that used 5 classes.
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+In the code chunk below, **equal** data classification method is used.
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "equal",
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+Notice that the distribution of **quantile** data classification method are more evenly distributed then **equal** data classification method.
 
 
