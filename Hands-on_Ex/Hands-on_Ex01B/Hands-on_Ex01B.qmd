@@ -643,8 +643,91 @@ To restore the default style, the following code is used:
 tmap_style("white")
 ```
 
+## 5 Drawing Small Multiple Choropleth Maps
 
+**Small multiple maps**, also referred to as **facet maps**, are composed of many maps arrange side-by-side, and sometimes stacked vertically. Small multiple maps enable the visualisation of how spatial relationships change with respect to another variable, such as time.
 
+In **tmap**, small multiple maps can be plotted in three ways:
+
+- by assigning multiple values to at least one of the aesthetic arguments,
+- by creating multiple stand-alone maps with `tmap_arrange()`, and
+- by defining a group-by variable in `tm_facets()`.
+
+### 5.1 Assigning multiple values to at least one of the aesthetic arguments
+
+In this example, small multiple choropleth maps are created by assigning two variables to the `fill` aesthetic.
+
+```{r}
+#| message: false
+#| fig-width: 12
+#| fig-height: 6
+
+tm_shape(mpsz_pop2024) + 
+  tm_polygons(
+    fill = c("YOUNG", "AGED"),
+    fill.legend = 
+      tm_legend(position = tm_pos_in(
+        "right", "bottom")),
+    fill.scale = tm_scale_intervals(
+      style = "equal", 
+      n = 5,
+      values = "brewer.blues")) +
+  tm_borders(fill_alpha = 0.5) +
+  tmap_style("natural")
+```
+
+### 5.2 Arranging multiple choropleth maps in a grid layout
+
+In this example, multiple choropleth maps are created and `tmap_arrange()` is used to arrange them in a grid layout.
+
+```{r}
+youngmap <- tm_shape(mpsz_pop2024)+ 
+  tm_polygons(fill = "YOUNG",
+              fill.legend = tm_legend(
+                position = tm_pos_in(
+                  "right", "bottom"),
+                  item.height = 0.8),
+              fill.scale = tm_scale_intervals(
+                style = "quantile", 
+                values = "brewer.blues")) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Distribution of young population")
+                
+agedmap <- tm_shape(mpsz_pop2024)+ 
+  tm_polygons(fill = "AGED",
+              fill.legend = tm_legend(
+                position = tm_pos_in(
+                  "right", "bottom"),
+                item.height = 0.8),
+              fill.scale = tm_scale_intervals(
+              style = "quantile", 
+              values = "brewer.blues")) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Distribution of aged population")
+
+tmap_arrange(youngmap, agedmap, asp=1, ncol=2)
+```
+
+### 5.3 Defining a group-by variable with tm_facets()
+
+In this example, multiple small choropleth maps are created using `tm_facets()`.
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_fill(fill = "DEPENDENCY",
+          fill.scale = tm_scale_intervals(
+            style = "quantile",
+            values = "brewer.blues")) + 
+  tm_facets(by = "REGION_N",
+            nrow = 2, 
+            ncols = 3,
+            free.coords=TRUE, 
+            drop.units=TRUE) +
+  tm_layout(legend.show = TRUE,
+            title.position = c("center", "center"), 
+            title.size = 20) +
+  tm_borders(fill_alpha = 0.5)
+```
 
 
 

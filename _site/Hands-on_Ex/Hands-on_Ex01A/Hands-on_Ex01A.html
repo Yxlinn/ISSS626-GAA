@@ -160,11 +160,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">In-class Exercise 1</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex01/In-class_Ex02.qmd">
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex02/In-class_Ex02.qmd">
  <span class="dropdown-text">In-class Exercise 2</span></a>
   </li>  
     </ul>
   </li>
+  <li class="nav-item">
+    <span class="nav-link">
+<span class="menu-text">Take-home Exercises</span>
+    </span>
+  </li>  
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
@@ -189,42 +194,42 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#learning-outcome" id="toc-learning-outcome" class="nav-link active" data-scroll-target="#learning-outcome">1 Learning Outcome</a></li>
   <li><a href="#data-acquisition" id="toc-data-acquisition" class="nav-link" data-scroll-target="#data-acquisition">2 Data Acquisition</a>
-  <ul class="collapse">
+  <ul>
   <li><a href="#extracting-the-geospatial-data-sets" id="toc-extracting-the-geospatial-data-sets" class="nav-link" data-scroll-target="#extracting-the-geospatial-data-sets">2.1 Extracting the geospatial data sets</a></li>
   <li><a href="#extracting-the-aspatial-data-set" id="toc-extracting-the-aspatial-data-set" class="nav-link" data-scroll-target="#extracting-the-aspatial-data-set">2.2 Extracting the aspatial data set</a></li>
   </ul></li>
   <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started">3 Getting Started</a></li>
   <li><a href="#importing-geospatial-data" id="toc-importing-geospatial-data" class="nav-link" data-scroll-target="#importing-geospatial-data">4 Importing Geospatial Data</a>
-  <ul class="collapse">
+  <ul>
   <li><a href="#importing-polyline-feature-data-in-geojson-format-master-plan-2024-subzone-boundary" id="toc-importing-polyline-feature-data-in-geojson-format-master-plan-2024-subzone-boundary" class="nav-link" data-scroll-target="#importing-polyline-feature-data-in-geojson-format-master-plan-2024-subzone-boundary">4.1 Importing polyline feature data in GeoJSON format (Master Plan 2024 Subzone Boundary)</a></li>
   <li><a href="#importing-polyline-feature-data-in-shapefile-format-cycling-path" id="toc-importing-polyline-feature-data-in-shapefile-format-cycling-path" class="nav-link" data-scroll-target="#importing-polyline-feature-data-in-shapefile-format-cycling-path">4.2 Importing polyline feature data in shapefile format (Cycling Path)</a></li>
   <li><a href="#importing-gis-data-in-geojson-format-pre-school-locations" id="toc-importing-gis-data-in-geojson-format-pre-school-locations" class="nav-link" data-scroll-target="#importing-gis-data-in-geojson-format-pre-school-locations">4.3 Importing GIS data in GeoJSON format (Pre-school Locations)</a></li>
   </ul></li>
   <li><a href="#checking-the-content-of-a-simple-feature-data-frame" id="toc-checking-the-content-of-a-simple-feature-data-frame" class="nav-link" data-scroll-target="#checking-the-content-of-a-simple-feature-data-frame">5 Checking the Content of A Simple Feature Data Frame</a>
-  <ul class="collapse">
+  <ul>
   <li><a href="#working-with-st_geometry" id="toc-working-with-st_geometry" class="nav-link" data-scroll-target="#working-with-st_geometry">5.1 Working with st_geometry()</a></li>
   <li><a href="#working-with-glimpse" id="toc-working-with-glimpse" class="nav-link" data-scroll-target="#working-with-glimpse">5.2 Working with glimpse()</a></li>
   <li><a href="#working-with-head" id="toc-working-with-head" class="nav-link" data-scroll-target="#working-with-head">5.3 Working with head()</a></li>
   </ul></li>
   <li><a href="#plotting-the-geospatial-data" id="toc-plotting-the-geospatial-data" class="nav-link" data-scroll-target="#plotting-the-geospatial-data">6 Plotting the Geospatial Data</a></li>
   <li><a href="#working-with-projection" id="toc-working-with-projection" class="nav-link" data-scroll-target="#working-with-projection">7 Working with Projection</a>
-  <ul class="collapse">
+  <ul>
   <li><a href="#assigning-epsg-code-to-a-simple-feature-data-frame" id="toc-assigning-epsg-code-to-a-simple-feature-data-frame" class="nav-link" data-scroll-target="#assigning-epsg-code-to-a-simple-feature-data-frame">7.1 Assigning EPSG code to a simple feature data frame</a></li>
   <li><a href="#transforming-the-projection-of-mpsz-from-wgs84-to-svy21" id="toc-transforming-the-projection-of-mpsz-from-wgs84-to-svy21" class="nav-link" data-scroll-target="#transforming-the-projection-of-mpsz-from-wgs84-to-svy21">7.2 Transforming the projection of mpsz from wgs84 to svy21</a></li>
   <li><a href="#transforming-the-projection-of-preschool-from-wgs84-to-svy21" id="toc-transforming-the-projection-of-preschool-from-wgs84-to-svy21" class="nav-link" data-scroll-target="#transforming-the-projection-of-preschool-from-wgs84-to-svy21">7.3 Transforming the projection of preschool from wgs84 to svy21</a></li>
   </ul></li>
   <li><a href="#importing-and-converting-an-aspatial-data" id="toc-importing-and-converting-an-aspatial-data" class="nav-link" data-scroll-target="#importing-and-converting-an-aspatial-data">8 Importing and Converting An Aspatial Data</a>
-  <ul class="collapse">
+  <ul>
   <li><a href="#importing-the-aspatial-data" id="toc-importing-the-aspatial-data" class="nav-link" data-scroll-target="#importing-the-aspatial-data">8.1 Importing the aspatial data</a></li>
   <li><a href="#creating-a-simple-feature-data-frame-from-an-aspatial-data-frame" id="toc-creating-a-simple-feature-data-frame-from-an-aspatial-data-frame" class="nav-link" data-scroll-target="#creating-a-simple-feature-data-frame-from-an-aspatial-data-frame">8.2 Creating a simple feature data frame from an aspatial data frame</a></li>
   </ul></li>
   <li><a href="#geoprocessing-with-sf-package" id="toc-geoprocessing-with-sf-package" class="nav-link" data-scroll-target="#geoprocessing-with-sf-package">9 Geoprocessing with sf package</a>
-  <ul class="collapse">
+  <ul>
   <li><a href="#use-case-1-land-acquisition-analysis" id="toc-use-case-1-land-acquisition-analysis" class="nav-link" data-scroll-target="#use-case-1-land-acquisition-analysis">9.1 Use Case 1: Land Acquisition Analysis</a></li>
   <li><a href="#use-case-2-to-determine-the-number-of-pre-schools-by-planning-subzone" id="toc-use-case-2-to-determine-the-number-of-pre-schools-by-planning-subzone" class="nav-link" data-scroll-target="#use-case-2-to-determine-the-number-of-pre-schools-by-planning-subzone">9.2 Use Case 2: To determine the number of pre-schools by planning subzone</a></li>
   </ul></li>
   <li><a href="#exploratory-data-analysis-eda" id="toc-exploratory-data-analysis-eda" class="nav-link" data-scroll-target="#exploratory-data-analysis-eda">10 Exploratory Data Analysis (EDA)</a>
-  <ul class="collapse">
+  <ul>
   <li><a href="#distribution-of-pre-school-density" id="toc-distribution-of-pre-school-density" class="nav-link" data-scroll-target="#distribution-of-pre-school-density">10.1 Distribution of pre-school density</a></li>
   <li><a href="#relationship-between-pre-school-density-and-count" id="toc-relationship-between-pre-school-density-and-count" class="nav-link" data-scroll-target="#relationship-between-pre-school-density-and-count">10.2 Relationship between pre-school density and count</a></li>
   </ul></li>
