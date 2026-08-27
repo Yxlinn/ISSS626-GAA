@@ -1,5 +1,4 @@
 ---
-title: "In-class_Ex01"
+title: "In-class Exercise 1"
 format: html
 ---
-
