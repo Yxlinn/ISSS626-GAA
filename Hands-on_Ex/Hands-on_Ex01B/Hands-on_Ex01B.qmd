@@ -322,4 +322,144 @@ tm_shape(mpsz_pop2024) +
 
 Notice that the distribution of **quantile** data classification method are more evenly distributed then **equal** data classification method.
 
+**Comparing classification methods:**
+
+The following choropleth maps use different classification methods supported by tmap, to compare their differences.
+
+::: {.panel-tabset}
+
+## SD
+
+```{r}
+#| fig-width: 11
+#| fig-height: 7
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "sd", 
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+## Equal
+
+```{r}
+#| fig-width: 11
+#| fig-height: 7
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "equal", 
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+## Pretty
+
+```{r}
+#| fig-width: 11
+#| fig-height: 7
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "pretty", 
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+## Quantile
+
+```{r}
+#| fig-width: 11
+#| fig-height: 7
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile", 
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+## K-means
+
+```{r}
+#| fig-width: 11
+#| fig-height: 7
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "kmeans", 
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+## Hclust
+
+```{r}
+#| fig-width: 11
+#| fig-height: 7
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "hclust", 
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+## Bclust
+
+```{r}
+#| results: hide
+#| fig-width: 11
+#| fig-height: 7
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "bclust", 
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+## Fisher
+
+```{r}
+#| fig-width: 11
+#| fig-height: 7
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "fisher", 
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+## Jenks
+
+```{r}
+#| fig-width: 11
+#| fig-height: 7
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "jenks", 
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5)
+```
+
+:::
+
+::: {.callout-note}
+
+**Observation:**
+
+Different classification methods produce noticeably different color patterns. Methods like *equal* and *sd* are heavily skewed by the outlier, compressing nearly all subzones into a single pale class. In contrast, methods like *quantile* and *jenks* adapt to the data's actual spread, revealing much clearer spatial variation across subzones. Choosing the right classification method based on the data's distribution is therefore crucial to avoid misleading choropleth maps.
+:::
+
+**Comparing number of classes:**
+
+The following choropleth maps use the same classification method with different numbers of classes (2, 6, 10, and 20), to compare differences in output.
+
+
+
+
 
