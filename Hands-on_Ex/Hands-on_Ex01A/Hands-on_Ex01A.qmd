@@ -30,7 +30,7 @@ The following data sets will be used:
 | **Singapore Airbnb Listings** | [Inside Airbnb](http://insideairbnb.com/get-the-data.html) | Listing data for Airbnb properties in Singapore |
 
 ::: callout-note
-The Master Plan 2014 Subzone Boundary and Pre-Schools Location data sets were downloaded in **GeoJSON** format, as data.gov.sg no longer offers these particular data sets in Shapefile or KML format respectively.
+The Master Plan 2014 Subzone Boundary and Pre-Schools Location data sets were downloaded in **GeoJSON** format.
 :::
 
 ### 2.1 Extracting the geospatial data sets
@@ -430,7 +430,7 @@ ggplot(data = mpsz,
        y = "Frequency")
 ```
 
-### 10.2 Relationship between pre-school density and count 
+### 10.2 Relationship between pre-school density and count
 
 In the code chunk below, a scatterplot is used to show the relationship between *Pre-school Density* and *Pre-school Count*.
 
