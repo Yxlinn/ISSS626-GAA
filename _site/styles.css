@@ -23,8 +23,8 @@
 
 /* Active/current page link */
 .navbar-nav .nav-link.active {
-  color: #ffffff !important;
-  font-weight: 600;
+  color: #e8f1fa !important;
+  font-weight: normal;
 }
 
 /* ===== Dropdown menu (Hands-on Exercise 1, 2, etc.) ===== */
