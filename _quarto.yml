@@ -25,6 +25,9 @@ website:
     right:
       - href: index.qmd
         text: Home
+      - icon: github
+        href: https://github.com/Yxlinn/ISSS626-GAA
+        aria-label: GitHub Repository
 
 format:
   html:
