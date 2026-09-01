@@ -152,5 +152,19 @@
     "title": "Hands-on Exercise 1B: Thematic Mapping and GeoVisualisation with R",
     "section": "9 References",
     "text": "9 References\n\n9.1 All about tmap package\n\ntmap: Thematic Maps in R\ntmap\n\n\n\n9.2 Geospatial data wrangling\n\nsf: Simple Features for R\nSimple Features for R: Standardized Support for Spatial Vector Data\nReading, Writing and Converting Simple Features\n\n\n\n9.3 Data wrangling\n\ndplyr\nTidy data\ntidyr: Tidy Messy Data"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex02A/Hands-on_Ex02A.html",
+    "href": "Hands-on_Ex/Hands-on_Ex02A/Hands-on_Ex02A.html",
+    "title": "Hands-on Exercise 2A: First-order Spatial Point Pattern Analysis (1st-SPPA)",
+    "section": "",
+    "text": "Spatial Point Pattern Analysis (SPPA) is the evaluation of the pattern or distribution of a set of points on a surface. The points may represent:\n\nevents such as crimes, traffic accidents, or disease onsets, or\nbusiness services (e.g., coffee shops and fast-food outlets) or facilities such as childcare centres and eldercare centres.\n\nFirst-order Spatial Point Pattern Analysis (1st-SPPA) focuses on understanding the intensity or density of points across a study area. It examines how the distribution of points varies over space, essentially identifying trends or patterns in point density. This type of analysis deals with the individual locations of points and their distribution, without considering interactions between them.\nThis exercise uses spatstat to perform two commonly used 1st-order SPPA methods, applied to childcare centres in Singapore.\nThe specific questions to be answered are:\n\nAre the childcare centres in Singapore randomly distributed throughout the country?\nIf the answer is not, then the next logical question is: where are the locations with higher concentration of childcare centres?"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex02A/Hands-on_Ex02A.html#overview",
+    "href": "Hands-on_Ex/Hands-on_Ex02A/Hands-on_Ex02A.html#overview",
+    "title": "Hands-on Exercise 2A: First-order Spatial Point Pattern Analysis (1st-SPPA)",
+    "section": "",
+    "text": "Spatial Point Pattern Analysis (SPPA) is the evaluation of the pattern or distribution of a set of points on a surface. The points may represent:\n\nevents such as crimes, traffic accidents, or disease onsets, or\nbusiness services (e.g., coffee shops and fast-food outlets) or facilities such as childcare centres and eldercare centres.\n\nFirst-order Spatial Point Pattern Analysis (1st-SPPA) focuses on understanding the intensity or density of points across a study area. It examines how the distribution of points varies over space, essentially identifying trends or patterns in point density. This type of analysis deals with the individual locations of points and their distribution, without considering interactions between them.\nThis exercise uses spatstat to perform two commonly used 1st-order SPPA methods, applied to childcare centres in Singapore.\nThe specific questions to be answered are:\n\nAre the childcare centres in Singapore randomly distributed throughout the country?\nIf the answer is not, then the next logical question is: where are the locations with higher concentration of childcare centres?"
   }
 ]

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Hands-on Exercise 2A – ISSS626 Geospatial Analytics</title>
+<title>Hands-on Exercise 2A: First-order Spatial Point Pattern Analysis (1st-SPPA) – ISSS626 Geospatial Analytics</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -157,15 +157,21 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">1 Overview</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Hands-on Exercise 2A</h1>
+<h1 class="title">Hands-on Exercise 2A: First-order Spatial Point Pattern Analysis (1st-SPPA)</h1>
 </div>
 
 
@@ -182,8 +188,23 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">1 Overview</h2>
+<p><strong>Spatial Point Pattern Analysis (SPPA)</strong> is the evaluation of the pattern or distribution of a set of points on a surface. The points may represent:</p>
+<ul>
+<li>events such as crimes, traffic accidents, or disease onsets, or</li>
+<li>business services (e.g., coffee shops and fast-food outlets) or facilities such as childcare centres and eldercare centres.</li>
+</ul>
+<p><strong>First-order Spatial Point Pattern Analysis (1st-SPPA)</strong> focuses on understanding the intensity or density of points across a study area. It examines how the distribution of points varies over space, essentially identifying trends or patterns in point density. This type of analysis deals with the individual locations of points and their distribution, without considering interactions between them.</p>
+<p>This exercise uses <a href="https://cran.r-project.org/web/packages/spatstat/"><strong>spatstat</strong></a> to perform two commonly used 1st-order SPPA methods, applied to childcare centres in Singapore.</p>
+<p>The specific questions to be answered are:</p>
+<ul>
+<li>Are the childcare centres in Singapore randomly distributed throughout the country?</li>
+<li>If the answer is not, then the next logical question is: where are the locations with higher concentration of childcare centres?</li>
+</ul>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
