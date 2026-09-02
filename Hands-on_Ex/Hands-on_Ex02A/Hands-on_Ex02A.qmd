@@ -21,7 +21,7 @@ This exercise uses [**spatstat**](https://cran.r-project.org/web/packages/spatst
 Two data sets are used for this exercise:
 
 | Dataset | Format | Source | Description |
-|---|---|---|---|
+|------------------|------------------|------------------|------------------|
 | Child Care Services | GeoJSON | [data.gov.sg](https://data.gov.sg/) | Point feature data providing the location and attribute information of childcare centres in Singapore. |
 | Master Plan 2019 Subzone Boundary (No Sea) | GeoJSON | [data.gov.sg](https://data.gov.sg/) | Polygon feature data providing the URA 2019 Master Plan Planning Subzone boundaries. |
 
@@ -30,7 +30,7 @@ Two data sets are used for this exercise:
 Four R packages will be used for this exercise:
 
 | Package | Purpose | Use Case in Exercise |
-|---|---|---|
+|------------------------|------------------------|------------------------|
 | [**sf**](https://r-spatial.github.io/sf/) | Imports, manages, and processes vector-based geospatial data. | Handling vector geospatial data in R. |
 | [**spatstat**](https://spatstat.org/) | Provides tools for point pattern analysis. | Performing 1st-order spatial point pattern analysis and deriving kernel density estimation (KDE). |
 | [**terra**](https://rspatial.github.io/terra/index.html) | Modern spatial data package built to replace `raster`; offers improved speed for raster and vector data. | Converting `spatstat` image output into raster format for cartographic-quality mapping. |
@@ -50,3 +50,110 @@ As this exercise will involve Monte Carlo simulation, a seed is set here so that
 set.seed(123)
 ```
 
+## 5 Importing and Wrangling Geospatial Data Sets
+
+The code chunk below imports the Master Plan 2019 Subzone Boundary (No Sea) data set, transforms it to the SVY21 projected coordinate system, and retains only the fields needed for the analysis that follows:
+
+```{r}
+mpsz_sf <- st_read("data/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson") %>%
+  st_transform(crs = 3414) %>%
+  select(REGION_N, PLN_AREA_N, SUBZONE_N, SUBZONE_C, geometry) %>%
+  relocate(geometry, .after = last_col())
+```
+
+The Southern Group subzone, and the Western Islands and North-Eastern Islands planning areas, are excluded, since these consist mainly of offshore islands with no childcare centres.
+
+```{r}
+mpsz_cl <- mpsz_sf %>%
+  filter(SUBZONE_N != "SOUTHERN GROUP",
+         PLN_AREA_N != "WESTERN ISLANDS",
+         PLN_AREA_N != "NORTH-EASTERN ISLANDS")
+```
+
+The cleaned boundary data set is saved as an `.rds` file so it can be reloaded directly in later sections without repeating the import and filtering steps.
+
+```{r}
+write_rds(mpsz_cl, "data/mpsz_cl.rds")
+```
+
+Next, the Child Care Services data set is imported, transformed to the same coordinate reference system as `mpsz_cl`. Only the `NAME` field is retained, since address and administrative details are not required for the spatial point pattern analysis that follows.
+
+```{r}
+childcare_sf <- st_read("data/ChildCareServices.geojson") %>%
+  st_transform(crs = 3414) %>%
+  select(NAME, geometry)
+```
+
+::: callout-note
+## Why select() is needed here
+
+KML's driver in GDAL flattens all attributes into a single `Description` HTML blob, so a KML import of this same data set would return only two fields — `Name` and `Description`. GeoJSON preserves every original attribute as its own column instead, so this data set arrives with 16 fields (e.g., address components, hyperlinks, and photo URLs).
+
+`select()` trims this down to only `NAME` and the geometry, which are the only fields relevant to the spatial point pattern analysis that follows.
+:::
+
+Before proceeding, the coordinate reference systems of both data sets are checked to confirm they match. Mismatched CRSs would silently distort every distance and area calculation in the sections that follow, so this check is a necessary safeguard.
+
+```{r}
+st_crs(mpsz_cl)
+```
+
+```{r}
+st_crs(childcare_sf)
+```
+
+::: callout-note
+Both coordinate reference systems match exactly — both report EPSG:3414 with identical WKT parameters (SVY21 datum, Singapore Transverse Mercator projection), confirming the two data sets share a consistent spatial reference.
+:::
+
+As a final check, both data sets are confirmed to remain in `sf` format after the import and wrangling steps above:
+
+```{r}
+class(mpsz_cl)
+class(childcare_sf)
+```
+
+### 5.1 Mapping the geospatial data sets
+
+With both `mpsz_cl` and `childcare_sf` confirmed to share the same coordinate reference system, a static map is prepared below to visualise their spatial patterns together.
+
+```{r}
+tm_shape(mpsz_cl) +
+  tm_polygons() +
+tm_shape(childcare_sf) +
+  tm_dots()
+```
+
+::: callout-tip
+## Reading the code
+
+`tm_shape()` declares which dataset to draw, and the layer function that follows it determines how: `tm_polygons()` renders `mpsz_cl` as filled subzone boundaries, while `tm_dots()` renders `childcare_sf` as point markers. The `+` operator layers them onto the same map, boundaries first so the childcare points render on top.
+:::
+
+::: callout-important
+Both geospatial layers fall within the same map extent, confirming their coordinate values refer to the same spatial context. This is an important check before any geospatial analysis proceeds.
+:::
+
+Alternatively, an interactive point symbol map can also be prepared using the code chunk below:
+
+```{r}
+#| message: false
+tmap_mode('view')
+tm_shape(childcare_sf) +
+  tm_dots()
+```
+
+::: callout-note
+In interactive mode, **tmap** uses the [leaflet for R](https://leafletjs.com/) API. This allows the map to be freely navigated and zoomed, and the attributes of each point queried by clicking on it. The background map layer can also be changed — three options are provided (*ESRI.WorldGrayCanvas*, *OpenStreetMap*, and *ESRI.WorldTopoMap*), with **ESRI.WorldGrayCanvas** as the default.
+:::
+
+```{r}
+#| message: false
+tmap_mode('plot')
+```
+
+::: callout-warning
+## Switch back to plot mode
+
+Remember to switch back to plot mode after viewing the interactive map. Each interactive map consumes a connection, and displaying too many interactive maps (more than 10) in a single document can cause issues when published on Netlify.
+:::
