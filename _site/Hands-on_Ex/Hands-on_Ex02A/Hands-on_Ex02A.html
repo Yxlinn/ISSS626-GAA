@@ -259,6 +259,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#working-with-different-automatic-bandwidth-methods" id="toc-working-with-different-automatic-bandwidth-methods" class="nav-link" data-scroll-target="#working-with-different-automatic-bandwidth-methods">8.3 Working with Different Automatic Bandwidth Methods</a></li>
   <li><a href="#working-with-different-kernel-methods" id="toc-working-with-different-kernel-methods" class="nav-link" data-scroll-target="#working-with-different-kernel-methods">8.4 Working with Different Kernel Methods</a></li>
   </ul></li>
+  <li><a href="#fixed-and-adaptive-kde" id="toc-fixed-and-adaptive-kde" class="nav-link" data-scroll-target="#fixed-and-adaptive-kde">9 Fixed and Adaptive KDE</a>
+  <ul>
+  <li><a href="#computing-kde-using-a-fixed-bandwidth" id="toc-computing-kde-using-a-fixed-bandwidth" class="nav-link" data-scroll-target="#computing-kde-using-a-fixed-bandwidth">9.1 Computing KDE Using a Fixed Bandwidth</a></li>
+  <li><a href="#computing-kde-using-adaptive-bandwidth" id="toc-computing-kde-using-adaptive-bandwidth" class="nav-link" data-scroll-target="#computing-kde-using-adaptive-bandwidth">9.2 Computing KDE Using Adaptive Bandwidth</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -1198,6 +1203,73 @@ Important
 <div>
 <figure class="figure">
 <p><img src="Hands-on_Ex02A_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="fixed-and-adaptive-kde" class="level2">
+<h2 class="anchored" data-anchor-id="fixed-and-adaptive-kde">9 Fixed and Adaptive KDE</h2>
+<section id="computing-kde-using-a-fixed-bandwidth" class="level3">
+<h3 class="anchored" data-anchor-id="computing-kde-using-a-fixed-bandwidth">9.1 Computing KDE Using a Fixed Bandwidth</h3>
+<p>A KDE layer is computed using a fixed bandwidth of 600 metres. Since the unit of measurement for <code>childcareSG_ppp_km</code> is in kilometres (600m = 0.6km), this is expressed as <strong>sigma = 0.6</strong>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>kde_childcareSG_fb <span class="ot">&lt;-</span> <span class="fu">density</span>(childcareSG_ppp_km,</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>                               <span class="at">sigma =</span> <span class="fl">0.6</span>,</span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">edge =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">kernel =</span> <span class="st">"gaussian"</span>)</span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_childcareSG_fb)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex02A_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="computing-kde-using-adaptive-bandwidth" class="level3">
+<h3 class="anchored" data-anchor-id="computing-kde-using-adaptive-bandwidth">9.2 Computing KDE Using Adaptive Bandwidth</h3>
+<p>The fixed bandwidth method is very sensitive to highly skewed distributions of spatial point patterns across geographical units, such as urban versus rural areas. One way to address this is to use <strong>adaptive bandwidth</strong>.</p>
+<p>This section covers deriving adaptive kernel density estimation using <code>adaptive.density()</code> of <strong>spatstat</strong>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>kde_childcareSG_ab <span class="ot">&lt;-</span> <span class="fu">adaptive.density</span>(childcareSG_ppp_km,</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">method =</span> <span class="st">"kernel"</span>)</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_childcareSG_ab)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex02A_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Why adaptive bandwidth handles this differently
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A fixed bandwidth applies the same smoothing radius everywhere on the map, regardless of local point density. In a densely packed area, this can over-smooth and blur together clusters that are genuinely distinct; in a sparse area, the same fixed radius may be too narrow to reveal any pattern at all.</p>
+<p>Adaptive bandwidth adjusts the radius locally: shorter in dense regions, longer in sparse ones, allowing it to represent both mature, densely built-up estates and newer, sparser ones more accurately within the same map.</p>
+</div>
+</div>
+<p>The fixed and adaptive kernel density estimation outputs are compared using the code chunk below:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_childcareSG_fb, <span class="at">main =</span> <span class="st">"Fixed bandwidth"</span>)</span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_childcareSG_ab, <span class="at">main =</span> <span class="st">"Adaptive bandwidth"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex02A_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid figure-img" width="960"></p>
 </figure>
 </div>
 </div>

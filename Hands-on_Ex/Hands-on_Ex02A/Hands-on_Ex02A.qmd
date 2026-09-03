@@ -519,4 +519,51 @@ plot(density(childcareSG_ppp_km,
      main = "Disc")
 ```
 
+## 9 Fixed and Adaptive KDE
+
+### 9.1 Computing KDE Using a Fixed Bandwidth
+
+A KDE layer is computed using a fixed bandwidth of 600 metres. Since the unit of measurement for `childcareSG_ppp_km` is in kilometres (600m = 0.6km), this is expressed as **sigma = 0.6**.
+
+```{r}
+kde_childcareSG_fb <- density(childcareSG_ppp_km,
+                               sigma = 0.6,
+                               edge = TRUE,
+                               kernel = "gaussian")
+
+plot(kde_childcareSG_fb)
+```
+
+### 9.2 Computing KDE Using Adaptive Bandwidth
+
+The fixed bandwidth method is very sensitive to highly skewed distributions of spatial point patterns across geographical units, such as urban versus rural areas. One way to address this is to use **adaptive bandwidth**.
+
+This section covers deriving adaptive kernel density estimation using `adaptive.density()` of **spatstat**.
+
+```{r}
+kde_childcareSG_ab <- adaptive.density(childcareSG_ppp_km,
+                                        method = "kernel")
+
+plot(kde_childcareSG_ab)
+```
+
+::: {.callout-tip}
+## Why adaptive bandwidth handles this differently
+A fixed bandwidth applies the same smoothing radius everywhere on the map, regardless of local point density. In a densely packed area, this can over-smooth and blur together clusters that are genuinely distinct; in a sparse area, the same fixed radius may be too narrow to reveal any pattern at all. 
+
+Adaptive bandwidth adjusts the radius locally: shorter in dense regions, longer in sparse ones, allowing it to represent both mature, densely built-up estates and newer, sparser ones more accurately within the same map.
+:::
+
+The fixed and adaptive kernel density estimation outputs are compared using the code chunk below:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 8
+par(mfrow = c(1, 2))
+plot(kde_childcareSG_fb, main = "Fixed bandwidth")
+plot(kde_childcareSG_ab, main = "Adaptive bandwidth")
+```
+
+
+
 
