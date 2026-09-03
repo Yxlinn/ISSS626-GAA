@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Hands-on Exercise 2B – ISSS626 Geospatial Analytics</title>
+<title>Hands-on Exercise 2B: Second-order Spatial Point Pattern Analysis (2nd-SPPA) – ISSS626 Geospatial Analytics</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -22,6 +22,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -157,15 +192,23 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">1 Overview</a></li>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">2 The Data</a></li>
+  <li><a href="#installing-and-loading-the-r-packages" id="toc-installing-and-loading-the-r-packages" class="nav-link" data-scroll-target="#installing-and-loading-the-r-packages">3 Installing and Loading the R packages</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Hands-on Exercise 2B</h1>
+<h1 class="title">Hands-on Exercise 2B: Second-order Spatial Point Pattern Analysis (2nd-SPPA)</h1>
 </div>
 
 
@@ -182,8 +225,85 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">1 Overview</h2>
+<p><strong>Second-order Spatial Point Pattern Analysis (2nd-SPPA)</strong> examines the spatial relationships between points in a pattern, specifically focusing on how the presence of one point influences the location of others. It goes beyond simply describing the overall density of points (first-order effects) by investigating clustering, dispersion, or randomness at various spatial scales.</p>
+<p>This exercise uses <a href="https://cran.r-project.org/web/packages/spatstat/"><strong>spatstat</strong></a> to discover the spatial point processes of childcare centres in Singapore, and will focus on two specific questions:</p>
+<ul>
+<li>Are the childcare centres in Singapore randomly distributed throughout the country?</li>
+<li>If the answer is not, then the next logical question is: where are the locations with higher concentration of childcare centres?</li>
+</ul>
+</section>
+<section id="the-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-data">2 The Data</h2>
+<p>Two data sets are used for this exercise:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Dataset</th>
+<th>Format</th>
+<th>Source</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Child Care Services</td>
+<td>GeoJSON</td>
+<td><a href="https://data.gov.sg/">data.gov.sg</a></td>
+<td>Point feature data providing the location and attribute information of childcare centres in Singapore.</td>
+</tr>
+<tr class="even">
+<td>Master Plan 2019 Subzone Boundary (No Sea)</td>
+<td>GeoJSON</td>
+<td><a href="https://data.gov.sg/">data.gov.sg</a></td>
+<td>Polygon feature data providing the URA 2019 Master Plan Planning Subzone boundaries.</td>
+</tr>
+</tbody>
+</table>
+<p>Both data sets are the same as those used in <a href="https://isss-626-gaa-one.vercel.app/Hands-on_Ex/Hands-on_Ex02A/Hands-on_Ex02A.html"><strong>Hands-on Exercise 2A</strong></a>, which covers 1st-order SPPA.</p>
+</section>
+<section id="installing-and-loading-the-r-packages" class="level2">
+<h2 class="anchored" data-anchor-id="installing-and-loading-the-r-packages">3 Installing and Loading the R packages</h2>
+<p>Four R packages will be used for this exercise:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Package</th>
+<th>Purpose</th>
+<th>Use Case in Exercise</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://r-spatial.github.io/sf/"><strong>sf</strong></a></td>
+<td>Imports, manages, and processes vector-based geospatial data.</td>
+<td>Handling vector geospatial data in R.</td>
+</tr>
+<tr class="even">
+<td><a href="https://spatstat.org/"><strong>spatstat</strong></a></td>
+<td>Provides tools for point pattern analysis.</td>
+<td>Performing 1st-order spatial point pattern analysis and deriving kernel density estimation (KDE).</td>
+</tr>
+<tr class="odd">
+<td><a href="https://cran.r-project.org/web/packages/tmap/index.html"><strong>tmap</strong></a></td>
+<td>Creates static and interactive thematic maps using cartographic-quality elements.</td>
+<td>Plotting the KDE surface as a static map, and the childcare point locations as an interactive map via <a href="https://leafletjs.com/">leaflet</a>.</td>
+</tr>
+<tr class="even">
+<td><a href="https://www.tidyverse.org/"><strong>tidyverse</strong></a></td>
+<td>Family of R packages for modern data science (data manipulation, transformation).</td>
+<td>Data wrangling and manipulation with <code>mutate()</code>, <code>filter()</code>, and pipe operators throughout the exercise.</td>
+</tr>
+</tbody>
+</table>
+<p>The code chunk below installs and loads the four R packages:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, spatstat, tmap, tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

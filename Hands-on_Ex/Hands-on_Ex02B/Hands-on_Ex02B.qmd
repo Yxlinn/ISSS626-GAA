@@ -1,3 +1,40 @@
 ---
-title: "Hands-on Exercise 2B"
+title: "Hands-on Exercise 2B: Second-order Spatial Point Pattern Analysis (2nd-SPPA)"
 ---
+
+## 1 Overview
+
+**Second-order Spatial Point Pattern Analysis (2nd-SPPA)** examines the spatial relationships between points in a pattern, specifically focusing on how the presence of one point influences the location of others. It goes beyond simply describing the overall density of points (first-order effects) by investigating clustering, dispersion, or randomness at various spatial scales.
+
+This exercise uses [**spatstat**](https://cran.r-project.org/web/packages/spatstat/) to discover the spatial point processes of childcare centres in Singapore, and will focus on two specific questions:
+
+- Are the childcare centres in Singapore randomly distributed throughout the country?
+- If the answer is not, then the next logical question is: where are the locations with higher concentration of childcare centres?
+
+## 2 The Data
+
+Two data sets are used for this exercise:
+
+| Dataset | Format | Source | Description |
+|---|---|---|---|
+| Child Care Services | GeoJSON | [data.gov.sg](https://data.gov.sg/) | Point feature data providing the location and attribute information of childcare centres in Singapore. |
+| Master Plan 2019 Subzone Boundary (No Sea) | GeoJSON | [data.gov.sg](https://data.gov.sg/) | Polygon feature data providing the URA 2019 Master Plan Planning Subzone boundaries. |
+
+Both data sets are the same as those used in [**Hands-on Exercise 2A**](https://isss-626-gaa-one.vercel.app/Hands-on_Ex/Hands-on_Ex02A/Hands-on_Ex02A.html), which covers 1st-order SPPA.
+
+## 3 Installing and Loading the R packages
+
+Four R packages will be used for this exercise:
+
+| Package | Purpose | Use Case in Exercise |
+|---|---|---|
+| [**sf**](https://r-spatial.github.io/sf/) | Imports, manages, and processes vector-based geospatial data. | Handling vector geospatial data in R. |
+| [**spatstat**](https://spatstat.org/) | Provides tools for point pattern analysis. | Performing 1st-order spatial point pattern analysis and deriving kernel density estimation (KDE). |
+| [**tmap**](https://cran.r-project.org/web/packages/tmap/index.html) | Creates static and interactive thematic maps using cartographic-quality elements. | Plotting the KDE surface as a static map, and the childcare point locations as an interactive map via [leaflet](https://leafletjs.com/). |
+| [**tidyverse**](https://www.tidyverse.org/) | Family of R packages for modern data science (data manipulation, transformation). | Data wrangling and manipulation with `mutate()`, `filter()`, and pipe operators throughout the exercise. |
+
+The code chunk below installs and loads the four R packages:
+
+```{r}
+pacman::p_load(sf, spatstat, tmap, tidyverse)
+```
