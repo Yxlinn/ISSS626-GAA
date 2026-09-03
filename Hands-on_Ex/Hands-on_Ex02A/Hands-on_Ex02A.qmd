@@ -311,3 +311,67 @@ childcareSG_ppp
 **Observation:** From the result, it was noted that the point count drops from 1,924 to 1,923. A possible reason could be because `rjitter()` displaces each point within `childcare_ppp_jit`'s own rectangular window, which extends slightly beyond Singapore's actual coastline. One point, likely sitting close to the original boundary, was jittered into that gap between the rectangle and the true polygon, landing just outside `sg_owin`.
 :::
 
+## 7 Clark-Evans Test for Nearest Neighbour Analysis
+
+Nearest Neighbor Analysis (NNA) is a spatial statistics method that calculates the average distance between each point and its closest neighbor to determine if a pattern of points is clustered, dispersed, or randomly distributed.
+
+Clark-Evans test is a specific statistical method used within NNA to quantify whether a point pattern is clustered, random, or uniformly spaced, using the Clark-Evans aggregation index (R) to describe this pattern. NNA provides a numerical value that describes the degree of clustering or regularity, and the Clark-Evans test calculates a specific index (R) for this purpose.
+
+In this section, the Clark-Evans test of aggregation for a spatial point pattern is performed using `clarkevans.test()` of the [**spatstat.explore**](https://cran.r-project.org/web/packages/spatstat.explore/refman/spatstat.explore.html) package.
+
+The test hypothesis are:
+
+- H0: The distribution of childcare centres is randomly distributed.
+- H1: The distribution of childcare centres is not randomly distributed.
+
+A 95% confidence interval is used.
+
+`clarkevans.test()` of **spatstat.explore** supports two variants of the Clark-Evans test: 1. Without CSR and 2. With CSR. 
+
+### 7.1 Performing the Clark-Evans Test Without CSR
+
+The code chunk below uses the method without CSR:
+
+```{r}
+clarkevans.test(childcareSG_ppp,
+                 correction = "none",
+                 clipregion = "sg_owin",
+                 alternative = c("clustered"))
+```
+
+::: {.callout-note}
+## Statistical Conclusion
+With R = 0.55518 (R < 1) and a p-value lower than the 0.05 level of significance, the null hypothesis is rejected. Childcare centres in Singapore are significantly clustered rather than randomly distributed.
+:::
+
+::: {.callout-tip}
+## Takeaway from statistical analysis
+Childcare centres in Singapore are not spread out evenly across the island. Instead, they tend to cluster together in certain areas, likely reflecting where families and young children actually live. This pattern is strong and statistically conclusive, not a result of chance variation in the data.
+:::
+
+### 7.2 Performing the Clark-Evans Test with CSR
+
+The code chunk below uses `method = "MonteCarlo"`. In this case, the p-value is computed by comparing the observed value of R to the results from `nsim` (i.e. 39, 99, 999) simulated realisations of Complete Spatial Randomness, conditional on the observed number of points:
+
+```{r}
+clarkevans.test(childcareSG_ppp,
+                 correction = "none",
+                 clipregion = "sg_owin",
+                 alternative = c("clustered"),
+                 method = "MonteCarlo",
+                 nsim = 99)
+```
+
+::: {.callout-note}
+## Statistical conclusion
+With R = 0.55518 (R < 1) and a p-value of 0.01, below the 0.05 level of significance, the null hypothesis is rejected. This result is consistent with the earlier test without CSR, confirming that childcare centres in Singapore are significantly clustered rather than randomly distributed.
+:::
+
+::: {.callout-tip}
+## Takeaway from statistical analysis
+Two independent methods (1. Without CSR and 2. With CSR) arrive at the same conclusion: childcare centres are not spread evenly across Singapore, but cluster together in certain areas. This consistency across methods adds confidence that the pattern is real, rather than an artefact of how the test was calculated.
+:::
+
+
+
+

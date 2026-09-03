@@ -247,6 +247,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#creating-owin-object" id="toc-creating-owin-object" class="nav-link" data-scroll-target="#creating-owin-object">6.4 Creating owin object</a></li>
   <li><a href="#combining-the-point-events-and-owin-objects" id="toc-combining-the-point-events-and-owin-objects" class="nav-link" data-scroll-target="#combining-the-point-events-and-owin-objects">6.5 Combining the Point Events and owin Objects</a></li>
   </ul></li>
+  <li><a href="#clark-evan-test-for-nearest-neighbour-analysis" id="toc-clark-evan-test-for-nearest-neighbour-analysis" class="nav-link" data-scroll-target="#clark-evan-test-for-nearest-neighbour-analysis">7 Clark-Evan Test for Nearest Neighbour Analysis</a>
+  <ul>
+  <li><a href="#performing-the-clark-evans-test-without-csr" id="toc-performing-the-clark-evans-test-without-csr" class="nav-link" data-scroll-target="#performing-the-clark-evans-test-without-csr">7.1 Performing the Clark-Evans Test Without CSR</a></li>
+  <li><a href="#performing-the-clark-evans-test-with-csr" id="toc-performing-the-clark-evans-test-with-csr" class="nav-link" data-scroll-target="#performing-the-clark-evans-test-with-csr">7.2 Performing the Clark-Evans Test with CSR</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -874,6 +879,113 @@ Note
 </div>
 <div class="callout-body-container callout-body">
 <p><strong>Observation:</strong> From the result, it was noted that the point count drops from 1,924 to 1,923. A possible reason could be because <code>rjitter()</code> displaces each point within <code>childcare_ppp_jit</code>’s own rectangular window, which extends slightly beyond Singapore’s actual coastline. One point, likely sitting close to the original boundary, was jittered into that gap between the rectangle and the true polygon, landing just outside <code>sg_owin</code>.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="clark-evan-test-for-nearest-neighbour-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="clark-evan-test-for-nearest-neighbour-analysis">7 Clark-Evan Test for Nearest Neighbour Analysis</h2>
+<p>Nearest Neighbor Analysis (NNA) is a spatial statistics method that calculates the average distance between each point and its closest neighbor to determine if a pattern of points is clustered, dispersed, or randomly distributed.</p>
+<p>Clark-Evans test is a specific statistical method used within NNA to quantify whether a point pattern is clustered, random, or uniformly spaced, using the Clark-Evans aggregation index (R) to describe this pattern. NNA provides a numerical value that describes the degree of clustering or regularity, and the Clark-Evans test calculates a specific index (R) for this purpose.</p>
+<p>In this section, the Clark-Evans test of aggregation for a spatial point pattern is performed using <code>clarkevans.test()</code> of the <a href="https://cran.r-project.org/web/packages/spatstat.explore/refman/spatstat.explore.html"><strong>spatstat.explore</strong></a> package.</p>
+<p>The test hypothesis are:</p>
+<ul>
+<li>H0: The distribution of childcare centres is randomly distributed.</li>
+<li>H1: The distribution of childcare centres is not randomly distributed.</li>
+</ul>
+<p>A 95% confidence interval is used.</p>
+<p><code>clarkevans.test()</code> of <strong>spatstat.explore</strong> supports two variants of the Clark-Evans test: 1. Without CSR and 2. With CSR.</p>
+<section id="performing-the-clark-evans-test-without-csr" class="level3">
+<h3 class="anchored" data-anchor-id="performing-the-clark-evans-test-without-csr">7.1 Performing the Clark-Evans Test Without CSR</h3>
+<p>The code chunk below uses the method without CSR:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">clarkevans.test</span>(childcareSG_ppp,</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">correction =</span> <span class="st">"none"</span>,</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">clipregion =</span> <span class="st">"sg_owin"</span>,</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">"clustered"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Clark-Evans test
+    No edge correction
+    Z-test
+
+data:  childcareSG_ppp
+R = 0.55518, p-value &lt; 2.2e-16
+alternative hypothesis: clustered (R &lt; 1)</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Statistical Conclusion
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>With R = 0.55518 (R &lt; 1) and a p-value lower than the 0.05 level of significance, the null hypothesis is rejected. Childcare centres in Singapore are significantly clustered rather than randomly distributed.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Takeaway from statistical analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Childcare centres in Singapore are not spread out evenly across the island. Instead, they tend to cluster together in certain areas, likely reflecting where families and young children actually live. This pattern is strong and statistically conclusive, not a result of chance variation in the data.</p>
+</div>
+</div>
+</section>
+<section id="performing-the-clark-evans-test-with-csr" class="level3">
+<h3 class="anchored" data-anchor-id="performing-the-clark-evans-test-with-csr">7.2 Performing the Clark-Evans Test with CSR</h3>
+<p>The code chunk below uses <code>method = "MonteCarlo"</code>. In this case, the p-value is computed by comparing the observed value of R to the results from <code>nsim</code> (i.e.&nbsp;39, 99, 999) simulated realisations of Complete Spatial Randomness, conditional on the observed number of points:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">clarkevans.test</span>(childcareSG_ppp,</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">correction =</span> <span class="st">"none"</span>,</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">clipregion =</span> <span class="st">"sg_owin"</span>,</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">"clustered"</span>),</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">method =</span> <span class="st">"MonteCarlo"</span>,</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">nsim =</span> <span class="dv">99</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Clark-Evans test
+    No edge correction
+    Monte Carlo test based on 99 simulations of CSR with fixed n
+
+data:  childcareSG_ppp
+R = 0.55518, p-value = 0.01
+alternative hypothesis: clustered (R &lt; 1)</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Statistical conclusion
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>With R = 0.55518 (R &lt; 1) and a p-value of 0.01, below the 0.05 level of significance, the null hypothesis is rejected. This result is consistent with the earlier test without CSR, confirming that childcare centres in Singapore are significantly clustered rather than randomly distributed.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Takeaway from statistical analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Two independent methods (1. Without CSR and 2. With CSR) arrive at the same conclusion: childcare centres are not spread evenly across Singapore, but cluster together in certain areas. This consistency across methods adds confidence that the pattern is real, rather than an artefact of how the test was calculated.</p>
 </div>
 </div>
 
