@@ -237,7 +237,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">4 Reproducibility</a></li>
   <li><a href="#importing-and-wrangling-geospatial-data-sets" id="toc-importing-and-wrangling-geospatial-data-sets" class="nav-link" data-scroll-target="#importing-and-wrangling-geospatial-data-sets">5 Importing and Wrangling Geospatial Data Sets</a>
   <ul>
-  <li><a href="#mapping-the-geospatial-data-sets" id="toc-mapping-the-geospatial-data-sets" class="nav-link" data-scroll-target="#mapping-the-geospatial-data-sets">5.1 Mapping the geospatial data sets</a></li>
+  <li><a href="#mapping-the-geospatial-data-sets" id="toc-mapping-the-geospatial-data-sets" class="nav-link" data-scroll-target="#mapping-the-geospatial-data-sets">5.1 Mapping the Geospatial Data Sets</a></li>
+  </ul></li>
+  <li><a href="#geospatial-data-wrangling" id="toc-geospatial-data-wrangling" class="nav-link" data-scroll-target="#geospatial-data-wrangling">6 Geospatial Data Wrangling</a>
+  <ul>
+  <li><a href="#converting-sf-data-frames-to-ppp-class" id="toc-converting-sf-data-frames-to-ppp-class" class="nav-link" data-scroll-target="#converting-sf-data-frames-to-ppp-class">6.1 Converting sf Data Frames to ppp Class</a></li>
+  <li><a href="#checking-for-duplicated-points" id="toc-checking-for-duplicated-points" class="nav-link" data-scroll-target="#checking-for-duplicated-points">6.2 Checking for Duplicated Points</a></li>
+  <li><a href="#resolving-the-duplicates" id="toc-resolving-the-duplicates" class="nav-link" data-scroll-target="#resolving-the-duplicates">6.3 Resolving the Duplicates</a></li>
+  <li><a href="#creating-owin-object" id="toc-creating-owin-object" class="nav-link" data-scroll-target="#creating-owin-object">6.4 Creating owin object</a></li>
+  <li><a href="#combining-the-point-events-and-owin-objects" id="toc-combining-the-point-events-and-owin-objects" class="nav-link" data-scroll-target="#combining-the-point-events-and-owin-objects">6.5 Combining the Point Events and owin Objects</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -408,8 +416,7 @@ Geodetic CRS:  WGS 84</code></pre>
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>KML’s driver in GDAL flattens all attributes into a single <code>Description</code> HTML blob, so a KML import of this same data set would return only two fields — <code>Name</code> and <code>Description</code>. GeoJSON preserves every original attribute as its own column instead, so this data set arrives with 16 fields (e.g., address components, hyperlinks, and photo URLs).</p>
-<p><code>select()</code> trims this down to only <code>NAME</code> and the geometry, which are the only fields relevant to the spatial point pattern analysis that follows.</p>
+<p>KML’s driver in GDAL flattens all attributes into a single <code>Description</code> HTML blob, so a KML import of this same data set would return only two fields — <code>Name</code> and <code>Description</code>. GeoJSON preserves every original attribute as its own column instead, so this data set arrives with 16 fields (e.g., address components, hyperlinks, and photo URLs). <code>select()</code> trims this down to only <code>NAME</code> and the geometry, which are the fields relevant to the spatial point pattern analysis.</p>
 </div>
 </div>
 <p>Before proceeding, the coordinate reference systems of both data sets are checked to confirm they match. Mismatched CRSs would silently distort every distance and area calculation in the sections that follow, so this check is a necessary safeguard.</p>
@@ -530,7 +537,7 @@ Note
 </div>
 </div>
 <section id="mapping-the-geospatial-data-sets" class="level3">
-<h3 class="anchored" data-anchor-id="mapping-the-geospatial-data-sets">5.1 Mapping the geospatial data sets</h3>
+<h3 class="anchored" data-anchor-id="mapping-the-geospatial-data-sets">5.1 Mapping the Geospatial Data Sets</h3>
 <p>With both <code>mpsz_cl</code> and <code>childcare_sf</code> confirmed to share the same coordinate reference system, a static map is prepared below to visualise their spatial patterns together.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_cl) <span class="sc">+</span></span>
@@ -591,14 +598,11 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>In interactive mode, <strong>tmap</strong> uses the <a href="https://leafletjs.com/">leaflet for R</a> API. This allows the map to be freely navigated and zoomed, and the attributes of each point queried by clicking on it. The background map layer can also be changed — three options are provided (<em>ESRI.WorldGrayCanvas</em>, <em>OpenStreetMap</em>, and <em>ESRI.WorldTopoMap</em>), with <strong>ESRI.WorldGrayCanvas</strong> as the default.</p>
+<p>In interactive mode, <strong>tmap</strong> uses the <a href="https://leafletjs.com/">leaflet for R</a> API. This allows the map to be freely navigated and zoomed, and the attributes of each point queried by clicking on it. The background map layer can also be changed — three options are provided (ESRI.WorldGrayCanvas, OpenStreetMap, and ESRI.WorldTopoMap), with <strong>ESRI.WorldGrayCanvas</strong> as the default.</p>
 </div>
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">'plot'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>ℹ tmap modes "plot" - "view"</code></pre>
-</div>
 </div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -611,6 +615,265 @@ Note
 </div>
 <div class="callout-body-container callout-body">
 <p>Remember to switch back to plot mode after viewing the interactive map. Each interactive map consumes a connection, and displaying too many interactive maps (more than 10) in a single document can cause issues when published on Netlify.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="geospatial-data-wrangling" class="level2">
+<h2 class="anchored" data-anchor-id="geospatial-data-wrangling">6 Geospatial Data Wrangling</h2>
+<p><strong>spatstat</strong> relies on its own specific data structures: <strong>ppp</strong> (planar point pattern) for point data, and <strong>owin</strong> for observation windows. This section converts <code>mpsz_cl</code> and <code>childcare_sf</code> from sf objects into ppp and owin objects.</p>
+<section id="converting-sf-data-frames-to-ppp-class" class="level3">
+<h3 class="anchored" data-anchor-id="converting-sf-data-frames-to-ppp-class">6.1 Converting sf Data Frames to ppp Class</h3>
+<p><strong>spatstat</strong> requires point event data in <code>*ppp*</code> object form. <code>as.ppp()</code> converts <code>childcare_sf</code> into this format:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>childcare_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(childcare_sf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Next, <code>class()</code> verifies the object class of <code>childcare_sf</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(childcare_ppp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "ppp"</code></pre>
+</div>
+</div>
+<p>We can also take a quick look at the summary statistics of the newly converted ppp object by using <code>summary()</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(childcare_ppp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern:  1925 points
+Average intensity 2.417323e-06 points per square unit
+
+*Pattern contains duplicated points*
+
+Coordinates are given to 11 decimal places
+
+marks are of type 'character'
+Summary:
+   Length  N.unique   N.blank Min.nchar Max.nchar 
+     1925      1572         0         9        74 
+
+Window: rectangle = [11810.03, 45404.24] x [25596.33, 49300.88] units
+                    (33590 x 23700 units)
+Window area = 796335000 square units</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Mark variables: NAME only
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>childcare_sf</code> was trimmed to <code>NAME</code> and geometry back in section 5, since <code>DESCRIPTION</code> held no distinguishing information (the same constant string across all records) and the remaining address/hyperlink fields were irrelevant to spatial analysis. As a result, <code>NAME</code> is the only mark variable reported.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The output above flags that the pattern contains duplicated points. Duplicated points are a common issue in spatial point pattern analysis, and worth taking seriously rather than glossing over. Many of the statistical methods used to analyse point patterns assume that points are distinct and non-coincident; when this assumption does not hold, the results can be misleading. Hence, this issue will be investigated below.</p>
+</div>
+</div>
+</section>
+<section id="checking-for-duplicated-points" class="level3">
+<h3 class="anchored" data-anchor-id="checking-for-duplicated-points">6.2 Checking for Duplicated Points</h3>
+<p>The <code>summary()</code> output above flags that <code>childcare_ppp</code> contains duplicated points. In <strong>spatstat</strong>, this refers to points sharing identical coordinates, not identical names. <code>duplicated()</code> is the function used to check for this, and it takes an argument called <code>rule</code>, which controls exactly what counts as a duplicate:</p>
+<ul>
+<li><code>rule = spatstat</code> (the default): a point counts as duplicated only if both its coordinates and its marks match an earlier point exactly.</li>
+<li><code>rule = deldir</code>: coordinates are compared using the same method as the <strong>deldir</strong> package, for consistency with functions like Delaunay triangulation that rely on it.</li>
+<li><code>rule = unmark</code>: only coordinates are compared, ignoring marks entirely.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>rules <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"spatstat"</span>, <span class="st">"deldir"</span>, <span class="st">"unmark"</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>duplicate_counts <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (rule <span class="cf">in</span> rules) {</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  duplicate_counts[[rule]] <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">duplicated</span>(childcare_ppp, <span class="at">rule =</span> rule))</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(duplicate_counts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$spatstat
+[1] 1
+
+$deldir
+[1] 1
+
+$unmark
+[1] 187</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Under the strict <code>spatstat</code> rule, only <strong>1 duplicate</strong> is found: two entries both named “Summer Montessori” registered at the exact same coordinates, which likely reflects the same centre appearing twice in the source data rather than two distinct centres. The <code>deldir</code> rule returns the same result, since it also compares coordinates using an equivalent matching logic.</p>
+<p>The <code>unmark</code> rule tells a very different story: <strong>187</strong> points share their coordinates with another point when names are ignored. A closer inspection of these locations shows that one address hosts “Childcare @ The Enrichment”, “MindChamps Preschool @ Jurong West”, and “Safari House Preschool JW” together, while another pairs “Key Elementary Eduhouse” with a branch of “PCF Sparkletots Preschool”. These are not data-entry errors: they reflect real childcare centres, under different names and likely different operators, sharing the same building or block.</p>
+<p>This distinction matters for how the duplication should be handled. A single true duplicate (the “Summer Montessori” case) could reasonably be removed as a data error. However, treating all 187 coordinate-sharing points as errors would be wrong, since it would delete genuinely distinct childcare centres simply because they operate from a shared address.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Why the results differ sharply by rule
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Under the strict <code>spatstat</code> rule, almost no points qualify as duplicates, since two centres would need identical coordinates <strong>and</strong> identical names. Under <code>unmark</code>, which checks coordinates alone, the count rises substantially. This gap reveals something specific about the data: many pairs of childcare centres share a building or address, but operate under different names — most likely different operators registered at the same location, rather than a single centre entered twice.</p>
+</div>
+</div>
+<p>The <code>unmark</code> rule above shows that <strong>187</strong> points share a location with another point, but not how many points cluster at each shared address.</p>
+<p>To exactly see which centres are involved, the coincident points can be extracted and inspected directly:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>coincident_points <span class="ot">&lt;-</span> <span class="fu">duplicated</span>(childcare_ppp, <span class="at">rule =</span> <span class="st">"unmark"</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>coincident_coordinates <span class="ot">&lt;-</span> childcare_ppp[coincident_points]</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>coincident_coordinates</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern: 187 points
+marks are of storage type  'character'
+window: rectangle = [11810.03, 45404.24] x [25596.33, 49300.88] units</code></pre>
+</div>
+</div>
+</section>
+<section id="resolving-the-duplicates" class="level3">
+<h3 class="anchored" data-anchor-id="resolving-the-duplicates">6.3 Resolving the Duplicates</h3>
+<p>Coincident points can be handled in a few different ways:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Approach</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Delete the duplicates</strong></td>
+<td>Simplest option, but discards potentially valid, distinct centres</td>
+</tr>
+<tr class="even">
+<td><strong>Attach duplicate count as a mark</strong></td>
+<td>Uses analytical methods that explicitly account for it</td>
+</tr>
+<tr class="odd">
+<td><strong>Apply jittering</strong></td>
+<td>Small random perturbation, so no two points occupy the exact same location</td>
+</tr>
+</tbody>
+</table>
+<p>As identified earlier, the “Summer Montessori” pair shares both coordinates and a name, and most plausibly reflects the same centre entered twice in the source data, rather than two different centres. The remaining coordinate-sharing groups are a different case: distinct centres, under different names, that genuinely share a building or address. Treating both cases the same way would either wrongly discard real data, or wrongly preserve a data-entry error, so the two are handled separately.</p>
+<p><strong>Step 1: Removing the true duplicate</strong></p>
+<p>The true duplicate is removed first, using <code>unique()</code>, which by default removes a point only if both its coordinates and its marks exactly match a point that appeared earlier:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>childcare_ppp_unique <span class="ot">&lt;-</span> <span class="fu">unique</span>(childcare_ppp)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>childcare_ppp_unique</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern: 1924 points
+marks are of storage type  'character'
+window: rectangle = [11810.03, 45404.24] x [25596.33, 49300.88] units</code></pre>
+</div>
+</div>
+<p>This drops the point count from 1,925 to 1,924.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Only the second “Summer Montessori” entry is removed; the first “Summer Montessori” entry, along with the other two distinct centres sharing that same address (“Pat’s Schoolhouse” and “Star Learners @ Yung Ho”) are all kept.</p>
+</div>
+</div>
+<p><strong>Step 2: Resolving the remaining coincident points</strong></p>
+<p>With the removal of the true duplicate, some locations still hold more than one point. <code>rjitter()</code> resolves this by applying a small, independent random displacement to every point in the pattern, so that no two points occupy the exact same location:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>childcare_ppp_jit <span class="ot">&lt;-</span> <span class="fu">rjitter</span>(childcare_ppp_unique,</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">retry =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">nsim =</span> <span class="dv">1</span>,</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>                              <span class="at">drop =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>To confirm that no coincident points remain after jittering:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(childcare_ppp_jit))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] FALSE</code></pre>
+</div>
+</div>
+<p>From this point onward, <code>childcare_ppp_jit</code> is used in place of <code>childcare_ppp</code> for the remainder of this exercise.</p>
+</section>
+<section id="creating-owin-object" class="level3">
+<h3 class="anchored" data-anchor-id="creating-owin-object">6.4 Creating owin object</h3>
+<p>When analysing spatial point patterns, it is a good practice to confine the analysis to a defined geographical area, such as Singapore’s boundary. In <strong>spatstat</strong>, an object called <strong>owin</strong> is specially designed to represent this polygonal region.</p>
+<p>The code chunk below, <code>as.owin()</code> is used to covert <code>mpsz_cl</code> into owin object.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>sg_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(mpsz_cl)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(sg_owin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "owin"</code></pre>
+</div>
+</div>
+<p>The result above confirms that <code>sg_owin</code> is indeed an owin object, which can be displayed using <code>plot()</code> function:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sg_owin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex02A_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="combining-the-point-events-and-owin-objects" class="level3">
+<h3 class="anchored" data-anchor-id="combining-the-point-events-and-owin-objects">6.5 Combining the Point Events and owin Objects</h3>
+<p>In the final step of data preparation, <code>childcare_ppp_jit</code> is clipped to <code>sg_owin</code>, keeping only childcare centres located within Singapore’s boundary:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>childcareSG_ppp <span class="ot">&lt;-</span> childcare_ppp_jit[sg_owin]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The output object combined both the point and polygon feature in one ppp object class as shown below.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>childcareSG_ppp</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern: 1923 points
+marks are of storage type  'character'
+window: polygonal boundary
+enclosing rectangle: [2667.54, 55941.94] x [21448.47, 50256.33] units</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Observation:</strong> From the result, it was noted that the point count drops from 1,924 to 1,923. A possible reason could be because <code>rjitter()</code> displaces each point within <code>childcare_ppp_jit</code>’s own rectangular window, which extends slightly beyond Singapore’s actual coastline. One point, likely sitting close to the original boundary, was jittered into that gap between the rectangle and the true polygon, landing just outside <code>sg_owin</code>.</p>
 </div>
 </div>
 

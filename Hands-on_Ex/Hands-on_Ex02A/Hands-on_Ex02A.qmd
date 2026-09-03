@@ -84,12 +84,9 @@ childcare_sf <- st_read("data/ChildCareServices.geojson") %>%
   select(NAME, geometry)
 ```
 
-::: callout-note
+::: {.callout-note}
 ## Why select() is needed here
-
-KML's driver in GDAL flattens all attributes into a single `Description` HTML blob, so a KML import of this same data set would return only two fields — `Name` and `Description`. GeoJSON preserves every original attribute as its own column instead, so this data set arrives with 16 fields (e.g., address components, hyperlinks, and photo URLs).
-
-`select()` trims this down to only `NAME` and the geometry, which are the only fields relevant to the spatial point pattern analysis that follows.
+KML's driver in GDAL flattens all attributes into a single `Description` HTML blob, so a KML import of this same data set would return only two fields — `Name` and `Description`. GeoJSON preserves every original attribute as its own column instead, so this data set arrives with 16 fields (e.g., address components, hyperlinks, and photo URLs). `select()` trims this down to only `NAME` and the geometry, which are the fields relevant to the spatial point pattern analysis.
 :::
 
 Before proceeding, the coordinate reference systems of both data sets are checked to confirm they match. Mismatched CRSs would silently distort every distance and area calculation in the sections that follow, so this check is a necessary safeguard.
@@ -102,7 +99,7 @@ st_crs(mpsz_cl)
 st_crs(childcare_sf)
 ```
 
-::: callout-note
+::: {.callout-note}
 Both coordinate reference systems match exactly — both report EPSG:3414 with identical WKT parameters (SVY21 datum, Singapore Transverse Mercator projection), confirming the two data sets share a consistent spatial reference.
 :::
 
@@ -113,7 +110,7 @@ class(mpsz_cl)
 class(childcare_sf)
 ```
 
-### 5.1 Mapping the geospatial data sets
+### 5.1 Mapping the Geospatial Data Sets
 
 With both `mpsz_cl` and `childcare_sf` confirmed to share the same coordinate reference system, a static map is prepared below to visualise their spatial patterns together.
 
@@ -124,13 +121,13 @@ tm_shape(childcare_sf) +
   tm_dots()
 ```
 
-::: callout-tip
+::: {.callout-tip}
 ## Reading the code
 
 `tm_shape()` declares which dataset to draw, and the layer function that follows it determines how: `tm_polygons()` renders `mpsz_cl` as filled subzone boundaries, while `tm_dots()` renders `childcare_sf` as point markers. The `+` operator layers them onto the same map, boundaries first so the childcare points render on top.
 :::
 
-::: callout-important
+::: {.callout-important}
 Both geospatial layers fall within the same map extent, confirming their coordinate values refer to the same spatial context. This is an important check before any geospatial analysis proceeds.
 :::
 
@@ -143,8 +140,8 @@ tm_shape(childcare_sf) +
   tm_dots()
 ```
 
-::: callout-note
-In interactive mode, **tmap** uses the [leaflet for R](https://leafletjs.com/) API. This allows the map to be freely navigated and zoomed, and the attributes of each point queried by clicking on it. The background map layer can also be changed — three options are provided (*ESRI.WorldGrayCanvas*, *OpenStreetMap*, and *ESRI.WorldTopoMap*), with **ESRI.WorldGrayCanvas** as the default.
+::: {.callout-note}
+In interactive mode, **tmap** uses the [leaflet for R](https://leafletjs.com/) API. This allows the map to be freely navigated and zoomed, and the attributes of each point queried by clicking on it. The background map layer can also be changed — three options are provided (ESRI.WorldGrayCanvas, OpenStreetMap, and ESRI.WorldTopoMap), with **ESRI.WorldGrayCanvas** as the default.
 :::
 
 ```{r}
@@ -152,8 +149,165 @@ In interactive mode, **tmap** uses the [leaflet for R](https://leafletjs.com/) A
 tmap_mode('plot')
 ```
 
-::: callout-warning
+::: {.callout-warning}
 ## Switch back to plot mode
 
 Remember to switch back to plot mode after viewing the interactive map. Each interactive map consumes a connection, and displaying too many interactive maps (more than 10) in a single document can cause issues when published on Netlify.
 :::
+
+## 6 Geospatial Data Wrangling
+
+**spatstat** relies on its own specific data structures: **ppp** (planar point pattern) for point data, and **owin** for observation windows. This section converts `mpsz_cl` and `childcare_sf` from sf objects into ppp and owin objects.
+
+### 6.1 Converting sf Data Frames to ppp Class
+
+**spatstat** requires point event data in `*ppp*` object form. `as.ppp()` converts `childcare_sf` into this format:
+
+```{r}
+childcare_ppp <- as.ppp(childcare_sf)
+```
+
+Next, `class()` verifies the object class of `childcare_sf`:
+
+```{r}
+class(childcare_ppp)
+```
+
+We can also take a quick look at the summary statistics of the newly converted ppp object by using `summary()`.
+
+```{r}
+summary(childcare_ppp)
+```
+
+::: {.callout-tip}
+## Mark variables: NAME only
+`childcare_sf` was trimmed to `NAME` and geometry back in section 5, since `DESCRIPTION` held no distinguishing information (the same constant string across all records) and the remaining address/hyperlink fields were irrelevant to spatial analysis. As a result, `NAME` is the only mark variable reported.
+:::
+
+::: {.callout-important}
+The output above flags that the pattern contains duplicated points. Duplicated points are a common issue in spatial point pattern analysis, and worth taking seriously rather than glossing over. Many of the statistical methods used to analyse point patterns assume that points are distinct and non-coincident; when this assumption does not hold, the results can be misleading. Hence, this issue will be investigated below.
+:::
+
+### 6.2 Checking for Duplicated Points
+
+The `summary()` output above flags that `childcare_ppp` contains duplicated points. In **spatstat**, this refers to points sharing identical coordinates, not identical names. `duplicated()` is the function used to check for this, and it takes an argument called `rule`, which controls exactly what counts as a duplicate:
+
+- `rule = spatstat` (the default): a point counts as duplicated only if both its coordinates and its marks match an earlier point exactly.
+- `rule = deldir`: coordinates are compared using the same method as the **deldir** package, for consistency with functions like Delaunay triangulation that rely on it.
+- `rule = unmark`: only coordinates are compared, ignoring marks entirely.
+
+```{r}
+rules <- c("spatstat", "deldir", "unmark")
+
+duplicate_counts <- list()
+for (rule in rules) {
+  duplicate_counts[[rule]] <- sum(duplicated(childcare_ppp, rule = rule))
+}
+
+print(duplicate_counts)
+```
+
+::: {.callout-note}
+Under the strict `spatstat` rule, only **1 duplicate** is found: two entries both named "Summer Montessori" registered at the exact same coordinates, which likely reflects the same centre appearing twice in the source data rather than two distinct centres. The `deldir` rule returns the same result, since it also compares coordinates using an equivalent matching logic.
+
+The `unmark` rule tells a very different story: **187** points share their coordinates with another point when names are ignored. A closer inspection of these locations shows that one address hosts "Childcare @ The Enrichment", "MindChamps Preschool @ Jurong West", and "Safari House Preschool JW" together, while another pairs "Key Elementary Eduhouse" with a branch of "PCF Sparkletots Preschool". These are not data-entry errors: they reflect real childcare centres, under different names and likely different operators, sharing the same building or block.
+
+This distinction matters for how the duplication should be handled. A single true duplicate (the "Summer Montessori" case) could reasonably be removed as a data error. However, treating all 187 coordinate-sharing points as errors would be wrong, since it would delete genuinely distinct childcare centres simply because they operate from a shared address.
+:::
+
+::: {.callout-tip}
+## Why the results differ sharply by rule
+Under the strict `spatstat` rule, almost no points qualify as duplicates, since two centres would need identical coordinates **and** identical names. Under `unmark`, which checks coordinates alone, the count rises substantially. This gap reveals something specific about the data: many pairs of childcare centres share a building or address, but operate under different names — most likely different operators registered at the same location, rather than a single centre entered twice.
+:::
+
+The `unmark` rule above shows that **187** points share a location with another point, but not how many points cluster at each shared address.
+
+To exactly see which centres are involved, the coincident points can be extracted and inspected directly:
+
+```{r}
+coincident_points <- duplicated(childcare_ppp, rule = "unmark")
+coincident_coordinates <- childcare_ppp[coincident_points]
+coincident_coordinates
+```
+
+### 6.3 Resolving the Duplicates
+
+Coincident points can be handled in a few different ways:
+
+| Approach | What it does |
+|---|---|
+| **Delete the duplicates** | Simplest option, but discards potentially valid, distinct centres |
+| **Attach duplicate count as a mark** | Uses analytical methods that explicitly account for it |
+| **Apply jittering** | Small random perturbation, so no two points occupy the exact same location |
+
+As identified earlier, the "Summer Montessori" pair shares both coordinates and a name, and most plausibly reflects the same centre entered twice in the source data, rather than two different centres. The remaining coordinate-sharing groups are a different case: distinct centres, under different names, that genuinely share a building or address. Treating both cases the same way would either wrongly discard real data, or wrongly preserve a data-entry error, so the two are handled separately.
+
+**Step 1: Removing the true duplicate**
+
+The true duplicate is removed first, using `unique()`, which by default removes a point only if both its coordinates and its marks exactly match a point that appeared earlier:
+
+```{r}
+childcare_ppp_unique <- unique(childcare_ppp)
+childcare_ppp_unique
+```
+
+This drops the point count from 1,925 to 1,924. 
+
+::: {.callout-note}
+Only the second "Summer Montessori" entry is removed; the first "Summer Montessori" entry, along with the other two distinct centres sharing that same address ("Pat's Schoolhouse" and "Star Learners @ Yung Ho") are all kept.
+:::
+
+**Step 2: Resolving the remaining coincident points**
+
+With the removal of the true duplicate, some locations still hold more than one point. `rjitter()` resolves this by applying a small, independent random displacement to every point in the pattern, so that no two points occupy the exact same location:
+
+```{r}
+childcare_ppp_jit <- rjitter(childcare_ppp_unique,
+                              retry = TRUE,
+                              nsim = 1,
+                              drop = TRUE)
+```
+
+To confirm that no coincident points remain after jittering:
+
+```{r}
+any(duplicated(childcare_ppp_jit))
+```
+
+From this point onward, `childcare_ppp_jit` is used in place of `childcare_ppp` for the remainder of this exercise.
+
+### 6.4 Creating owin object
+
+When analysing spatial point patterns, it is a good practice to confine the analysis to a defined geographical area, such as Singapore's boundary. In **spatstat**, an object called **owin** is specially designed to represent this polygonal region.
+
+The code chunk below, `as.owin()` is used to covert `mpsz_cl` into owin object.
+
+```{r}
+sg_owin <- as.owin(mpsz_cl)
+class(sg_owin)
+```
+
+The result above confirms that `sg_owin` is indeed an owin object, which can be displayed using `plot()` function:
+
+```{r}
+plot(sg_owin)
+```
+
+### 6.5 Combining the Point Events and owin Objects
+
+In the final step of data preparation, `childcare_ppp_jit` is clipped to `sg_owin`, keeping only childcare centres located within Singapore's boundary:
+
+```{r}
+childcareSG_ppp <- childcare_ppp_jit[sg_owin]
+```
+
+The output object combined both the point and polygon feature in one ppp object class as shown below.
+
+```{r}
+childcareSG_ppp
+```
+
+::: {.callout-note}
+**Observation:** From the result, it was noted that the point count drops from 1,924 to 1,923. A possible reason could be because `rjitter()` displaces each point within `childcare_ppp_jit`'s own rectangular window, which extends slightly beyond Singapore's actual coastline. One point, likely sitting close to the original boundary, was jittered into that gap between the rectangle and the true polygon, landing just outside `sg_owin`.
+:::
+
