@@ -270,6 +270,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#assigning-projection-systems" id="toc-assigning-projection-systems" class="nav-link" data-scroll-target="#assigning-projection-systems">10.2 Assigning Projection Systems</a></li>
   <li><a href="#plotting-kde-map-with-tmap" id="toc-plotting-kde-map-with-tmap" class="nav-link" data-scroll-target="#plotting-kde-map-with-tmap">10.3 Plotting KDE Map with tmap</a></li>
   </ul></li>
+  <li><a href="#first-order-sppa-at-the-planning-subzone-level" id="toc-first-order-sppa-at-the-planning-subzone-level" class="nav-link" data-scroll-target="#first-order-sppa-at-the-planning-subzone-level">11 First Order SPPA at the Planning Subzone Level</a>
+  <ul>
+  <li><a href="#geospatial-data-wrangling-1" id="toc-geospatial-data-wrangling-1" class="nav-link" data-scroll-target="#geospatial-data-wrangling-1">11.1 Geospatial Data Wrangling</a>
+  <ul class="collapse">
+  <li><a href="#extracting-the-study-area" id="toc-extracting-the-study-area" class="nav-link" data-scroll-target="#extracting-the-study-area">11.1.1 Extracting the Study Area</a></li>
+  <li><a href="#creating-owin-objects" id="toc-creating-owin-objects" class="nav-link" data-scroll-target="#creating-owin-objects">11.1.2 Creating owin Objects</a></li>
+  <li><a href="#combining-the-point-events-and-owin-objects-1" id="toc-combining-the-point-events-and-owin-objects-1" class="nav-link" data-scroll-target="#combining-the-point-events-and-owin-objects-1">11.1.3 Combining the Point Events and owin Objects</a></li>
+  </ul></li>
+  <li><a href="#clark-and-evans-test" id="toc-clark-and-evans-test" class="nav-link" data-scroll-target="#clark-and-evans-test">11.2 Clark and Evans Test</a>
+  <ul class="collapse">
+  <li><a href="#punggol-planning-area" id="toc-punggol-planning-area" class="nav-link" data-scroll-target="#punggol-planning-area">11.2.1 Punggol Planning Area</a></li>
+  <li><a href="#tampines-planning-area" id="toc-tampines-planning-area" class="nav-link" data-scroll-target="#tampines-planning-area">11.2.2 Tampines Planning Area</a></li>
+  <li><a href="#choa-chu-kang-planning-area" id="toc-choa-chu-kang-planning-area" class="nav-link" data-scroll-target="#choa-chu-kang-planning-area">11.2.3 Choa Chu Kang Planning Area</a></li>
+  <li><a href="#jurong-west-planning-area" id="toc-jurong-west-planning-area" class="nav-link" data-scroll-target="#jurong-west-planning-area">11.2.4 Jurong West Planning Area</a></li>
+  <li><a href="#comparing-results-across-planning-areas" id="toc-comparing-results-across-planning-areas" class="nav-link" data-scroll-target="#comparing-results-across-planning-areas">11.2.5 Comparing Results Across Planning Areas</a></li>
+  </ul></li>
+  <li><a href="#computing-kde-surfaces-by-planning-area" id="toc-computing-kde-surfaces-by-planning-area" class="nav-link" data-scroll-target="#computing-kde-surfaces-by-planning-area">11.3 Computing KDE Surfaces by Planning Area</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -1379,6 +1397,265 @@ unit        : km</code></pre>
 </div>
 </div>
 <p>The raster values are encoded explicitly onto the raster pixels using the values in the <code>lyr.1</code> field.</p>
+</section>
+</section>
+<section id="first-order-sppa-at-the-planning-subzone-level" class="level2">
+<h2 class="anchored" data-anchor-id="first-order-sppa-at-the-planning-subzone-level">11 First Order SPPA at the Planning Subzone Level</h2>
+<p>This section extends the analysis to the planning area level. For simplicity, the focus is on the Punggol, Tampines, Choa Chu Kang, and Jurong West planning areas.</p>
+<section id="geospatial-data-wrangling-1" class="level3">
+<h3 class="anchored" data-anchor-id="geospatial-data-wrangling-1">11.1 Geospatial Data Wrangling</h3>
+<section id="extracting-the-study-area" class="level4">
+<h4 class="anchored" data-anchor-id="extracting-the-study-area">11.1.1 Extracting the Study Area</h4>
+<p>The code chunk below extracts the four target planning areas:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>pg <span class="ot">&lt;-</span> mpsz_cl <span class="sc">%&gt;%</span></span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(PLN_AREA_N <span class="sc">==</span> <span class="st">"PUNGGOL"</span>)</span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>tm <span class="ot">&lt;-</span> mpsz_cl <span class="sc">%&gt;%</span></span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(PLN_AREA_N <span class="sc">==</span> <span class="st">"TAMPINES"</span>)</span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>ck <span class="ot">&lt;-</span> mpsz_cl <span class="sc">%&gt;%</span></span>
+<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(PLN_AREA_N <span class="sc">==</span> <span class="st">"CHOA CHU KANG"</span>)</span>
+<span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a>jw <span class="ot">&lt;-</span> mpsz_cl <span class="sc">%&gt;%</span></span>
+<span id="cb74-8"><a href="#cb74-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(PLN_AREA_N <span class="sc">==</span> <span class="st">"JURONG WEST"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The code chunk below plots each extracted planning area:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(pg), <span class="at">main =</span> <span class="st">"Punggol"</span>)</span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(tm), <span class="at">main =</span> <span class="st">"Tampines"</span>)</span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(ck), <span class="at">main =</span> <span class="st">"Choa Chu Kang"</span>)</span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(jw), <span class="at">main =</span> <span class="st">"Jurong West"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex02A_files/figure-html/unnamed-chunk-49-1.png" class="img-fluid figure-img" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="creating-owin-objects" class="level4">
+<h4 class="anchored" data-anchor-id="creating-owin-objects">11.1.2 Creating owin Objects</h4>
+<p>These <code>sf</code> objects are converted into <code>owin</code> objects, required by <strong>spatstat</strong>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>pg_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(pg)</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>tm_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(tm)</span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>ck_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(ck)</span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>jw_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(jw)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="combining-the-point-events-and-owin-objects-1" class="level4">
+<h4 class="anchored" data-anchor-id="combining-the-point-events-and-owin-objects-1">11.1.3 Combining the Point Events and owin Objects</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>childcare_pg_ppp <span class="ot">&lt;-</span> childcare_ppp_jit[pg_owin]</span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>childcare_tm_ppp <span class="ot">&lt;-</span> childcare_ppp_jit[tm_owin]</span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>childcare_ck_ppp <span class="ot">&lt;-</span> childcare_ppp_jit[ck_owin]</span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>childcare_jw_ppp <span class="ot">&lt;-</span> childcare_ppp_jit[jw_owin]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>*rescale.ppp()*</code> is used to convert the unit of measurement from metres to kilometres:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>childcare_pg_ppp_km <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(childcare_pg_ppp, <span class="dv">1000</span>, <span class="st">"km"</span>)</span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>childcare_tm_ppp_km <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(childcare_tm_ppp, <span class="dv">1000</span>, <span class="st">"km"</span>)</span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>childcare_ck_ppp_km <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(childcare_ck_ppp, <span class="dv">1000</span>, <span class="st">"km"</span>)</span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>childcare_jw_ppp_km <span class="ot">&lt;-</span> <span class="fu">rescale.ppp</span>(childcare_jw_ppp, <span class="dv">1000</span>, <span class="st">"km"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The code chunk below plots the four study areas along with the locations of the childcare centres within each:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">unmark</span>(childcare_pg_ppp_km), <span class="at">main =</span> <span class="st">"Punggol"</span>)</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">unmark</span>(childcare_tm_ppp_km), <span class="at">main =</span> <span class="st">"Tampines"</span>)</span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">unmark</span>(childcare_ck_ppp_km), <span class="at">main =</span> <span class="st">"Choa Chu Kang"</span>)</span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">unmark</span>(childcare_jw_ppp_km), <span class="at">main =</span> <span class="st">"Jurong West"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex02A_files/figure-html/unnamed-chunk-53-1.png" class="img-fluid figure-img" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="clark-and-evans-test" class="level3">
+<h3 class="anchored" data-anchor-id="clark-and-evans-test">11.2 Clark and Evans Test</h3>
+<p>Using <code>clarkevans.test()</code> of <strong>spatstat</strong>, the Clark-Evans test of aggregation is run on each of the four planning areas.</p>
+<p>The hypotheses tested are:</p>
+<ul>
+<li>H0: The distribution of childcare centres within the planning area is randomly distributed.</li>
+<li>H1: The distribution of childcare centres within the planning area is not randomly distributed.</li>
+</ul>
+<section id="punggol-planning-area" class="level4">
+<h4 class="anchored" data-anchor-id="punggol-planning-area">11.2.1 Punggol Planning Area</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">clarkevans.test</span>(childcare_pg_ppp,</span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">correction =</span> <span class="st">"none"</span>,</span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">clipregion =</span> <span class="cn">NULL</span>,</span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">"two.sided"</span>),</span>
+<span id="cb80-5"><a href="#cb80-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">method =</span> <span class="st">"MonteCarlo"</span>,</span>
+<span id="cb80-6"><a href="#cb80-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Clark-Evans test
+    No edge correction
+    Monte Carlo test based on 999 simulations of CSR with fixed n
+
+data:  childcare_pg_ppp
+R = 0.84663, p-value = 0.006
+alternative hypothesis: two-sided</code></pre>
+</div>
+</div>
+</section>
+<section id="tampines-planning-area" class="level4">
+<h4 class="anchored" data-anchor-id="tampines-planning-area">11.2.2 Tampines Planning Area</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">clarkevans.test</span>(childcare_tm_ppp,</span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">correction =</span> <span class="st">"none"</span>,</span>
+<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">clipregion =</span> <span class="cn">NULL</span>,</span>
+<span id="cb82-4"><a href="#cb82-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">"two.sided"</span>),</span>
+<span id="cb82-5"><a href="#cb82-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">method =</span> <span class="st">"MonteCarlo"</span>,</span>
+<span id="cb82-6"><a href="#cb82-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Clark-Evans test
+    No edge correction
+    Monte Carlo test based on 999 simulations of CSR with fixed n
+
+data:  childcare_tm_ppp
+R = 0.69013, p-value = 0.002
+alternative hypothesis: two-sided</code></pre>
+</div>
+</div>
+</section>
+<section id="choa-chu-kang-planning-area" class="level4">
+<h4 class="anchored" data-anchor-id="choa-chu-kang-planning-area">11.2.3 Choa Chu Kang Planning Area</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="fu">clarkevans.test</span>(childcare_ck_ppp,</span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">correction =</span> <span class="st">"none"</span>,</span>
+<span id="cb84-3"><a href="#cb84-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">clipregion =</span> <span class="cn">NULL</span>,</span>
+<span id="cb84-4"><a href="#cb84-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">"two.sided"</span>),</span>
+<span id="cb84-5"><a href="#cb84-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">method =</span> <span class="st">"MonteCarlo"</span>,</span>
+<span id="cb84-6"><a href="#cb84-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Clark-Evans test
+    No edge correction
+    Monte Carlo test based on 999 simulations of CSR with fixed n
+
+data:  childcare_ck_ppp
+R = 0.89171, p-value = 0.014
+alternative hypothesis: two-sided</code></pre>
+</div>
+</div>
+</section>
+<section id="jurong-west-planning-area" class="level4">
+<h4 class="anchored" data-anchor-id="jurong-west-planning-area">11.2.4 Jurong West Planning Area</h4>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="fu">clarkevans.test</span>(childcare_jw_ppp,</span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">correction =</span> <span class="st">"none"</span>,</span>
+<span id="cb86-3"><a href="#cb86-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">clipregion =</span> <span class="cn">NULL</span>,</span>
+<span id="cb86-4"><a href="#cb86-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">alternative =</span> <span class="fu">c</span>(<span class="st">"two.sided"</span>),</span>
+<span id="cb86-5"><a href="#cb86-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">method =</span> <span class="st">"MonteCarlo"</span>,</span>
+<span id="cb86-6"><a href="#cb86-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Clark-Evans test
+    No edge correction
+    Monte Carlo test based on 999 simulations of CSR with fixed n
+
+data:  childcare_jw_ppp
+R = 0.72168, p-value = 0.002
+alternative hypothesis: two-sided</code></pre>
+</div>
+</div>
+</section>
+<section id="comparing-results-across-planning-areas" class="level4">
+<h4 class="anchored" data-anchor-id="comparing-results-across-planning-areas">11.2.5 Comparing Results Across Planning Areas</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Planning Area</th>
+<th>R</th>
+<th>p-value</th>
+<th>Conclusion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Punggol</td>
+<td>0.84663</td>
+<td>0.006</td>
+<td>Reject H0; clustered</td>
+</tr>
+<tr class="even">
+<td>Tampines</td>
+<td>0.69013</td>
+<td>0.002</td>
+<td>Reject H0; clustered</td>
+</tr>
+<tr class="odd">
+<td>Choa Chu Kang</td>
+<td>0.89171</td>
+<td>0.014</td>
+<td>Reject H0; clustered</td>
+</tr>
+<tr class="even">
+<td>Jurong West</td>
+<td>0.72168</td>
+<td>0.002</td>
+<td>Reject H0; clustered</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Analysis of Results:</strong></p>
+<p>All four planning areas reject the null hypothesis of complete spatial randomness at the 0.05 significance level, with every R value falling below 1. Childcare centres are significantly clustered within each of the four areas individually.</p>
+<p>Ranking the four by clustering strength (lowest R to highest): Tampines (0.690) shows the strongest within-area clustering, followed by Jurong West (0.722), then Punggol (0.847), with Choa Chu Kang (0.892) closest to random of the four.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Takeaway
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Each of the four planning areas sits closer to 1 than the whole-of-Singapore result (R = 0.55518). This reflects two different scales of clustering, not a contradiction. The national test captures clustering between areas, since some planning areas simply have far more childcare centres than others. Restricting the test to a single planning area removes that between-area effect, leaving only the clustering that occurs within the area, at the neighbourhood level. This within-area signal is real and statistically significant.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="computing-kde-surfaces-by-planning-area" class="level3">
+<h3 class="anchored" data-anchor-id="computing-kde-surfaces-by-planning-area">11.3 Computing KDE Surfaces by Planning Area</h3>
+<p>The KDE for each of the four planning areas is computed below, using <code>bw.diggle()</code> to derive the bandwidth for each:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(childcare_pg_ppp_km,</span>
+<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">sigma =</span> bw.diggle,</span>
+<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">edge =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb88-5"><a href="#cb88-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">kernel =</span> <span class="st">"gaussian"</span>),</span>
+<span id="cb88-6"><a href="#cb88-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Punggol"</span>)</span>
+<span id="cb88-7"><a href="#cb88-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(childcare_tm_ppp_km,</span>
+<span id="cb88-8"><a href="#cb88-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">sigma =</span> bw.diggle,</span>
+<span id="cb88-9"><a href="#cb88-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">edge =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb88-10"><a href="#cb88-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">kernel =</span> <span class="st">"gaussian"</span>),</span>
+<span id="cb88-11"><a href="#cb88-11" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Tampines"</span>)</span>
+<span id="cb88-12"><a href="#cb88-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(childcare_ck_ppp_km,</span>
+<span id="cb88-13"><a href="#cb88-13" aria-hidden="true" tabindex="-1"></a>             <span class="at">sigma =</span> bw.diggle,</span>
+<span id="cb88-14"><a href="#cb88-14" aria-hidden="true" tabindex="-1"></a>             <span class="at">edge =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb88-15"><a href="#cb88-15" aria-hidden="true" tabindex="-1"></a>             <span class="at">kernel =</span> <span class="st">"gaussian"</span>),</span>
+<span id="cb88-16"><a href="#cb88-16" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Choa Chu Kang"</span>)</span>
+<span id="cb88-17"><a href="#cb88-17" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(childcare_jw_ppp_km,</span>
+<span id="cb88-18"><a href="#cb88-18" aria-hidden="true" tabindex="-1"></a>             <span class="at">sigma =</span> bw.diggle,</span>
+<span id="cb88-19"><a href="#cb88-19" aria-hidden="true" tabindex="-1"></a>             <span class="at">edge =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb88-20"><a href="#cb88-20" aria-hidden="true" tabindex="-1"></a>             <span class="at">kernel =</span> <span class="st">"gaussian"</span>),</span>
+<span id="cb88-21"><a href="#cb88-21" aria-hidden="true" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">"Jurong West"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex02A_files/figure-html/unnamed-chunk-58-1.png" class="img-fluid figure-img" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 </section>

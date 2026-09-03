@@ -629,5 +629,179 @@ tm_shape(kde_childcareSG_bw_terra) +
 
 The raster values are encoded explicitly onto the raster pixels using the values in the `lyr.1` field.
 
+## 11 First Order SPPA at the Planning Subzone Level
 
+This section extends the analysis to the planning area level. For simplicity, the focus is on the Punggol, Tampines, Choa Chu Kang, and Jurong West planning areas.
 
+### 11.1 Geospatial Data Wrangling
+
+#### 11.1.1 Extracting the Study Area
+
+The code chunk below extracts the four target planning areas:
+
+```{r}
+pg <- mpsz_cl %>%
+  filter(PLN_AREA_N == "PUNGGOL")
+tm <- mpsz_cl %>%
+  filter(PLN_AREA_N == "TAMPINES")
+ck <- mpsz_cl %>%
+  filter(PLN_AREA_N == "CHOA CHU KANG")
+jw <- mpsz_cl %>%
+  filter(PLN_AREA_N == "JURONG WEST")
+```
+
+The code chunk below plots each extracted planning area:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 8
+par(mfrow = c(2, 2))
+plot(st_geometry(pg), main = "Punggol")
+plot(st_geometry(tm), main = "Tampines")
+plot(st_geometry(ck), main = "Choa Chu Kang")
+plot(st_geometry(jw), main = "Jurong West")
+```
+
+#### 11.1.2 Creating owin Objects
+
+These `sf` objects are converted into `owin` objects, required by **spatstat**:
+
+```{r}
+pg_owin <- as.owin(pg)
+tm_owin <- as.owin(tm)
+ck_owin <- as.owin(ck)
+jw_owin <- as.owin(jw)
+```
+
+#### 11.1.3 Combining the Point Events and owin Objects
+
+```{r}
+childcare_pg_ppp <- childcare_ppp_jit[pg_owin]
+childcare_tm_ppp <- childcare_ppp_jit[tm_owin]
+childcare_ck_ppp <- childcare_ppp_jit[ck_owin]
+childcare_jw_ppp <- childcare_ppp_jit[jw_owin]
+```
+
+`*rescale.ppp()*` is used to convert the unit of measurement from metres to kilometres:
+
+```{r}
+childcare_pg_ppp_km <- rescale.ppp(childcare_pg_ppp, 1000, "km")
+childcare_tm_ppp_km <- rescale.ppp(childcare_tm_ppp, 1000, "km")
+childcare_ck_ppp_km <- rescale.ppp(childcare_ck_ppp, 1000, "km")
+childcare_jw_ppp_km <- rescale.ppp(childcare_jw_ppp, 1000, "km")
+```
+
+The code chunk below plots the four study areas along with the locations of the childcare centres within each:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 10
+par(mfrow = c(2, 2))
+plot(unmark(childcare_pg_ppp_km), main = "Punggol")
+plot(unmark(childcare_tm_ppp_km), main = "Tampines")
+plot(unmark(childcare_ck_ppp_km), main = "Choa Chu Kang")
+plot(unmark(childcare_jw_ppp_km), main = "Jurong West")
+```
+
+### 11.2 Clark and Evans Test
+
+Using `clarkevans.test()` of **spatstat**, the Clark-Evans test of aggregation is run on each of the four planning areas.
+
+The hypotheses tested are:
+
+- H0: The distribution of childcare centres within the planning area is randomly distributed.
+- H1: The distribution of childcare centres within the planning area is not randomly distributed.
+
+#### 11.2.1 Punggol Planning Area
+
+```{r}
+clarkevans.test(childcare_pg_ppp,
+                 correction = "none",
+                 clipregion = NULL,
+                 alternative = c("two.sided"),
+                 method = "MonteCarlo",
+                 nsim = 999)
+```
+
+#### 11.2.2 Tampines Planning Area
+
+```{r}
+clarkevans.test(childcare_tm_ppp,
+                 correction = "none",
+                 clipregion = NULL,
+                 alternative = c("two.sided"),
+                 method = "MonteCarlo",
+                 nsim = 999)
+```
+
+#### 11.2.3 Choa Chu Kang Planning Area
+
+```{r}
+clarkevans.test(childcare_ck_ppp,
+                 correction = "none",
+                 clipregion = NULL,
+                 alternative = c("two.sided"),
+                 method = "MonteCarlo",
+                 nsim = 999)
+```
+
+#### 11.2.4 Jurong West Planning Area
+
+```{r}
+clarkevans.test(childcare_jw_ppp,
+                 correction = "none",
+                 clipregion = NULL,
+                 alternative = c("two.sided"),
+                 method = "MonteCarlo",
+                 nsim = 999)
+```
+
+#### 11.2.5 Comparing Results Across Planning Areas
+
+| Planning Area | R | p-value | Conclusion |
+|---|---|---|---|
+| Punggol | 0.84663 | 0.006 | Reject H0; clustered |
+| Tampines | 0.69013 | 0.002 | Reject H0; clustered |
+| Choa Chu Kang | 0.89171 | 0.014 | Reject H0; clustered |
+| Jurong West | 0.72168 | 0.002 | Reject H0; clustered |
+
+**Analysis of Results:**
+
+All four planning areas reject the null hypothesis of complete spatial randomness at the 0.05 significance level, with every R value falling below 1. Childcare centres are significantly clustered within each of the four areas individually.
+
+Ranking the four by clustering strength (lowest R to highest): Tampines (0.690) shows the strongest within-area clustering, followed by Jurong West (0.722), then Punggol (0.847), with Choa Chu Kang (0.892) closest to random of the four.
+
+::: {.callout-tip}
+## Takeaway
+Each of the four planning areas sits closer to 1 than the whole-of-Singapore result (R = 0.55518). This reflects two different scales of clustering, not a contradiction. The national test captures clustering between areas, since some planning areas simply have far more childcare centres than others. Restricting the test to a single planning area removes that between-area effect, leaving only the clustering that occurs within the area, at the neighbourhood level. This within-area signal is real and statistically significant.
+:::
+
+### 11.3 Computing KDE Surfaces by Planning Area
+
+The KDE for each of the four planning areas is computed below, using `bw.diggle()` to derive the bandwidth for each:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 10
+par(mfrow = c(2, 2))
+plot(density(childcare_pg_ppp_km,
+             sigma = bw.diggle,
+             edge = TRUE,
+             kernel = "gaussian"),
+     main = "Punggol")
+plot(density(childcare_tm_ppp_km,
+             sigma = bw.diggle,
+             edge = TRUE,
+             kernel = "gaussian"),
+     main = "Tampines")
+plot(density(childcare_ck_ppp_km,
+             sigma = bw.diggle,
+             edge = TRUE,
+             kernel = "gaussian"),
+     main = "Choa Chu Kang")
+plot(density(childcare_jw_ppp_km,
+             sigma = bw.diggle,
+             edge = TRUE,
+             kernel = "gaussian"),
+     main = "Jurong West")
+```
