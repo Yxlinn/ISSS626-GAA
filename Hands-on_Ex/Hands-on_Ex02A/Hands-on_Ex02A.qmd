@@ -372,6 +372,151 @@ With R = 0.55518 (R < 1) and a p-value of 0.01, below the 0.05 level of signific
 Two independent methods (1. Without CSR and 2. With CSR) arrive at the same conclusion: childcare centres are not spread evenly across Singapore, but cluster together in certain areas. This consistency across methods adds confidence that the pattern is real, rather than an artefact of how the test was calculated.
 :::
 
+## 8 Kernel Density Estimation Method
 
+**Kernel Density Estimation (KDE)** is a valuable tool for visualising and analysing first-order spatial point patterns. It is widely considered a method within **Exploratory Spatial Data Analysis (ESDA)**, since it transforms discrete point data (such as childcare centre locations, crime incidents, or disease cases) into continuous density surfaces that reveal clusters and variations in event occurrence, without making prior assumptions about the underlying data distribution. It helps in understanding data distribution, identifying hotspots, and exploring relationships between spatial variables before more rigorous analysis is performed.
+
+This section covers computing the kernel density estimation (KDE) of childcare centres in Singapore.
+
+### 8.1 Working with Automatic Bandwidth Selection Method
+
+The code chunk below computes a kernel density using the following configurations of `density()` of **spatstat**:
+
+- `bw.diggle()` as the automatic bandwidth selection method. Other recommended methods are `bw.CvL()`, `bw.scott()`, or `bw.ppl()`.
+- The smoothing kernel used is `gaussian`, which is the default. Other smoothing methods are `epanechnikov`, `quartic`, or `disc`.
+- The intensity estimate is corrected for edge effect bias using the method described by Jones (1993) and Diggle (2010, equation 18.9). The default is **FALSE**.
+
+```{r}
+kde_SG_diggle <- density(childcareSG_ppp,
+                          sigma = bw.diggle,
+                          edge = TRUE,
+                          kernel = "gaussian")
+```
+
+::: {.callout-note}
+The output of `density()` of **spatstat** is an **im** class, representing a two-dimensional pixel image. It is used to store and manipulate raster data, where the spatial domain is divided into a grid of rectangular pixels. Each pixel has an associated value, which can be numerical or a factor.
+:::
+
+The `plot()` function of Base R is then used to display the kernel density derived.
+
+```{r}
+plot(kde_SG_diggle)
+```
+
+Below is a summary report of the derived kernel density surface:
+
+```{r}
+summary(kde_SG_diggle)
+```
+
+::: {.callout-important}
+The `range` above shows a maximum density of roughly 0.0000321 points per square metre. This is not because the pattern is sparse; it is a consequence of measuring density in SVY21's base unit, metres. Singapore's land area is roughly 700 million square metres, hence any density expressed per square metre produces very small decimal values regardless of how concentrated the actual points are. When expressed as points per square kilometre (multiplying by 1,000,000), the same maximum value reads as approximately 32.1, a more intuitive figure.
+:::
+
+Before moving to the next section, the bandwidth used to compute the KDE layer can be retrieved using the code below.
+
+```{r}
+bw <- bw.diggle(childcareSG_ppp)
+bw
+```
+
+### 8.2 Rescaling KDE Values
+
+`rescale.ppp()` converts the unit of measurement from metres to kilometres:
+
+```{r}
+childcareSG_ppp_km <- rescale.ppp(childcareSG_ppp, 1000, "km")
+```
+
+The rescaled data set is then passed into `density()` to recompute the kernel density surface, and `plot()` displays the result.
+
+```{r}
+#| fig-width: 8
+#| fig-height: 6
+kde_childcareSG_km <- density(childcareSG_ppp_km,
+                               sigma = bw.diggle,
+                               edge = TRUE,
+                               kernel = "gaussian")
+
+plot(kde_childcareSG_km)
+```
+
+The output image looks identical to the earlier version; only the data values change, as reflected in the legend.
+
+::: {.callout-tip}
+## Resolving the earlier scale issue
+Rescaling to kilometres directly addresses the readability problem flagged earlier: with distances measured in kilometres rather than metres, the resulting density values land in an easily interpreted range (the legend here runs from 0 to roughly 30), instead of the near-unreadable values per square metre.
+:::
+
+### 8.3 Working with Different Automatic Bandwidth Methods
+
+Besides `bw.diggle()`, three other **spatstat** functions can be used to determine the bandwidth: `bw.CvL()`, `bw.scott()`, and `bw.ppl()`.
+
+The bandwidth values returned by each method are compared below:
+
+```{r}
+bw.diggle(childcareSG_ppp_km)
+```
+
+```{r}
+bw.CvL(childcareSG_ppp_km)
+```
+
+```{r}
+bw.scott(childcareSG_ppp_km)
+```
+
+```{r}
+bw.ppl(childcareSG_ppp_km)
+```
+
+Baddeley et al. (2016) suggested the use of the `bw.ppl()` algorithm because past experience showed that it tends to produce more appropriate values when the pattern consists predominantly of tight clusters. They also noted that if the purpose of the study is to detect a single tight cluster in the midst of random noise, the `bw.diggle()` method may work better.
+
+The code chunk below compares the output of `bw.diggle()` and `bw.ppl()` methods:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 8
+kde_childcareSG_ppl <- density(childcareSG_ppp_km,
+                                sigma = bw.ppl,
+                                edge = TRUE,
+                                kernel = "gaussian")
+
+par(mfrow = c(1, 2))
+plot(kde_childcareSG_km, main = "bw.diggle")
+plot(kde_childcareSG_ppl, main = "bw.ppl")
+```
+
+### 8.4 Working with Different Kernel Methods
+
+By default, the kernel method used in `density.ppp()` is `gaussian`. There are also three other options available: `epanechnikov`, `quartic`, and `disc`.
+
+The code chunk below computes three more kernel density estimations using these three kernel functions:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 10
+par(mfrow = c(2, 2))
+plot(density(childcareSG_ppp_km,
+             sigma = 0.2889242,
+             edge = TRUE,
+             kernel = "gaussian"),
+     main = "Gaussian")
+plot(density(childcareSG_ppp_km,
+             sigma = 0.2889242,
+             edge = TRUE,
+             kernel = "epanechnikov"),
+     main = "Epanechnikov")
+plot(density(childcareSG_ppp_km,
+             sigma = 0.2889242,
+             edge = TRUE,
+             kernel = "quartic"),
+     main = "Quartic")
+plot(density(childcareSG_ppp_km,
+             sigma = 0.2889242,
+             edge = TRUE,
+             kernel = "disc"),
+     main = "Disc")
+```
 
 
