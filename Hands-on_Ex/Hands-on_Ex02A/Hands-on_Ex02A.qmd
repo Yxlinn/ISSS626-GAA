@@ -564,6 +564,70 @@ plot(kde_childcareSG_fb, main = "Fixed bandwidth")
 plot(kde_childcareSG_ab, main = "Adaptive bandwidth")
 ```
 
+## 10 Plotting Cartographic Quality KDE Maps
+
+### 10.1 Converting Gridded Output into Raster
+
+The `im` kernel density objects are converted into **SpatRaster** objects using `rast()` of the **terra** package:
+
+```{r}
+kde_childcareSG_bw_terra <- rast(kde_childcareSG_km)
+```
+
+`class()` is used to verify that `kde_childcareSG_bw_terra` belongs to the **SpatRaster** class:
+
+```{r}
+class(kde_childcareSG_bw_terra)
+```
+
+Next, the properties of `kde_childcareSG_bw_terra` are shown below:
+
+```{r}
+kde_childcareSG_bw_terra
+```
+
+::: {.callout-note}
+Notice that the `coord. ref.` field above is **empty**. The reason is because `rast()` carries over the numeric grid and its extent from the `im` object, but not the coordinate reference system information. Hence, this is addressed in the next step.
+:::
+
+### 10.2 Assigning Projection Systems
+
+In the code chunk below, `crs()` of **terra** is used to assign CRS information to the `kde_childcareSG_bw_terra` layer.
+
+```{r}
+crs(kde_childcareSG_bw_terra) <- "EPSG:3414"
+```
+
+The properties of `kde_childcareSG_bw_terra` are checked again below, to confirm the CRS assignment:
+
+```{r}
+kde_childcareSG_bw_terra
+```
+
+The `coord. ref.` field now shows "SVY21 / Singapore TM (EPSG:3414)", resolving the empty field flagged in the previous step.
+
+### 10.3 Plotting KDE Map with tmap
+
+Finally, the raster is displayed as a cartographic quality map using **tmap**:
+
+```{r}
+#| message: false
+tm_shape(kde_childcareSG_bw_terra) +
+  tm_raster(col.scale = tm_scale_continuous(values = "viridis"),
+            col.legend = tm_legend(
+              title = "Density values",
+              title.size = 0.7,
+              text.size = 0.7,
+              bg.color = "white",
+              bg.alpha = 0.7,
+              position = tm_pos_in("right", "bottom"),
+              frame = TRUE)) +
+  tm_graticules(labels.size = 0.7) +
+  tm_compass() +
+  tm_layout(scale = 1.0)
+```
+
+The raster values are encoded explicitly onto the raster pixels using the values in the `lyr.1` field.
 
 
 

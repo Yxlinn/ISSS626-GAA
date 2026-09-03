@@ -264,6 +264,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#computing-kde-using-a-fixed-bandwidth" id="toc-computing-kde-using-a-fixed-bandwidth" class="nav-link" data-scroll-target="#computing-kde-using-a-fixed-bandwidth">9.1 Computing KDE Using a Fixed Bandwidth</a></li>
   <li><a href="#computing-kde-using-adaptive-bandwidth" id="toc-computing-kde-using-adaptive-bandwidth" class="nav-link" data-scroll-target="#computing-kde-using-adaptive-bandwidth">9.2 Computing KDE Using Adaptive Bandwidth</a></li>
   </ul></li>
+  <li><a href="#plotting-cartographic-quality-kde-maps" id="toc-plotting-cartographic-quality-kde-maps" class="nav-link" data-scroll-target="#plotting-cartographic-quality-kde-maps">10 Plotting Cartographic Quality KDE Maps</a>
+  <ul>
+  <li><a href="#converting-gridded-output-into-raster" id="toc-converting-gridded-output-into-raster" class="nav-link" data-scroll-target="#converting-gridded-output-into-raster">10.1 Converting Gridded Output into Raster</a></li>
+  <li><a href="#assigning-projection-systems" id="toc-assigning-projection-systems" class="nav-link" data-scroll-target="#assigning-projection-systems">10.2 Assigning Projection Systems</a></li>
+  <li><a href="#plotting-kde-map-with-tmap" id="toc-plotting-kde-map-with-tmap" class="nav-link" data-scroll-target="#plotting-kde-map-with-tmap">10.3 Plotting KDE Map with tmap</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -1274,6 +1280,105 @@ Important
 </div>
 </div>
 </div>
+</section>
+</section>
+<section id="plotting-cartographic-quality-kde-maps" class="level2">
+<h2 class="anchored" data-anchor-id="plotting-cartographic-quality-kde-maps">10 Plotting Cartographic Quality KDE Maps</h2>
+<section id="converting-gridded-output-into-raster" class="level3">
+<h3 class="anchored" data-anchor-id="converting-gridded-output-into-raster">10.1 Converting Gridded Output into Raster</h3>
+<p>The <code>im</code> kernel density objects are converted into <strong>SpatRaster</strong> objects using <code>rast()</code> of the <strong>terra</strong> package:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>kde_childcareSG_bw_terra <span class="ot">&lt;-</span> <span class="fu">rast</span>(kde_childcareSG_km)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>class()</code> is used to verify that <code>kde_childcareSG_bw_terra</code> belongs to the <strong>SpatRaster</strong> class:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(kde_childcareSG_bw_terra)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "SpatRaster"
+attr(,"package")
+[1] "terra"</code></pre>
+</div>
+</div>
+<p>Next, the properties of <code>kde_childcareSG_bw_terra</code> are shown below:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>kde_childcareSG_bw_terra</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class       : SpatRaster
+size        : 128, 128, 1  (nrow, ncol, nlyr)
+resolution  : 0.4162063, 0.2250614  (x, y)
+extent      : 2.667538, 55.94194, 21.44847, 50.25633  (xmin, xmax, ymin, ymax)
+coord. ref. : 
+source(s)   : memory
+name        :     lyr.1
+min value   :        -0
+max value   : 32.086275
+unit        : km</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Notice that the <code>coord. ref.</code> field above is <strong>empty</strong>. The reason is because <code>rast()</code> carries over the numeric grid and its extent from the <code>im</code> object, but not the coordinate reference system information. Hence, this is addressed in the next step.</p>
+</div>
+</div>
+</section>
+<section id="assigning-projection-systems" class="level3">
+<h3 class="anchored" data-anchor-id="assigning-projection-systems">10.2 Assigning Projection Systems</h3>
+<p>In the code chunk below, <code>crs()</code> of <strong>terra</strong> is used to assign CRS information to the <code>kde_childcareSG_bw_terra</code> layer.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">crs</span>(kde_childcareSG_bw_terra) <span class="ot">&lt;-</span> <span class="st">"EPSG:3414"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The properties of <code>kde_childcareSG_bw_terra</code> are checked again below, to confirm the CRS assignment:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>kde_childcareSG_bw_terra</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class       : SpatRaster
+size        : 128, 128, 1  (nrow, ncol, nlyr)
+resolution  : 0.4162063, 0.2250614  (x, y)
+extent      : 2.667538, 55.94194, 21.44847, 50.25633  (xmin, xmax, ymin, ymax)
+coord. ref. : SVY21 / Singapore TM (EPSG:3414)
+source(s)   : memory
+name        :     lyr.1
+min value   :        -0
+max value   : 32.086275
+unit        : km</code></pre>
+</div>
+</div>
+<p>The <code>coord. ref.</code> field now shows “SVY21 / Singapore TM (EPSG:3414)”, resolving the empty field flagged in the previous step.</p>
+</section>
+<section id="plotting-kde-map-with-tmap" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-kde-map-with-tmap">10.3 Plotting KDE Map with tmap</h3>
+<p>Finally, the raster is displayed as a cartographic quality map using <strong>tmap</strong>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kde_childcareSG_bw_terra) <span class="sc">+</span></span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_raster</span>(<span class="at">col.scale =</span> <span class="fu">tm_scale_continuous</span>(<span class="at">values =</span> <span class="st">"viridis"</span>),</span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">col.legend =</span> <span class="fu">tm_legend</span>(</span>
+<span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">title =</span> <span class="st">"Density values"</span>,</span>
+<span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">title.size =</span> <span class="fl">0.7</span>,</span>
+<span id="cb73-6"><a href="#cb73-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">text.size =</span> <span class="fl">0.7</span>,</span>
+<span id="cb73-7"><a href="#cb73-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">bg.color =</span> <span class="st">"white"</span>,</span>
+<span id="cb73-8"><a href="#cb73-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">bg.alpha =</span> <span class="fl">0.7</span>,</span>
+<span id="cb73-9"><a href="#cb73-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">position =</span> <span class="fu">tm_pos_in</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>),</span>
+<span id="cb73-10"><a href="#cb73-10" aria-hidden="true" tabindex="-1"></a>              <span class="at">frame =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span></span>
+<span id="cb73-11"><a href="#cb73-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_graticules</span>(<span class="at">labels.size =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb73-12"><a href="#cb73-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_compass</span>() <span class="sc">+</span></span>
+<span id="cb73-13"><a href="#cb73-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">scale =</span> <span class="fl">1.0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex02A_files/figure-html/unnamed-chunk-47-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The raster values are encoded explicitly onto the raster pixels using the values in the <code>lyr.1</code> field.</p>
 
 
 </section>
