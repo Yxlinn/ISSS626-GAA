@@ -27,16 +27,17 @@ Two data sets are used for this exercise:
 
 ## 3 Installing and Loading the R packages
 
-Four R packages will be used for this exercise:
+Five R packages will be used for this exercise:
 
 | Package | Purpose | Use Case in Exercise |
-|------------------------|------------------------|------------------------|
+|---|---|---|
 | [**sf**](https://r-spatial.github.io/sf/) | Imports, manages, and processes vector-based geospatial data. | Handling vector geospatial data in R. |
 | [**spatstat**](https://spatstat.org/) | Provides tools for point pattern analysis. | Performing 1st-order spatial point pattern analysis and deriving kernel density estimation (KDE). |
 | [**terra**](https://rspatial.github.io/terra/index.html) | Modern spatial data package built to replace `raster`; offers improved speed for raster and vector data. | Converting `spatstat` image output into raster format for cartographic-quality mapping. |
 | [**tmap**](https://cran.r-project.org/web/packages/tmap/index.html) | Creates static and interactive thematic maps using cartographic-quality elements. | Plotting the KDE surface as a static map, and the childcare point locations as an interactive map via [leaflet](https://leafletjs.com/). |
+| [**tidyverse**](https://www.tidyverse.org/) | Family of R packages for modern data science (data manipulation, transformation). | Data wrangling and manipulation with `mutate()`, `filter()`, and pipe operators throughout the exercise. |
 
-The code chunk below installs and loads the four R packages:
+The code chunk below installs and loads the five R packages:
 
 ```{r}
 pacman::p_load(sf, spatstat, terra, tmap, tidyverse)

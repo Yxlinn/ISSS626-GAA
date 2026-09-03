@@ -357,7 +357,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="installing-and-loading-the-r-packages" class="level2">
 <h2 class="anchored" data-anchor-id="installing-and-loading-the-r-packages">3 Installing and Loading the R packages</h2>
-<p>Four R packages will be used for this exercise:</p>
+<p>Five R packages will be used for this exercise:</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -387,9 +387,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Creates static and interactive thematic maps using cartographic-quality elements.</td>
 <td>Plotting the KDE surface as a static map, and the childcare point locations as an interactive map via <a href="https://leafletjs.com/">leaflet</a>.</td>
 </tr>
+<tr class="odd">
+<td><a href="https://www.tidyverse.org/"><strong>tidyverse</strong></a></td>
+<td>Family of R packages for modern data science (data manipulation, transformation).</td>
+<td>Data wrangling and manipulation with <code>mutate()</code>, <code>filter()</code>, and pipe operators throughout the exercise.</td>
+</tr>
 </tbody>
 </table>
-<p>The code chunk below installs and loads the four R packages:</p>
+<p>The code chunk below installs and loads the five R packages:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, spatstat, terra, tmap, tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
