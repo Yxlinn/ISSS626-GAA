@@ -80,5 +80,101 @@ plot(unmark(childcare_ck_ppp), main = "Choa Chu Kang")
 plot(unmark(childcare_jw_ppp), main = "Jurong West")
 ```
 
+The following sections compute G-, F-, K-, and L-functions for the Choa Chu Kang and Tampines planning areas, each accompanied by a Monte Carlo simulation test of Complete Spatial Randomness (CSR).
+
+## 5 Analysing Spatial Point Process Using G-Function
+
+The G-function measures the distribution of distances from an arbitrary point to its nearest neighbouring point. This section computes the G-function using `Gest()` of **spatstat**, and tests it against Complete Spatial Randomness using `envelope()`.
+
+### 5.1 Choa Chu Kang Planning Area
+
+#### 5.1.1 Computing G-function Estimation
+
+The code chunk below computes the G-function using `Gest()` of **spatstat**:
+
+```{r}
+G_CK <- Gest(childcare_ck_ppp, correction = "border")
+plot(G_CK, xlim = c(0, 500))
+```
+
+::: {.callout-note}
+## Interpretation
+The plot shows two lines: the empirical G-function (black line), representing the actual cumulative distribution of nearest-neighbour distances observed among childcare centres in Choa Chu Kang, and the theoretical CSR G-function (pink dashed line), representing the expected distribution if childcare centres were randomly distributed with no clustering or dispersion.
+
+The black line lies consistently above the pink line across the observed range of distances. Since the G-function measures the proportion of points with a nearest neighbour within a given distance, a higher curve means shorter nearest-neighbour distances overall. This indicates that childcare centres in Choa Chu Kang tend to have another centre nearby more often than random chance would predict — consistent with a clustered spatial pattern. This matches the earlier Clark-Evans result for Choa Chu Kang (R = 0.892) in Hands-on Exercise 2A.
+:::
+
+#### 5.1.2 Performing Complete Spatial Randomness Test
+
+To confirm the observed spatial patterns above, a hypothesis test is conducted:
+
+- H0: The distribution of childcare centres in Choa Chu Kang is randomly distributed.
+- H1: The distribution of childcare centres in Choa Chu Kang is not randomly distributed.
+
+The null hypothesis will be rejected if the p-value is smaller than the alpha value of 0.001.
+
+A Monte Carlo simulation test is performed using `envelope()` of **spatstat**:
+
+```{r}
+set.seed(123)
+G_CK.csr <- envelope(childcare_ck_ppp, Gest, nsim = 999)
+```
+
+```{r}
+plot(G_CK.csr)
+```
+
+::: {.callout-note}
+## Interpretation
+The observed G-function (black line) stays within the simulation envelope (grey band) for shorter distances, but rises above the upper envelope bound for larger distances (roughly beyond r = 130–150). This suggests that at these greater distances, childcare centres in Choa Chu Kang are spaced more closely together than 999 simulations of Complete Spatial Randomness would typically produce — a pattern consistent with clustering.
+:::
+
+### 5.2 Tampines Planning Area
+
+#### 5.2.1 Computing G-function Estimation
+
+The code chunk below computes the G-function for Tampines:
+
+```{r}
+G_tm <- Gest(childcare_tm_ppp, correction = "best")
+plot(G_tm)
+```
+
+::: {.callout-tip}
+## Correction methods for Gest()
+`Gest()` supports several edge-correction methods via the `correction` argument. In the previous example, Choa Chu Kang used `correction = "border"`, a straightforward method that excludes points too close to the study area boundary. This section uses `correction = "best"` instead, which lets **spatstat** automatically select the most appropriate correction for the given data.
+:::
+
+::: {.callout-note}
+## Interpretation
+The black line lies consistently above the pink line across the observed range of distances, and the gap between them is noticeably wider than in the Choa Chu Kang plot. This indicates that childcare centres in Tampines tend to have another centre nearby more often than random chance would predict — a pattern consistent with clustering. The wider gap also suggests stronger clustering in Tampines than in Choa Chu Kang, matching the lower (more clustered) Clark-Evans R-value for Tampines (R = 0.690) versus Choa Chu Kang (R = 0.892) from Hands-on Exercise 2A.
+:::
+
+#### 5.2.2 Performing Complete Spatial Randomness Test
+
+To confirm the observed spatial patterns above, a hypothesis test is conducted:
+
+- H0: The distribution of childcare centres in Tampines is randomly distributed.
+- H1: The distribution of childcare centres in Tampines is not randomly distributed.
+
+The null hypothesis is rejected if the p-value is smaller than the alpha value of 0.001.
+
+A Monte Carlo simulation test is performed using `envelope()` of **spatstat**:
+
+```{r}
+set.seed(123)
+G_tm.csr <- envelope(childcare_tm_ppp, Gest, correction = "all", nsim = 999)
+```
+
+```{r}
+plot(G_tm.csr)
+```
+
+::: {.callout-note}
+## Interpretation
+The observed G-function (black line) rises above the upper envelope bound almost immediately, from roughly r = 20 onward, and remains outside the envelope for most of the observed distance range. This indicates that childcare centres in Tampines are consistently spaced more closely together than 999 simulations of Complete Spatial Randomness would typically produce, suggesting a stronger degree of clustering than seen in Choa Chu Kang, where the observed line only exceeded the envelope at larger distances.
+:::
+
+
 
 

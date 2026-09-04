@@ -201,6 +201,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">2 The Data</a></li>
   <li><a href="#installing-and-loading-the-r-packages" id="toc-installing-and-loading-the-r-packages" class="nav-link" data-scroll-target="#installing-and-loading-the-r-packages">3 Installing and Loading the R packages</a></li>
   <li><a href="#data-import-and-preparation" id="toc-data-import-and-preparation" class="nav-link" data-scroll-target="#data-import-and-preparation">4 Data Import and Preparation</a></li>
+  <li><a href="#analysing-spatial-point-process-using-g-function" id="toc-analysing-spatial-point-process-using-g-function" class="nav-link" data-scroll-target="#analysing-spatial-point-process-using-g-function">5 Analysing Spatial Point Process Using G-Function</a>
+  <ul>
+  <li><a href="#choa-chu-kang-planning-area" id="toc-choa-chu-kang-planning-area" class="nav-link" data-scroll-target="#choa-chu-kang-planning-area">5.1 Choa Chu Kang Planning Area</a>
+  <ul class="collapse">
+  <li><a href="#computing-g-function-estimation" id="toc-computing-g-function-estimation" class="nav-link" data-scroll-target="#computing-g-function-estimation">5.1.1 Computing G-function Estimation</a></li>
+  <li><a href="#performing-complete-spatial-randomness-test" id="toc-performing-complete-spatial-randomness-test" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test">5.1.2 Performing Complete Spatial Randomness Test</a></li>
+  </ul></li>
+  <li><a href="#tampines-planning-area" id="toc-tampines-planning-area" class="nav-link" data-scroll-target="#tampines-planning-area">5.2 Tampines Planning Area</a>
+  <ul class="collapse">
+  <li><a href="#computing-g-function-estimation-1" id="toc-computing-g-function-estimation-1" class="nav-link" data-scroll-target="#computing-g-function-estimation-1">5.2.1 Computing G-function Estimation</a></li>
+  <li><a href="#performing-complete-spatial-randomness-test-1" id="toc-performing-complete-spatial-randomness-test-1" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-1">5.2.2 Performing Complete Spatial Randomness Test</a></li>
+  </ul></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -345,8 +358,192 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+<p>The following sections compute G-, F-, K-, and L-functions for the Choa Chu Kang and Tampines planning areas, each accompanied by a Monte Carlo simulation test of Complete Spatial Randomness (CSR).</p>
+</section>
+<section id="analysing-spatial-point-process-using-g-function" class="level2">
+<h2 class="anchored" data-anchor-id="analysing-spatial-point-process-using-g-function">5 Analysing Spatial Point Process Using G-Function</h2>
+<p>The G-function measures the distribution of distances from an arbitrary point to its nearest neighbouring point. This section computes the G-function using <code>Gest()</code> of <strong>spatstat</strong>, and tests it against Complete Spatial Randomness using <code>envelope()</code>.</p>
+<section id="choa-chu-kang-planning-area" class="level3">
+<h3 class="anchored" data-anchor-id="choa-chu-kang-planning-area">5.1 Choa Chu Kang Planning Area</h3>
+<section id="computing-g-function-estimation" class="level4">
+<h4 class="anchored" data-anchor-id="computing-g-function-estimation">5.1.1 Computing G-function Estimation</h4>
+<p>The code chunk below computes the G-function using <code>Gest()</code> of <strong>spatstat</strong>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>G_CK <span class="ot">&lt;-</span> <span class="fu">Gest</span>(childcare_ck_ppp, <span class="at">correction =</span> <span class="st">"border"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(G_CK, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">500</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex02B_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Interpretation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The plot shows two lines: the empirical G-function (black line), representing the actual cumulative distribution of nearest-neighbour distances observed among childcare centres in Choa Chu Kang, and the theoretical CSR G-function (pink dashed line), representing the expected distribution if childcare centres were randomly distributed with no clustering or dispersion.</p>
+<p>The black line lies consistently above the pink line across the observed range of distances. Since the G-function measures the proportion of points with a nearest neighbour within a given distance, a higher curve means shorter nearest-neighbour distances overall. This indicates that childcare centres in Choa Chu Kang tend to have another centre nearby more often than random chance would predict — consistent with a clustered spatial pattern. This matches the earlier Clark-Evans result for Choa Chu Kang (R = 0.892) in Hands-on Exercise 2A.</p>
+</div>
+</div>
+</section>
+<section id="performing-complete-spatial-randomness-test" class="level4">
+<h4 class="anchored" data-anchor-id="performing-complete-spatial-randomness-test">5.1.2 Performing Complete Spatial Randomness Test</h4>
+<p>To confirm the observed spatial patterns above, a hypothesis test is conducted:</p>
+<ul>
+<li>H0: The distribution of childcare centres in Choa Chu Kang is randomly distributed.</li>
+<li>H1: The distribution of childcare centres in Choa Chu Kang is not randomly distributed.</li>
+</ul>
+<p>The null hypothesis will be rejected if the p-value is smaller than the alpha value of 0.001.</p>
+<p>A Monte Carlo simulation test is performed using <code>envelope()</code> of <strong>spatstat</strong>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>G_CK.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_ck_ppp, Gest, <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generating 999 simulated realisations of CSR  ...
+1, 2, 3, ......10.........20.........30.........40.........50.........60..
+.......70.........80.........90.........100.........110.........120.........130
+.........140.........150.........160.........170.........180.........190........
+.200.........210.........220.........230.........240.........250.........260......
+...270.........280.........290.........300.........310.........320.........330....
+.....340.........350.........360.........370.........380.........390.........400..
+.......410.........420.........430.........440.........450.........460.........470
+.........480.........490.........500.........510.........520.........530........
+.540.........550.........560.........570.........580.........590.........600......
+...610.........620.........630.........640.........650.........660.........670....
+.....680.........690.........700.........710.........720.........730.........740..
+.......750.........760.........770.........780.........790.........800.........810
+.........820.........830.........840.........850.........860.........870........
+.880.........890.........900.........910.........920.........930.........940......
+...950.........960.........970.........980.........990........
+999.
+
+Done.</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(G_CK.csr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex02B_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Interpretation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The observed G-function (black line) stays within the simulation envelope (grey band) for shorter distances, but rises above the upper envelope bound for larger distances (roughly beyond r = 130–150). This suggests that at these greater distances, childcare centres in Choa Chu Kang are spaced more closely together than 999 simulations of Complete Spatial Randomness would typically produce — a pattern consistent with clustering.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="tampines-planning-area" class="level3">
+<h3 class="anchored" data-anchor-id="tampines-planning-area">5.2 Tampines Planning Area</h3>
+<section id="computing-g-function-estimation-1" class="level4">
+<h4 class="anchored" data-anchor-id="computing-g-function-estimation-1">5.2.1 Computing G-function Estimation</h4>
+<p>The code chunk below computes the G-function for Tampines:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>G_tm <span class="ot">&lt;-</span> <span class="fu">Gest</span>(childcare_tm_ppp, <span class="at">correction =</span> <span class="st">"best"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(G_tm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex02B_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Correction methods for Gest()
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>Gest()</code> supports several edge-correction methods via the <code>correction</code> argument. In the previous example, Choa Chu Kang used <code>correction = "border"</code>, a straightforward method that excludes points too close to the study area boundary. This section uses <code>correction = "best"</code> instead, which lets <strong>spatstat</strong> automatically select the most appropriate correction for the given data.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Interpretation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The black line lies consistently above the pink line across the observed range of distances, and the gap between them is noticeably wider than in the Choa Chu Kang plot. This indicates that childcare centres in Tampines tend to have another centre nearby more often than random chance would predict — a pattern consistent with clustering. The wider gap also suggests stronger clustering in Tampines than in Choa Chu Kang, matching the lower (more clustered) Clark-Evans R-value for Tampines (R = 0.690) versus Choa Chu Kang (R = 0.892) from Hands-on Exercise 2A.</p>
+</div>
+</div>
+</section>
+<section id="performing-complete-spatial-randomness-test-1" class="level4">
+<h4 class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-1">5.2.2 Performing Complete Spatial Randomness Test</h4>
+<p>To confirm the observed spatial patterns above, a hypothesis test is conducted:</p>
+<ul>
+<li>H0: The distribution of childcare centres in Tampines is randomly distributed.</li>
+<li>H1: The distribution of childcare centres in Tampines is not randomly distributed.</li>
+</ul>
+<p>The null hypothesis is rejected if the p-value is smaller than the alpha value of 0.001.</p>
+<p>A Monte Carlo simulation test is performed using <code>envelope()</code> of <strong>spatstat</strong>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>G_tm.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_tm_ppp, Gest, <span class="at">correction =</span> <span class="st">"all"</span>, <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Generating 999 simulated realisations of CSR  ...
+1, 2, 3, ......10.........20.........30.........40.........50.........60..
+.......70.........80.........90.........100.........110.........120.........130
+.........140.........150.........160.........170.........180.........190........
+.200.........210.........220.........230.........240.........250.........260......
+...270.........280.........290.........300.........310.........320.........330....
+.....340.........350.........360.........370.........380.........390.........400..
+.......410.........420.........430.........440.........450.........460.........470
+.........480.........490.........500.........510.........520.........530........
+.540.........550.........560.........570.........580.........590.........600......
+...610.........620.........630.........640.........650.........660.........670....
+.....680.........690.........700.........710.........720.........730.........740..
+.......750.........760.........770.........780.........790.........800.........810
+.........820.........830.........840.........850.........860.........870........
+.880.........890.........900.........910.........920.........930.........940......
+...950.........960.........970.........980.........990........
+999.
+
+Done.</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(G_tm.csr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex02B_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
