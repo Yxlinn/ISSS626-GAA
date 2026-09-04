@@ -390,6 +390,8 @@ L_ck.csr <- envelope(childcare_ck_ppp, Lest, nsim = 99, rank = 1, glocal = TRUE)
 ```
 
 ```{r}
+#| fig-width: 8
+#| fig-height: 6
 plot(L_ck.csr, . - r ~ r, xlab = "d", ylab = "L(d)-r")
 ```
 
@@ -431,6 +433,8 @@ L_tm.csr <- envelope(childcare_tm_ppp, Lest, nsim = 99, rank = 1, glocal = TRUE)
 ```
 
 ```{r}
+#| fig-width: 8
+#| fig-height: 6
 plot(L_tm.csr, . - r ~ r, 
      xlab = "d", ylab = "L(d)-r", xlim = c(0, 500))
 ```
