@@ -38,3 +38,47 @@ The code chunk below installs and loads the four R packages:
 ```{r}
 pacman::p_load(sf, spatstat, tmap, tidyverse)
 ```
+
+## 4 Data Import and Preparation
+
+Data import and preparation for this exercise reuse the objects prepared in [Hands-on Exercise 2A](https://isss-626-gaa-one.vercel.app/Hands-on_Ex/Hands-on_Ex02A/Hands-on_Ex02A.html): the cleaned boundary data (`mpsz_cl`) and the jittered childcare point pattern (`childcare_ppp_jit`). Both were saved there as `.rds` files and copied into this exercise's own `data` folder. Full details of the import, CRS transformation, and jittering steps are available under the following Hands-on Exercise 2A sections:
+
+- [Importing and Wrangling Geospatial Data Sets](https://isss-626-gaa-one.vercel.app/Hands-on_Ex/Hands-on_Ex02A/Hands-on_Ex02A.html#importing-and-wrangling-geospatial-data-sets)
+- [Geospatial Data Wrangling](https://isss-626-gaa-one.vercel.app/Hands-on_Ex/Hands-on_Ex02A/Hands-on_Ex02A.html#geospatial-data-wrangling)
+
+The code chunk below loads both objects, then extracts the same four planning areas used in Hands-on Exercise 2A — Punggol, Tampines, Choa Chu Kang, and Jurong West:
+
+```{r}
+mpsz_cl <- read_rds("data/mpsz_cl.rds")
+childcare_ppp_jit <- read_rds("data/childcare_ppp_jit.rds")
+
+pg <- mpsz_cl %>% filter(PLN_AREA_N == "PUNGGOL")
+tm <- mpsz_cl %>% filter(PLN_AREA_N == "TAMPINES")
+ck <- mpsz_cl %>% filter(PLN_AREA_N == "CHOA CHU KANG")
+jw <- mpsz_cl %>% filter(PLN_AREA_N == "JURONG WEST")
+
+pg_owin <- as.owin(pg)
+tm_owin <- as.owin(tm)
+ck_owin <- as.owin(ck)
+jw_owin <- as.owin(jw)
+
+childcare_pg_ppp <- childcare_ppp_jit[pg_owin]
+childcare_tm_ppp <- childcare_ppp_jit[tm_owin]
+childcare_ck_ppp <- childcare_ppp_jit[ck_owin]
+childcare_jw_ppp <- childcare_ppp_jit[jw_owin]
+```
+
+The four planning areas are plotted below to confirm the extraction:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 10
+par(mfrow = c(2, 2))
+plot(unmark(childcare_pg_ppp), main = "Punggol")
+plot(unmark(childcare_tm_ppp), main = "Tampines")
+plot(unmark(childcare_ck_ppp), main = "Choa Chu Kang")
+plot(unmark(childcare_jw_ppp), main = "Jurong West")
+```
+
+
+
