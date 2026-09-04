@@ -21,7 +21,7 @@ This exercise uses [**spatstat**](https://cran.r-project.org/web/packages/spatst
 Two data sets are used for this exercise:
 
 | Dataset | Format | Source | Description |
-|------------------|------------------|------------------|------------------|
+|---|---|---|---|
 | Child Care Services | GeoJSON | [data.gov.sg](https://data.gov.sg/) | Point feature data providing the location and attribute information of childcare centres in Singapore. |
 | Master Plan 2019 Subzone Boundary (No Sea) | GeoJSON | [data.gov.sg](https://data.gov.sg/) | Polygon feature data providing the URA 2019 Master Plan Planning Subzone boundaries. |
 
@@ -273,6 +273,12 @@ To confirm that no coincident points remain after jittering:
 
 ```{r}
 any(duplicated(childcare_ppp_jit))
+```
+
+The jittered point pattern is saved as an `.rds` file for reuse in later analysis:
+
+```{r}
+write_rds(childcare_ppp_jit, "data/childcare_ppp_jit.rds")
 ```
 
 From this point onward, `childcare_ppp_jit` is used in place of `childcare_ppp` for the remainder of this exercise.
