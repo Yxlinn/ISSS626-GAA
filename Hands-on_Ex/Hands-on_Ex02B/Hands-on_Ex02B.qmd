@@ -1,5 +1,15 @@
 ---
 title: "Hands-on Exercise 2B: Second-order Spatial Point Pattern Analysis (2nd-SPPA)"
+date: "September 03, 2026"
+date-modified: "last-modified"
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
 ---
 
 ## 1 Overview
@@ -16,7 +26,7 @@ This exercise uses [**spatstat**](https://cran.r-project.org/web/packages/spatst
 Two data sets are used for this exercise:
 
 | Dataset | Format | Source | Description |
-|---|---|---|---|
+|------------------|------------------|------------------|------------------|
 | Child Care Services | GeoJSON | [data.gov.sg](https://data.gov.sg/) | Point feature data providing the location and attribute information of childcare centres in Singapore. |
 | Master Plan 2019 Subzone Boundary (No Sea) | GeoJSON | [data.gov.sg](https://data.gov.sg/) | Polygon feature data providing the URA 2019 Master Plan Planning Subzone boundaries. |
 
@@ -27,7 +37,7 @@ Both data sets are the same as those used in [**Hands-on Exercise 2A**](https://
 Four R packages will be used for this exercise:
 
 | Package | Purpose | Use Case in Exercise |
-|---|---|---|
+|------------------------|------------------------|------------------------|
 | [**sf**](https://r-spatial.github.io/sf/) | Imports, manages, and processes vector-based geospatial data. | Handling vector geospatial data in R. |
 | [**spatstat**](https://spatstat.org/) | Provides tools for point pattern analysis. | Performing 1st-order spatial point pattern analysis and deriving kernel density estimation (KDE). |
 | [**tmap**](https://cran.r-project.org/web/packages/tmap/index.html) | Creates static and interactive thematic maps using cartographic-quality elements. | Plotting the KDE surface as a static map, and the childcare point locations as an interactive map via [leaflet](https://leafletjs.com/). |
@@ -39,7 +49,15 @@ The code chunk below installs and loads the four R packages:
 pacman::p_load(sf, spatstat, tmap, tidyverse)
 ```
 
-## 4 Data Import and Preparation
+## 4 Reproducibility
+
+As this exercise involves Monte Carlo simulation, a seed is set so that the result stays consistent across re-renders.
+
+```{r}
+set.seed(123)
+```
+
+## 5 Data Import and Preparation
 
 Data import and preparation for this exercise reuse the objects prepared in [Hands-on Exercise 2A](https://isss-626-gaa-one.vercel.app/Hands-on_Ex/Hands-on_Ex02A/Hands-on_Ex02A.html): the cleaned boundary data (`mpsz_cl`) and the jittered childcare point pattern (`childcare_ppp_jit`). Both were saved there as `.rds` files and copied into this exercise's own `data` folder. Full details of the import, CRS transformation, and jittering steps are available under the following Hands-on Exercise 2A sections:
 
@@ -82,13 +100,13 @@ plot(unmark(childcare_jw_ppp), main = "Jurong West")
 
 The following sections compute G-, F-, K-, and L-functions for the Choa Chu Kang and Tampines planning areas, each accompanied by a Monte Carlo simulation test of Complete Spatial Randomness (CSR).
 
-## 5 Analysing Spatial Point Process Using G-Function
+## 6 Analysing Spatial Point Process Using G-Function
 
 The G-function measures the distribution of distances from an arbitrary point to its nearest neighbouring point. This section computes the G-function using `Gest()` of **spatstat**, and tests it against Complete Spatial Randomness using `envelope()`.
 
-### 5.1 Choa Chu Kang Planning Area
+### 6.1 Choa Chu Kang Planning Area
 
-#### 5.1.1 Computing G-function Estimation
+#### 6.1.1 Computing G-function Estimation
 
 The code chunk below computes the G-function using `Gest()` of **spatstat**:
 
@@ -99,12 +117,13 @@ plot(G_CK, xlim = c(0, 500))
 
 ::: {.callout-note}
 ## Interpretation
-The plot shows two lines: the empirical G-function (black line), representing the actual cumulative distribution of nearest-neighbour distances observed among childcare centres in Choa Chu Kang, and the theoretical CSR G-function (pink dashed line), representing the expected distribution if childcare centres were randomly distributed with no clustering or dispersion.
 
-The black line lies consistently above the pink line across the observed range of distances. Since the G-function measures the proportion of points with a nearest neighbour within a given distance, a higher curve means shorter nearest-neighbour distances overall. This indicates that childcare centres in Choa Chu Kang tend to have another centre nearby more often than random chance would predict — consistent with a clustered spatial pattern. This matches the earlier Clark-Evans result for Choa Chu Kang (R = 0.892) in Hands-on Exercise 2A.
+The plot shows two lines: the empirical G-function (black line), representing the actual cumulative distribution of nearest-neighbour distances observed among childcare centres in Choa Chu Kang, and the theoretical CSR G-function (red dashed line), representing the expected distribution if childcare centres were randomly distributed with no clustering or dispersion.
+
+The black line lies consistently above the red line across the observed range of distances. Since the G-function measures the proportion of points with a nearest neighbour within a given distance, a higher curve means shorter nearest-neighbour distances overall. This indicates that childcare centres in Choa Chu Kang tend to have another centre nearby more often than random chance would predict — consistent with a clustered spatial pattern. This matches the earlier Clark-Evans result for Choa Chu Kang (R = 0.892) in Hands-on Exercise 2A.
 :::
 
-#### 5.1.2 Performing Complete Spatial Randomness Test
+#### 6.1.2 Performing Complete Spatial Randomness Test
 
 To confirm the observed spatial patterns above, a hypothesis test is conducted:
 
@@ -116,7 +135,6 @@ The null hypothesis will be rejected if the p-value is smaller than the alpha va
 A Monte Carlo simulation test is performed using `envelope()` of **spatstat**:
 
 ```{r}
-set.seed(123)
 G_CK.csr <- envelope(childcare_ck_ppp, Gest, nsim = 999)
 ```
 
@@ -126,12 +144,13 @@ plot(G_CK.csr)
 
 ::: {.callout-note}
 ## Interpretation
-The observed G-function (black line) stays within the simulation envelope (grey band) for shorter distances, but rises above the upper envelope bound for larger distances (roughly beyond r = 130–150). This suggests that at these greater distances, childcare centres in Choa Chu Kang are spaced more closely together than 999 simulations of Complete Spatial Randomness would typically produce — a pattern consistent with clustering.
+
+The observed G-function (black line) tracks closely alongside the theoretical CSR line (red dashed) throughout, staying within the envelope (grey band) across the entire observed distance range. It does not show a significant departure from CSR for Choa Chu Kang.
 :::
 
-### 5.2 Tampines Planning Area
+### 6.2 Tampines Planning Area
 
-#### 5.2.1 Computing G-function Estimation
+#### 6.2.1 Computing G-function Estimation
 
 The code chunk below computes the G-function for Tampines:
 
@@ -142,15 +161,17 @@ plot(G_tm)
 
 ::: {.callout-tip}
 ## Correction methods for Gest()
+
 `Gest()` supports several edge-correction methods via the `correction` argument. In the previous example, Choa Chu Kang used `correction = "border"`, a straightforward method that excludes points too close to the study area boundary. This section uses `correction = "best"` instead, which lets **spatstat** automatically select the most appropriate correction for the given data.
 :::
 
 ::: {.callout-note}
 ## Interpretation
-The black line lies consistently above the pink line across the observed range of distances, and the gap between them is noticeably wider than in the Choa Chu Kang plot. This indicates that childcare centres in Tampines tend to have another centre nearby more often than random chance would predict — a pattern consistent with clustering. The wider gap also suggests stronger clustering in Tampines than in Choa Chu Kang, matching the lower (more clustered) Clark-Evans R-value for Tampines (R = 0.690) versus Choa Chu Kang (R = 0.892) from Hands-on Exercise 2A.
+
+The black line lies consistently above the red line across the observed range of distances, and the gap between them is noticeably wider than in the Choa Chu Kang plot. This indicates that childcare centres in Tampines tend to have another centre nearby more often than random chance would predict — a pattern consistent with clustering. The wider gap also suggests stronger clustering in Tampines than in Choa Chu Kang, matching the lower (more clustered) Clark-Evans R-value for Tampines (R = 0.690) versus Choa Chu Kang (R = 0.892) from Hands-on Exercise 2A.
 :::
 
-#### 5.2.2 Performing Complete Spatial Randomness Test
+#### 6.2.2 Performing Complete Spatial Randomness Test
 
 To confirm the observed spatial pattern above, a hypothesis test is conducted:
 
@@ -162,7 +183,6 @@ The null hypothesis will be rejected if the p-value is smaller than the alpha va
 A Monte Carlo simulation test is performed using `envelope()` of **spatstat**:
 
 ```{r}
-set.seed(123)
 G_tm.csr <- envelope(childcare_tm_ppp, Gest, correction = "all", nsim = 999)
 ```
 
@@ -172,18 +192,19 @@ plot(G_tm.csr)
 
 ::: {.callout-note}
 ## Interpretation
-The observed G-function (black line) rises above the upper envelope bound almost immediately, from roughly r = 20 onward, and remains outside the envelope for most of the observed distance range. This indicates that childcare centres in Tampines are consistently spaced more closely together than 999 simulations of Complete Spatial Randomness would typically produce, suggesting a stronger degree of clustering than seen in Choa Chu Kang, where the observed line only exceeded the envelope at larger distances.
+
+The observed G-function (black line) rises above the upper envelope bound for most of the observed distance range. This indicates that childcare centres in Tampines are consistently spaced more closely together than 999 simulations of CSR would produce.
 :::
 
-## 6 Analysing Spatial Point Process Using F-Function
+## 7 Analysing Spatial Point Process Using F-Function
 
-The F-function estimates the empty space function F(r), the probability that the distance from an arbitrary location (not a data point) to the nearest observed point is at most *r*. Unlike the G-function, where higher observed values indicate clustering, a **lower** observed F-function than expected under Complete Spatial Randomness indicates clustering — since clustered patterns leave larger gaps between clusters, empty space distances take longer to fill in. 
+The F-function estimates the empty space function F(r), the probability that the distance from an arbitrary location (not a data point) to the nearest observed point is at most *r*. Unlike the G-function, where higher observed values indicate clustering, a **lower** observed F-function than expected under Complete Spatial Randomness indicates clustering — since clustered patterns leave larger gaps between clusters, empty space distances take longer to fill in.
 
 This section computes the F-function using `Fest()` of **spatstat**, and tests it against Complete Spatial Randomness using `envelope()`.
 
-### 6.1 Choa Chu Kang Planning Area
+### 7.1 Choa Chu Kang Planning Area
 
-#### 6.1.1 Computing F-function Estimation
+#### 7.1.1 Computing F-function Estimation
 
 The code chunk below computes the F-function using `Fest()` of **spatstat**:
 
@@ -194,12 +215,13 @@ plot(F_CK)
 
 ::: {.callout-note}
 ## Interpretation
-The plot shows four lines: the theoretical CSR F-function (light blue dash-dot line, F_pois), and three empirical estimates using different edge corrections - Kaplan-Meier (black, F_km), border (pink dashed, F_bord), and Chiu-Stoyan (green dotted, F_cs). 
 
-The three empirical F-function estimates — Kaplan-Meier (black), border (pink dashed), and Chiu-Stoyan (green dotted) - track closely together throughout, while the theoretical CSR line (light blue dash-dot) sits visibly above all three, with the gap widening noticeably from around r = 150 onward. Since a lower-than-expected F-function indicates clustering, this is consistent with the clustered pattern already identified for Choa Chu Kang via the G-function above and Clark-Evans test in Hands-on Exercise 2A.
+The plot shows four lines: the theoretical CSR F-function (light blue dash-dot line, F_pois), and three empirical estimates using different edge corrections - Kaplan-Meier (black, F_km), border (red dashed, F_bord), and Chiu-Stoyan (green dotted, F_cs).
+
+The three empirical F-function estimates — Kaplan-Meier (black), border (red dashed), and Chiu-Stoyan (green dotted) - track closely together throughout, while the theoretical CSR line (light blue dash-dot) sits visibly above all three, with the gap widening noticeably from r = 150 onward. Since a lower-than-expected F-function indicates clustering, this is consistent with the clustered pattern already identified for Choa Chu Kang via the G-function above and Clark-Evans test in Hands-on Exercise 2A.
 :::
 
-#### 6.1.2 Performing Complete Spatial Randomness Test
+#### 7.1.2 Performing Complete Spatial Randomness Test
 
 To confirm the observed spatial pattern above, a hypothesis test is conducted:
 
@@ -211,7 +233,6 @@ The null hypothesis will be rejected if p-value is smaller than alpha value of 0
 Monte Carlo test with F-function:
 
 ```{r}
-set.seed(123)
 F_CK.csr <- envelope(childcare_ck_ppp, Fest, nsim = 999)
 ```
 
@@ -221,12 +242,13 @@ plot(F_CK.csr)
 
 ::: {.callout-note}
 ## Interpretation
-The observed F-function (black line) stays within the simulation envelope (grey band) across the entire observed distance range, never crossing either the upper or lower bound. This indicates that, based on this test, the spatial pattern of childcare centres in Choa Chu Kang is not distinguishable from Complete Spatial Randomness at these distances — unlike the G-function result, which did show the observed line exceeding the envelope at larger distances.
+
+The observed F-function (black line) stays within the simulation envelope (grey band) across the entire observed distance range, never crossing either the upper or lower bound. This indicates that the spatial pattern of childcare centres in Choa Chu Kang is not distinguishable from CSR at these distances — unlike the G-function result, which did show the observed line exceeding the envelope at larger distances.
 :::
 
-### 6.2 Tampines Planning Area
+### 7.2 Tampines Planning Area
 
-#### 6.2.1 Computing F-function Estimation
+#### 7.2.1 Computing F-function Estimation
 
 The code chunk below computes the F-function using `Fest()` of **spatstat**:
 
@@ -237,10 +259,11 @@ plot(F_tm)
 
 ::: {.callout-note}
 ## Interpretation
-The observed F-function (black line) sits below the theoretical CSR line (pink dashed), with the gap widening substantially through the mid-range before narrowing again as both curves approach 1. Since a lower-than-expected F-function indicates clustering, this points to a clustered pattern of childcare centres in Tampines, which is consistent with the strong clustering signal already seen in the G-function result, and with the Clark-Evans test in Hands-on Exercise 2A.
+
+The observed F-function (black line) sits below the theoretical CSR line (red dashed), with the gap widening substantially through the mid-range before narrowing again as both curves approach 1. Since a lower-than-expected F-function indicates clustering, this points to a clustered pattern of childcare centres in Tampines, which is consistent with the strong clustering signal already seen in the G-function result, and with the Clark-Evans test in Hands-on Exercise 2A.
 :::
 
-#### 6.2.2 Performing Complete Spatial Randomness Test
+#### 7.2.2 Performing Complete Spatial Randomness Test
 
 To confirm the observed spatial pattern above, a hypothesis test is conducted:
 
@@ -252,7 +275,6 @@ The null hypothesis will be rejected if p-value is smaller than alpha value of 0
 Monte Carlo test with F-function:
 
 ```{r}
-set.seed(123)
 F_tm.csr <- envelope(childcare_tm_ppp, Fest, correction = "all", nsim = 999)
 ```
 
@@ -262,18 +284,19 @@ plot(F_tm.csr)
 
 ::: {.callout-note}
 ## Interpretation
-The observed F-function (black line) falls below the lower envelope bound for a substantial portion of the observed distance range. This indicates that childcare centres in Tampines are significantly more clustered than 999 simulations of Complete Spatial Randomness would typically produce, a stronger and more sustained departure from CSR than seen in Choa Chu Kang, where the observed F-function stayed within the envelope throughout.
+
+The observed F-function (black line) falls below the lower envelope bound for a substantial portion of the observed distance range. This indicates that childcare centres in Tampines are significantly more clustered than 999 simulations of CSR would typically produce, a stronger and more sustained departure from CSR than seen in Choa Chu Kang, where the observed F-function stayed within the envelope throughout.
 :::
 
-## 7 Analysing Spatial Point Process Using K-Function
+## 8 Analysing Spatial Point Process Using K-Function
 
-The K-function measures the expected number of points found within a given distance of an arbitrary point, compared to what would be expected under Complete Spatial Randomness. Like the G-function, a K-function **higher** than the CSR line indicates clustering while a **lower** K-function indicates dispersion. 
+The K-function measures the expected number of points found within a given distance of an arbitrary point, compared to what would be expected under Complete Spatial Randomness. Like the G-function, a K-function **higher** than the CSR line indicates clustering while a **lower** K-function indicates dispersion.
 
 This section computes the K-function using `Kest()` of **spatstat**, and tests it against Complete Spatial Randomness using `envelope()`.
 
-### 7.1 Choa Chu Kang Planning Area
+### 8.1 Choa Chu Kang Planning Area
 
-#### 7.1.1 Computing K-function Estimation
+#### 8.1.1 Computing K-function Estimation
 
 The code chunk below computes the K-function using `Kest()` of **spatstat**:
 
@@ -284,95 +307,8 @@ plot(K_ck, . -r ~ r, ylab = "K(d)-r", xlab = "d(m)")
 
 ::: {.callout-note}
 ## Interpretation
-The observed K-function (black line) sits consistently above the theoretical CSR line (pink dashed) across the entire observed distance range, with the gap widening as distance increases. Since a higher-than-expected K-function indicates clustering, this confirms that childcare centres in Choa Chu Kang are more clustered than Complete Spatial Randomness would predict, which is consistent with the earlier G-function result.
-:::
 
-#### 7.1.2 Performing Complete Spatial Randomness Test
-
-To confirm the observed spatial pattern above, a hypothesis test is conducted:
-
-- H0: The distribution of childcare services at Choa Chu Kang are randomly distributed.
-- H1: The distribution of childcare services at Choa Chu Kang are not randomly distributed.
-
-The null hypothesis will be rejected if the p-value is smaller than the alpha value of 0.001.
-
-```{r}
-set.seed(123)
-K_ck.csr <- envelope(childcare_ck_ppp, Kest, nsim = 99, rank = 1, glocal = TRUE)
-```
-
-```{r}
-plot(K_ck.csr, . - r ~ r, xlab = "d", ylab = "K(d)-r")
-```
-
-::: {.callout-note}
-## Interpretation
-The observed K-function (black line) stays close to the upper edge of the simulation envelope (grey band) for much of the observed distance range, briefly exceeding it near the largest distances. This suggests a degree of clustering among childcare centres in Choa Chu Kang.
-:::
-
-### 7.2 Tampines Planning Area
-
-#### 7.2.1 Computing K-function Estimation
-
-The code chunk below computes the K-function using `Kest()` of **spatstat**:
-
-```{r}
-K_tm <- Kest(childcare_tm_ppp, correction = "Ripley")
-plot(K_tm, . -r ~ r,
-     ylab = "K(d)-r", xlab = "d(m)",
-     xlim = c(0, 1000))
-```
-
-::: {.callout-note}
-## Interpretation
-The observed K-function (black line) sits above the theoretical CSR line (pink dashed) across the entire observed distance range, with the gap widening substantially as distance increases. This indicates that childcare centres in Tampines are more clustered than Complete Spatial Randomness would predict, and more strongly than Choa Chu Kang.
-:::
-
-#### 7.2.2 Performing Complete Spatial Randomness Test
-
-To confirm the observed spatial pattern above, a hypothesis test is conducted:
-
-- H0: The distribution of childcare services at Tampines are randomly distributed.
-- H1:The distribution of childcare services at Tampines are not randomly distributed.
-
-The null hypothesis will be rejected if the p-value is smaller than the alpha value of 0.001.
-
-```{r}
-set.seed(123)
-K_tm.csr <- envelope(childcare_tm_ppp, Kest, nsim = 99, rank = 1, glocal = TRUE)
-```
-
-```{r}
-plot(K_tm.csr, . - r ~ r,
-     xlab = "d", ylab = "K(d)-r", xlim = c(0, 500))
-```
-
-::: {.callout-note}
-## Interpretation
-The observed K-function (black line) rises above the upper envelope bound, and is outside the envelope for the entire distance range. This indicates that childcare centres in Tampines are consistently more clustered than 99 simulations of Complete Spatial Randomness would produce.
-:::
-
-## 8 Analysing Spatial Point Process Using L-Function
-
-The L-function is a variance-stabilised transformation of the K-function, computed so that its theoretical value under Complete Spatial Randomness is a flat line at zero rather than a curve. This makes deviations from CSR easier to identify visually. An L-function **above** the CSR line indicates clustering, while a value **below** indicates dispersion. 
-
-This section computes the L-function using `Lest()` of **spatstat**, and tests it against Complete Spatial Randomness using `envelope()`.
-
-### 8.1 Choa Chu Kang Planning Area
-
-#### 8.1.1 Computing L-function Estimation
-
-The code chunk below computes the L-function using `Lest()` of **spatstat**:
-
-```{r}
-L_ck <- Lest(childcare_ck_ppp, correction = "Ripley")
-plot(L_ck, . -r ~ r,
-     ylab = "L(d)-r", xlab = "d(m)")
-```
-
-::: {.callout-note}
-## Interpretation
-The observed L-function (black line) dips briefly below the theoretical CSR line (pink dashed, flat at zero) at very short distances, before rising consistently above it for the remainder of the observed range, reaching around 50–60 when d = 700–800. This confirms the clustering pattern already identified for Choa Chu Kang via the G-, F-, and K-function results, with the brief early dip likely reflecting local variation at very short distances where few point pairs are available to estimate the function reliably.
+The observed K-function (black line) sits consistently above the theoretical CSR line (red dashed) across the entire observed distance range, with the gap widening as distance increases. Since a higher-than-expected K-function indicates clustering, this confirms that childcare centres in Choa Chu Kang are more clustered than CSR would predict, which is consistent with the earlier G-function result.
 :::
 
 #### 8.1.2 Performing Complete Spatial Randomness Test
@@ -385,24 +321,114 @@ To confirm the observed spatial pattern above, a hypothesis test is conducted:
 The null hypothesis will be rejected if the p-value is smaller than the alpha value of 0.001.
 
 ```{r}
-set.seed(123)
-L_ck.csr <- envelope(childcare_ck_ppp, Lest, nsim = 99, rank = 1, glocal = TRUE)
+K_ck.csr <- envelope(childcare_ck_ppp, Kest, nsim = 99, nrank = 1, global = TRUE)
 ```
 
 ```{r}
-#| fig-width: 8
-#| fig-height: 6
+plot(K_ck.csr, . - r ~ r, xlab = "d", ylab = "K(d)-r")
+```
+
+::: {.callout-note}
+## Interpretation
+
+The observed K-function (black line) stays close to the upper edge of the simulation envelope (grey band) for much of the observed distance range, briefly exceeding it near the largest distances. This suggests a degree of clustering among childcare centres in Choa Chu Kang.
+:::
+
+### 8.2 Tampines Planning Area
+
+#### 8.2.1 Computing K-function Estimation
+
+The code chunk below computes the K-function using `Kest()` of **spatstat**:
+
+```{r}
+K_tm <- Kest(childcare_tm_ppp, correction = "Ripley")
+plot(K_tm, . -r ~ r,
+     ylab = "K(d)-r", xlab = "d(m)",
+     xlim = c(0, 1000))
+```
+
+::: {.callout-note}
+## Interpretation
+
+The observed K-function (black line) sits above the theoretical CSR line (red dashed) across the entire observed distance range, with the gap widening substantially as distance increases. This indicates that childcare centres in Tampines are more clustered than CSR would predict, and more strongly than Choa Chu Kang.
+:::
+
+#### 8.2.2 Performing Complete Spatial Randomness Test
+
+To confirm the observed spatial pattern above, a hypothesis test is conducted:
+
+- H0: The distribution of childcare services at Tampines are randomly distributed.
+- H1:The distribution of childcare services at Tampines are not randomly distributed.
+
+The null hypothesis will be rejected if the p-value is smaller than the alpha value of 0.001.
+
+```{r}
+K_tm.csr <- envelope(childcare_tm_ppp, Kest, nsim = 99, nrank = 1, global = TRUE)
+```
+
+```{r}
+plot(K_tm.csr, . - r ~ r,
+     xlab = "d", ylab = "K(d)-r", xlim = c(0, 500))
+```
+
+::: {.callout-note}
+## Interpretation
+
+The observed K-function (black line) rises above the upper envelope bound, and is outside the envelope for the entire distance range. This indicates that childcare centres in Tampines are consistently more clustered than 99 simulations of CSR would produce.
+:::
+
+## 9 Analysing Spatial Point Process Using L-Function
+
+The L-function is a variance-stabilised transformation of the K-function, computed so that its theoretical value under Complete Spatial Randomness is a flat line at zero rather than a curve. This makes deviations from CSR easier to identify visually. An L-function **above** the CSR line indicates clustering, while a value **below** indicates dispersion.
+
+This section computes the L-function using `Lest()` of **spatstat**, and tests it against Complete Spatial Randomness using `envelope()`.
+
+### 9.1 Choa Chu Kang Planning Area
+
+#### 9.1.1 Computing L-function Estimation
+
+The code chunk below computes the L-function using `Lest()` of **spatstat**:
+
+```{r}
+L_ck <- Lest(childcare_ck_ppp, correction = "Ripley")
+plot(L_ck, . -r ~ r,
+     ylab = "L(d)-r", xlab = "d(m)")
+```
+
+::: {.callout-note}
+## Interpretation
+
+The observed L-function (black line) dips briefly below the theoretical CSR line (red dashed, flat at zero) at very short distances, before rising consistently above it for the remainder of the observed range, reaching around 50–60 when d = 700–800. This confirms the clustering pattern already identified for Choa Chu Kang via the G-, F-, and K-function results, with the brief early dip likely reflecting local variation at very short distances where few point pairs are available to estimate the function reliably.
+:::
+
+#### 9.1.2 Performing Complete Spatial Randomness Test
+
+To confirm the observed spatial pattern above, a hypothesis test is conducted:
+
+- H0: The distribution of childcare services at Choa Chu Kang are randomly distributed.
+- H1: The distribution of childcare services at Choa Chu Kang are not randomly distributed.
+
+The null hypothesis will be rejected if the p-value is smaller than the alpha value of 0.001.
+
+```{r}
+L_ck.csr <- envelope(childcare_ck_ppp, Lest, nsim = 99, nrank = 1, global = TRUE)
+```
+
+```{r}
+#| fig-width: 9
+#| fig-height: 7
 plot(L_ck.csr, . - r ~ r, xlab = "d", ylab = "L(d)-r")
 ```
 
 ::: {.callout-note}
 ## Interpretation
+
 The observed L-function (black line) stays within the simulation envelope (grey band) for most of the distance range. This suggests a degree of clustering among childcare centres in Choa Chu Kang, though the departure from Complete Spatial Randomness is not as pronounced as the pattern seen in the G- and F-function results.
 :::
 
-### 8.2 Tampines Planning Area
+### 9.2 Tampines Planning Area
 
-#### 8.2.1 Computing L-function Estimation
+#### 9.2.1 Computing L-function Estimation
 
 The code chunk below computes the L-function using `Lest()` of **spatstat**:
 
@@ -415,10 +441,11 @@ plot(L_tm, . -r ~ r,
 
 ::: {.callout-note}
 ## Interpretation
+
 The observed L-function (black line) rises above the theoretical CSR line (pink dashed, flat at zero) almost immediately and climbs steadily throughout the observed range. This confirms the strong clustering pattern already identified for Tampines via the G-, F-, and K-function results.
 :::
 
-#### 8.2.2 Performing Complete Spatial Randomness Test
+#### 9.2.2 Performing Complete Spatial Randomness Test
 
 To confirm the observed spatial pattern above, a hypothesis test is conducted:
 
@@ -428,8 +455,7 @@ To confirm the observed spatial pattern above, a hypothesis test is conducted:
 The null hypothesis will be rejected if the p-value is smaller than the alpha value of 0.001.
 
 ```{r}
-set.seed(123)
-L_tm.csr <- envelope(childcare_tm_ppp, Lest, nsim = 99, rank = 1, glocal = TRUE)
+L_tm.csr <- envelope(childcare_tm_ppp, Lest, nsim = 99, nrank = 1, global = TRUE)
 ```
 
 ```{r}
@@ -441,5 +467,6 @@ plot(L_tm.csr, . - r ~ r,
 
 ::: {.callout-note}
 ## Interpretation
-The observed L-function (black line) rises above the upper envelope bound early, and remains outside the envelope for the entire remaining distance range. This confirms that childcare centres in Tampines are consistently more clustered than 99 simulations of Complete Spatial Randomness would produce.
+
+The observed L-function (black line) rises above the upper envelope bound early, and remains outside the envelope for the entire remaining distance range. This confirms that childcare centres in Tampines are consistently more clustered than 99 simulations of CSR would produce.
 :::

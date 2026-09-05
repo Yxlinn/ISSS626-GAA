@@ -1,5 +1,15 @@
 ---
 title: "Hands-on Exercise 2A: First-order Spatial Point Pattern Analysis (1st-SPPA)"
+date: "September 02, 2026"
+date-modified: "last-modified"
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
 ---
 
 ## 1 Overview
@@ -21,7 +31,7 @@ This exercise uses [**spatstat**](https://cran.r-project.org/web/packages/spatst
 Two data sets are used for this exercise:
 
 | Dataset | Format | Source | Description |
-|---|---|---|---|
+|------------------|------------------|------------------|------------------|
 | Child Care Services | GeoJSON | [data.gov.sg](https://data.gov.sg/) | Point feature data providing the location and attribute information of childcare centres in Singapore. |
 | Master Plan 2019 Subzone Boundary (No Sea) | GeoJSON | [data.gov.sg](https://data.gov.sg/) | Polygon feature data providing the URA 2019 Master Plan Planning Subzone boundaries. |
 
@@ -30,7 +40,7 @@ Two data sets are used for this exercise:
 Five R packages will be used for this exercise:
 
 | Package | Purpose | Use Case in Exercise |
-|---|---|---|
+|------------------------|------------------------|------------------------|
 | [**sf**](https://r-spatial.github.io/sf/) | Imports, manages, and processes vector-based geospatial data. | Handling vector geospatial data in R. |
 | [**spatstat**](https://spatstat.org/) | Provides tools for point pattern analysis. | Performing 1st-order spatial point pattern analysis and deriving kernel density estimation (KDE). |
 | [**terra**](https://rspatial.github.io/terra/index.html) | Modern spatial data package built to replace `raster`; offers improved speed for raster and vector data. | Converting `spatstat` image output into raster format for cartographic-quality mapping. |
@@ -85,8 +95,9 @@ childcare_sf <- st_read("data/ChildCareServices.geojson") %>%
   select(NAME, geometry)
 ```
 
-::: {.callout-note}
+::: callout-note
 ## Why select() is needed here
+
 KML's driver in GDAL flattens all attributes into a single `Description` HTML blob, so a KML import of this same data set would return only two fields — `Name` and `Description`. GeoJSON preserves every original attribute as its own column instead, so this data set arrives with 16 fields (e.g., address components, hyperlinks, and photo URLs). `select()` trims this down to only `NAME` and the geometry, which are the fields relevant to the spatial point pattern analysis.
 :::
 
@@ -100,7 +111,7 @@ st_crs(mpsz_cl)
 st_crs(childcare_sf)
 ```
 
-::: {.callout-note}
+::: callout-note
 Both coordinate reference systems match exactly — both report EPSG:3414 with identical WKT parameters (SVY21 datum, Singapore Transverse Mercator projection), confirming the two data sets share a consistent spatial reference.
 :::
 
@@ -122,13 +133,13 @@ tm_shape(childcare_sf) +
   tm_dots()
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ## Reading the code
 
 `tm_shape()` declares which dataset to draw, and the layer function that follows it determines how: `tm_polygons()` renders `mpsz_cl` as filled subzone boundaries, while `tm_dots()` renders `childcare_sf` as point markers. The `+` operator layers them onto the same map, boundaries first so the childcare points render on top.
 :::
 
-::: {.callout-important}
+::: callout-important
 Both geospatial layers fall within the same map extent, confirming their coordinate values refer to the same spatial context. This is an important check before any geospatial analysis proceeds.
 :::
 
@@ -141,7 +152,7 @@ tm_shape(childcare_sf) +
   tm_dots()
 ```
 
-::: {.callout-note}
+::: callout-note
 In interactive mode, **tmap** uses the [leaflet for R](https://leafletjs.com/) API. This allows the map to be freely navigated and zoomed, and the attributes of each point queried by clicking on it. The background map layer can also be changed — three options are provided (ESRI.WorldGrayCanvas, OpenStreetMap, and ESRI.WorldTopoMap), with **ESRI.WorldGrayCanvas** as the default.
 :::
 
@@ -150,7 +161,7 @@ In interactive mode, **tmap** uses the [leaflet for R](https://leafletjs.com/) A
 tmap_mode('plot')
 ```
 
-::: {.callout-warning}
+::: callout-warning
 ## Switch back to plot mode
 
 Remember to switch back to plot mode after viewing the interactive map. Each interactive map consumes a connection, and displaying too many interactive maps (more than 10) in a single document can cause issues when published on Netlify.
@@ -180,12 +191,13 @@ We can also take a quick look at the summary statistics of the newly converted p
 summary(childcare_ppp)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ## Mark variables: NAME only
+
 `childcare_sf` was trimmed to `NAME` and geometry back in section 5, since `DESCRIPTION` held no distinguishing information (the same constant string across all records) and the remaining address/hyperlink fields were irrelevant to spatial analysis. As a result, `NAME` is the only mark variable reported.
 :::
 
-::: {.callout-important}
+::: callout-important
 The output above flags that the pattern contains duplicated points. Duplicated points are a common issue in spatial point pattern analysis, and worth taking seriously rather than glossing over. Many of the statistical methods used to analyse point patterns assume that points are distinct and non-coincident; when this assumption does not hold, the results can be misleading. Hence, this issue will be investigated below.
 :::
 
@@ -208,16 +220,17 @@ for (rule in rules) {
 print(duplicate_counts)
 ```
 
-::: {.callout-note}
+::: callout-note
 Under the strict `spatstat` rule, only **1 duplicate** is found: two entries both named "Summer Montessori" registered at the exact same coordinates, which likely reflects the same centre appearing twice in the source data rather than two distinct centres. The `deldir` rule returns the same result, since it also compares coordinates using an equivalent matching logic.
 
-The `unmark` rule tells a very different story: **187** points share their coordinates with another point when names are ignored. A closer inspection of these locations shows that one address hosts "Childcare @ The Enrichment", "MindChamps Preschool @ Jurong West", and "Safari House Preschool JW" together, while another pairs "Key Elementary Eduhouse" with a branch of "PCF Sparkletots Preschool". These are not data-entry errors: they reflect real childcare centres, under different names and likely different operators, sharing the same building or block.
+The `unmark` rule tells a very different story: **187** points share their coordinates with another point when names are ignored. A closer inspection of these locations shows that one address hosts "Childcare \@ The Enrichment", "MindChamps Preschool \@ Jurong West", and "Safari House Preschool JW" together, while another pairs "Key Elementary Eduhouse" with a branch of "PCF Sparkletots Preschool". These are not data-entry errors: they reflect real childcare centres, under different names and likely different operators, sharing the same building or block.
 
 This distinction matters for how the duplication should be handled. A single true duplicate (the "Summer Montessori" case) could reasonably be removed as a data error. However, treating all 187 coordinate-sharing points as errors would be wrong, since it would delete genuinely distinct childcare centres simply because they operate from a shared address.
 :::
 
-::: {.callout-tip}
+::: callout-tip
 ## Why the results differ sharply by rule
+
 Under the strict `spatstat` rule, almost no points qualify as duplicates, since two centres would need identical coordinates **and** identical names. Under `unmark`, which checks coordinates alone, the count rises substantially. This gap reveals something specific about the data: many pairs of childcare centres share a building or address, but operate under different names — most likely different operators registered at the same location, rather than a single centre entered twice.
 :::
 
@@ -236,7 +249,7 @@ coincident_coordinates
 Coincident points can be handled in a few different ways:
 
 | Approach | What it does |
-|---|---|
+|------------------------------------|------------------------------------|
 | **Delete the duplicates** | Simplest option, but discards potentially valid, distinct centres |
 | **Attach duplicate count as a mark** | Uses analytical methods that explicitly account for it |
 | **Apply jittering** | Small random perturbation, so no two points occupy the exact same location |
@@ -252,10 +265,10 @@ childcare_ppp_unique <- unique(childcare_ppp)
 childcare_ppp_unique
 ```
 
-This drops the point count from 1,925 to 1,924. 
+This drops the point count from 1,925 to 1,924.
 
-::: {.callout-note}
-Only the second "Summer Montessori" entry is removed; the first "Summer Montessori" entry, along with the other two distinct centres sharing that same address ("Pat's Schoolhouse" and "Star Learners @ Yung Ho") are all kept.
+::: callout-note
+Only the second "Summer Montessori" entry is removed; the first "Summer Montessori" entry, along with the other two distinct centres sharing that same address ("Pat's Schoolhouse" and "Star Learners \@ Yung Ho") are all kept.
 :::
 
 **Step 2: Resolving the remaining coincident points**
@@ -314,7 +327,7 @@ The output object combined both the point and polygon feature in one ppp object 
 childcareSG_ppp
 ```
 
-::: {.callout-note}
+::: callout-note
 **Observation:** From the result, it was noted that the point count drops from 1,924 to 1,923. A possible reason could be because `rjitter()` displaces each point within `childcare_ppp_jit`'s own rectangular window, which extends slightly beyond Singapore's actual coastline. One point, likely sitting close to the original boundary, was jittered into that gap between the rectangle and the true polygon, landing just outside `sg_owin`.
 :::
 
@@ -333,7 +346,7 @@ The test hypothesis are:
 
 A 95% confidence interval is used.
 
-`clarkevans.test()` of **spatstat.explore** supports two variants of the Clark-Evans test: 1. Without CSR and 2. With CSR. 
+`clarkevans.test()` of **spatstat.explore** supports two variants of the Clark-Evans test: 1. Without CSR and 2. With CSR.
 
 ### 7.1 Performing the Clark-Evans Test Without CSR
 
@@ -342,17 +355,19 @@ The code chunk below uses the method without CSR:
 ```{r}
 clarkevans.test(childcareSG_ppp,
                  correction = "none",
-                 clipregion = "sg_owin",
+                 clipregion = sg_owin,
                  alternative = c("clustered"))
 ```
 
-::: {.callout-note}
-## Statistical Conclusion
+::: callout-note
+## Statistical conclusion
+
 With R = 0.55518 (R < 1) and a p-value lower than the 0.05 level of significance, the null hypothesis is rejected. Childcare centres in Singapore are significantly clustered rather than randomly distributed.
 :::
 
-::: {.callout-tip}
+::: callout-tip
 ## Takeaway from statistical analysis
+
 Childcare centres in Singapore are not spread out evenly across the island. Instead, they tend to cluster together in certain areas, likely reflecting where families and young children actually live. This pattern is strong and statistically conclusive, not a result of chance variation in the data.
 :::
 
@@ -363,19 +378,21 @@ The code chunk below uses `method = "MonteCarlo"`. In this case, the p-value is 
 ```{r}
 clarkevans.test(childcareSG_ppp,
                  correction = "none",
-                 clipregion = "sg_owin",
+                 clipregion = sg_owin,
                  alternative = c("clustered"),
                  method = "MonteCarlo",
                  nsim = 99)
 ```
 
-::: {.callout-note}
+::: callout-note
 ## Statistical conclusion
+
 With R = 0.55518 (R < 1) and a p-value of 0.01, below the 0.05 level of significance, the null hypothesis is rejected. This result is consistent with the earlier test without CSR, confirming that childcare centres in Singapore are significantly clustered rather than randomly distributed.
 :::
 
-::: {.callout-tip}
+::: callout-tip
 ## Takeaway from statistical analysis
+
 Two independent methods (1. Without CSR and 2. With CSR) arrive at the same conclusion: childcare centres are not spread evenly across Singapore, but cluster together in certain areas. This consistency across methods adds confidence that the pattern is real, rather than an artefact of how the test was calculated.
 :::
 
@@ -400,7 +417,7 @@ kde_SG_diggle <- density(childcareSG_ppp,
                           kernel = "gaussian")
 ```
 
-::: {.callout-note}
+::: callout-note
 The output of `density()` of **spatstat** is an **im** class, representing a two-dimensional pixel image. It is used to store and manipulate raster data, where the spatial domain is divided into a grid of rectangular pixels. Each pixel has an associated value, which can be numerical or a factor.
 :::
 
@@ -416,7 +433,7 @@ Below is a summary report of the derived kernel density surface:
 summary(kde_SG_diggle)
 ```
 
-::: {.callout-important}
+::: callout-important
 The `range` above shows a maximum density of roughly 0.0000321 points per square metre. This is not because the pattern is sparse; it is a consequence of measuring density in SVY21's base unit, metres. Singapore's land area is roughly 700 million square metres, hence any density expressed per square metre produces very small decimal values regardless of how concentrated the actual points are. When expressed as points per square kilometre (multiplying by 1,000,000), the same maximum value reads as approximately 32.1, a more intuitive figure.
 :::
 
@@ -450,8 +467,9 @@ plot(kde_childcareSG_km)
 
 The output image looks identical to the earlier version; only the data values change, as reflected in the legend.
 
-::: {.callout-tip}
+::: callout-tip
 ## Resolving the earlier scale issue
+
 Rescaling to kilometres directly addresses the readability problem flagged earlier: with distances measured in kilometres rather than metres, the resulting density values land in an easily interpreted range (the legend here runs from 0 to roughly 30), instead of the near-unreadable values per square metre.
 :::
 
@@ -554,9 +572,10 @@ kde_childcareSG_ab <- adaptive.density(childcareSG_ppp_km,
 plot(kde_childcareSG_ab)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ## Why adaptive bandwidth handles this differently
-A fixed bandwidth applies the same smoothing radius everywhere on the map, regardless of local point density. In a densely packed area, this can over-smooth and blur together clusters that are genuinely distinct; in a sparse area, the same fixed radius may be too narrow to reveal any pattern at all. 
+
+A fixed bandwidth applies the same smoothing radius everywhere on the map, regardless of local point density. In a densely packed area, this can over-smooth and blur together clusters that are genuinely distinct; in a sparse area, the same fixed radius may be too narrow to reveal any pattern at all.
 
 Adaptive bandwidth adjusts the radius locally: shorter in dense regions, longer in sparse ones, allowing it to represent both mature, densely built-up estates and newer, sparser ones more accurately within the same map.
 :::
@@ -593,7 +612,7 @@ Next, the properties of `kde_childcareSG_bw_terra` are shown below:
 kde_childcareSG_bw_terra
 ```
 
-::: {.callout-note}
+::: callout-note
 Notice that the `coord. ref.` field above is **empty**. The reason is because `rast()` carries over the numeric grid and its extent from the `im` object, but not the coordinate reference system information. Hence, this is addressed in the next step.
 :::
 
@@ -765,12 +784,12 @@ clarkevans.test(childcare_jw_ppp,
 
 #### 11.2.5 Comparing Results Across Planning Areas
 
-| Planning Area | R | p-value | Conclusion |
-|---|---|---|---|
-| Punggol | 0.84663 | 0.006 | Reject H0; clustered |
-| Tampines | 0.69013 | 0.002 | Reject H0; clustered |
-| Choa Chu Kang | 0.89171 | 0.014 | Reject H0; clustered |
-| Jurong West | 0.72168 | 0.002 | Reject H0; clustered |
+| Planning Area | R       | p-value | Conclusion           |
+|---------------|---------|---------|----------------------|
+| Punggol       | 0.84663 | 0.006   | Reject H0; clustered |
+| Tampines      | 0.69013 | 0.002   | Reject H0; clustered |
+| Choa Chu Kang | 0.89171 | 0.014   | Reject H0; clustered |
+| Jurong West   | 0.72168 | 0.002   | Reject H0; clustered |
 
 **Analysis of Results:**
 
@@ -778,8 +797,9 @@ All four planning areas reject the null hypothesis of complete spatial randomnes
 
 Ranking the four by clustering strength (lowest R to highest): Tampines (0.690) shows the strongest within-area clustering, followed by Jurong West (0.722), then Punggol (0.847), with Choa Chu Kang (0.892) closest to random of the four.
 
-::: {.callout-tip}
+::: callout-tip
 ## Takeaway
+
 Each of the four planning areas sits closer to 1 than the whole-of-Singapore result (R = 0.55518). This reflects two different scales of clustering, not a contradiction. The national test captures clustering between areas, since some planning areas simply have far more childcare centres than others. Restricting the test to a single planning area removes that between-area effect, leaving only the clustering that occurs within the area, at the neighbourhood level. This within-area signal is real and statistically significant.
 :::
 
