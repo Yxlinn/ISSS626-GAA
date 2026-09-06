@@ -1,0 +1,14 @@
+---
+title: "Hands-on Exercise 3: Spatio-Temporal Point Patterns Analysis"
+date: "September 06, 2026"
+date-modified: "last-modified"
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
+---
+
