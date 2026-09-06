@@ -225,8 +225,8 @@ The three empirical F-function estimates — Kaplan-Meier (black), border (red d
 
 To confirm the observed spatial pattern above, a hypothesis test is conducted:
 
-- H0: The distribution of childcare services at Choa Chu Kang are randomly distributed.
-- H1: The distribution of childcare services at Choa Chu Kang are not randomly distributed.
+- H0: The distribution of childcare services at Choa Chu Kang is randomly distributed.
+- H1: The distribution of childcare services at Choa Chu Kang is not randomly distributed.
 
 The null hypothesis will be rejected if p-value is smaller than alpha value of 0.001.
 
@@ -243,7 +243,7 @@ plot(F_CK.csr)
 ::: {.callout-note}
 ## Interpretation
 
-The observed F-function (black line) stays within the simulation envelope (grey band) across the entire observed distance range, never crossing either the upper or lower bound. This indicates that the spatial pattern of childcare centres in Choa Chu Kang is not distinguishable from CSR at these distances — unlike the G-function result, which did show the observed line exceeding the envelope at larger distances.
+The observed F-function (black line) stays within the envelope (grey band) across the entire observed distance range, never crossing either the upper or lower bound. This indicates that the spatial pattern of childcare centres in Choa Chu Kang is not distinguishable from CSR at these distances, consistent with the G-function result.
 :::
 
 ### 7.2 Tampines Planning Area
@@ -267,8 +267,8 @@ The observed F-function (black line) sits below the theoretical CSR line (red da
 
 To confirm the observed spatial pattern above, a hypothesis test is conducted:
 
-- H0: The distribution of childcare services at Tampines are randomly distributed.
-- H1: The distribution of childcare services at Tampines are not randomly distributed.
+- H0: The distribution of childcare services at Tampines is randomly distributed.
+- H1: The distribution of childcare services at Tampines is not randomly distributed.
 
 The null hypothesis will be rejected if p-value is smaller than alpha value of 0.001.
 
@@ -308,15 +308,15 @@ plot(K_ck, . -r ~ r, ylab = "K(d)-r", xlab = "d(m)")
 ::: {.callout-note}
 ## Interpretation
 
-The observed K-function (black line) sits consistently above the theoretical CSR line (red dashed) across the entire observed distance range, with the gap widening as distance increases. Since a higher-than-expected K-function indicates clustering, this confirms that childcare centres in Choa Chu Kang are more clustered than CSR would predict, which is consistent with the earlier G-function result.
+The observed K-function (black line) sits consistently above the theoretical CSR line (red dashed) across the entire observed distance range, with the gap widening as distance increases. Since a higher-than-expected K-function indicates clustering, this confirms that childcare centres in Choa Chu Kang are more clustered than CSR would predict.
 :::
 
 #### 8.1.2 Performing Complete Spatial Randomness Test
 
 To confirm the observed spatial pattern above, a hypothesis test is conducted:
 
-- H0: The distribution of childcare services at Choa Chu Kang are randomly distributed.
-- H1: The distribution of childcare services at Choa Chu Kang are not randomly distributed.
+- H0: The distribution of childcare services at Choa Chu Kang is randomly distributed.
+- H1: The distribution of childcare services at Choa Chu Kang is not randomly distributed.
 
 The null hypothesis will be rejected if the p-value is smaller than the alpha value of 0.001.
 
@@ -331,7 +331,7 @@ plot(K_ck.csr, . - r ~ r, xlab = "d", ylab = "K(d)-r")
 ::: {.callout-note}
 ## Interpretation
 
-The observed K-function (black line) stays close to the upper edge of the simulation envelope (grey band) for much of the observed distance range, briefly exceeding it near the largest distances. This suggests a degree of clustering among childcare centres in Choa Chu Kang.
+The observed K-function (black line) stays within the envelope (grey band) for most of the observed distance range, but rises above the upper bound at larger distances, roughly from d = 700 onward. This suggests a degree of clustering among childcare centres in Choa Chu Kang at these greater distances.
 :::
 
 ### 8.2 Tampines Planning Area
@@ -357,8 +357,8 @@ The observed K-function (black line) sits above the theoretical CSR line (red da
 
 To confirm the observed spatial pattern above, a hypothesis test is conducted:
 
-- H0: The distribution of childcare services at Tampines are randomly distributed.
-- H1:The distribution of childcare services at Tampines are not randomly distributed.
+- H0: The distribution of childcare services at Tampines is randomly distributed.
+- H1: The distribution of childcare services at Tampines is not randomly distributed.
 
 The null hypothesis will be rejected if the p-value is smaller than the alpha value of 0.001.
 
@@ -374,7 +374,7 @@ plot(K_tm.csr, . - r ~ r,
 ::: {.callout-note}
 ## Interpretation
 
-The observed K-function (black line) rises above the upper envelope bound, and is outside the envelope for the entire distance range. This indicates that childcare centres in Tampines are consistently more clustered than 99 simulations of CSR would produce.
+The observed K-function (black line) rises steadily above the theoretical CSR line (red dashed) throughout the observed distance range, but stays within the envelope (grey band) the entire time, never crossing the upper bound. While the black line is consistently above the red CSR line, that gap is not large enough to rule out random chance — 99 simulations of Complete Spatial Randomness could plausibly produce this much variation on their own. This test therefore does not confirm a statistically significant departure from CSR for Tampines.
 :::
 
 ## 9 Analysing Spatial Point Process Using L-Function
@@ -398,15 +398,17 @@ plot(L_ck, . -r ~ r,
 ::: {.callout-note}
 ## Interpretation
 
-The observed L-function (black line) dips briefly below the theoretical CSR line (red dashed, flat at zero) at very short distances, before rising consistently above it for the remainder of the observed range, reaching around 50–60 when d = 700–800. This confirms the clustering pattern already identified for Choa Chu Kang via the G-, F-, and K-function results, with the brief early dip likely reflecting local variation at very short distances where few point pairs are available to estimate the function reliably.
+The observed L-function (black line) dips briefly below the theoretical CSR line (red dashed, flat at zero) at very short distances, before rising consistently above it for the remainder of the observed range, reaching around 50–60 when d = 700–800.
+
+This matches the pattern seen in the G-, F-, and K-function plots for Choa Chu Kang shown earlier, all of which compared the observed pattern directly against the theoretical CSR line and showed clear separation from it, though the Monte Carlo simulation tests for these functions have generally not confirmed this separation as statistically significant. The brief early dip likely reflects local variation at very short distances, where few point pairs are available to estimate the function reliably.
 :::
 
 #### 9.1.2 Performing Complete Spatial Randomness Test
 
 To confirm the observed spatial pattern above, a hypothesis test is conducted:
 
-- H0: The distribution of childcare services at Choa Chu Kang are randomly distributed.
-- H1: The distribution of childcare services at Choa Chu Kang are not randomly distributed.
+- H0: The distribution of childcare services at Choa Chu Kang is randomly distributed.
+- H1: The distribution of childcare services at Choa Chu Kang is not randomly distributed.
 
 The null hypothesis will be rejected if the p-value is smaller than the alpha value of 0.001.
 
@@ -415,15 +417,17 @@ L_ck.csr <- envelope(childcare_ck_ppp, Lest, nsim = 99, nrank = 1, global = TRUE
 ```
 
 ```{r}
-#| fig-width: 9
-#| fig-height: 7
+#| fig-width: 8
+#| fig-height: 6
 plot(L_ck.csr, . - r ~ r, xlab = "d", ylab = "L(d)-r")
 ```
 
 ::: {.callout-note}
 ## Interpretation
 
-The observed L-function (black line) stays within the simulation envelope (grey band) for most of the distance range. This suggests a degree of clustering among childcare centres in Choa Chu Kang, though the departure from Complete Spatial Randomness is not as pronounced as the pattern seen in the G- and F-function results.
+The observed L-function (black line) remains within the envelope (grey band) across the entire distance range. This test does not show a significant departure from CSR for Choa Chu Kang.
+
+Note that the envelope appears unusually wide here. This happens because a **global** rank envelope test (`global = TRUE`) applies a single constant margin across the whole distance range, calibrated to the largest deviation typically seen at greater distances, making the band wider overall than a pointwise test would produce.
 :::
 
 ### 9.2 Tampines Planning Area
@@ -442,15 +446,17 @@ plot(L_tm, . -r ~ r,
 ::: {.callout-note}
 ## Interpretation
 
-The observed L-function (black line) rises above the theoretical CSR line (pink dashed, flat at zero) almost immediately and climbs steadily throughout the observed range. This confirms the strong clustering pattern already identified for Tampines via the G-, F-, and K-function results.
+The observed L-function (black line) increases steadily above the theoretical CSR line (red dashed, flat at zero), separating from it at very short distances.
+
+This matches the pattern seen in the G- and F-function plots for Tampines shown earlier, both of which compared the observed pattern directly against the theoretical CSR line and were later confirmed by their respective Monte Carlo simulation tests. The K-function's simulation test, by contrast, did not confirm a significant departure for Tampines, despite showing a similar separation when compared directly against the theoretical line.
 :::
 
 #### 9.2.2 Performing Complete Spatial Randomness Test
 
 To confirm the observed spatial pattern above, a hypothesis test is conducted:
 
-- H0: The distribution of childcare services at Tampines are randomly distributed.
-- H1: The distribution of childcare services at Tampines are not randomly distributed.
+- H0: The distribution of childcare services at Tampines is randomly distributed.
+- H1: The distribution of childcare services at Tampines is not randomly distributed.
 
 The null hypothesis will be rejected if the p-value is smaller than the alpha value of 0.001.
 
