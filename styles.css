@@ -10,7 +10,7 @@
   font-weight: 600;
 }
 
-/* ===== Top-level nav links (Hands-on Exercises, In-class Exercises, Home, About) ===== */
+/* ===== Top-level nav links (Hands-on Exercises, Home, About) ===== */
 .navbar-nav .nav-link {
   color: #e8f1fa !important;   /* soft white-blue, readable on dark blue */
   transition: color 0.15s ease;

@@ -6,7 +6,7 @@ title: "ISSS626 Geospatial Analytics & Applications"
 
 ## About this site
 
-This site documents my coursework for ISSS626 Geospatial Analytics and Applications, including hands-on exercises, in-class exercises, and take-home exercises using R.
+This site documents my coursework for ISSS626 Geospatial Analytics and Applications, including hands-on exercises and take-home exercises using R.
 
 **Topics covered in this course:**
 
