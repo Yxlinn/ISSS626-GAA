@@ -5,7 +5,6 @@
 .DS_Store
 .quarto
 
-/data
+data/
 /.quarto/
 **/*.quarto_ipynb
-Hands-on_Ex/Hands-on_Ex03/data/BATAS WILAYAH KELURAHAN-DESA 10K/
