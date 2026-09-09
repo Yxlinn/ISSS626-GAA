@@ -202,7 +202,7 @@ fire_month <- fire_sf %>%
   select(Month_num)
 ```
 
-### 7.2 Creating ppp
+### 7.2 Creating the ppp object
 
 `as.ppp()` converts fire_month into a marked planar point pattern object:
 
@@ -285,4 +285,56 @@ Belitung Island and the surrounding smaller islands generally show low density a
 
 October stands out as the single most intense month, consistent with the July to October fire season pattern identified in the earlier monthly forest fire maps.
 :::
+
+## 8 Computing STKDE by Day of Year
+
+This section covers computing STKDE using fire occurrence by day of year instead of by month.
+
+### 8.1 Extracting Forest Fires by Day of Year
+
+Unwanted columns are removed from the fire point data, retaining only `DayOfYear`.
+
+```{r}
+fire_yday <- fire_sf %>%
+  select(DayOfYear)
+```
+
+### 8.2 Creating the ppp object
+
+`as.ppp()` converts fire_yday into a marked planar point pattern object:
+
+```{r}
+fire_yday_ppp <- as.ppp(fire_yday)
+fire_yday_ppp
+```
+
+### 8.3 Including the owin object
+
+The ppp object is combined with the `kbb_owin` study area boundary:
+
+```{r}
+fire_yday_owin <- fire_yday_ppp[kbb_owin]
+summary(fire_yday_owin)
+```
+
+### 8.4 Computing Spatio-temporal KDE
+
+`spattemp.density()` from **sparr** is used to compute the STKDE.
+
+```{r}
+kde_yday <- spattemp.density(fire_yday_owin)
+summary(kde_yday)
+```
+
+::: {.callout-note}
+The spatial bandwidth (h = 19110) is identical to the monthly STKDE, since both use the same `kbb_owin` window. The temporal bandwidth (lambda = 6.4541) is much larger than the monthly version's lambda (0.0264), but this reflects the different scales used to measure time rather than a real difference in smoothing: `DayOfYear` spans a much wider numeric range (10 to 360) than `Month_num` (1 to 12), so a larger bandwidth value is expected.
+:::
+
+```{r}
+plot(kde_yday)
+```
+
+
+
+
 
