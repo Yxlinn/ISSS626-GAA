@@ -254,7 +254,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">September 10, 2026</p>
+      <p class="date-modified">September 11, 2026</p>
     </div>
   </div>
     
@@ -7023,15 +7023,34 @@ Note
 </section>
 <section id="computing-spatio-temporal-k-function" class="level3">
 <h3 class="anchored" data-anchor-id="computing-spatio-temporal-k-function">10.2 Computing spatio-temporal K-function</h3>
-<p><a href="https://cran.r-project.org/web/packages/stpp/refman/stpp.html#STIKhat">STIKhat()</a> from <strong>stpp</strong> is used to compute the space-time inhomogeneous K-function. The result can be visualised using <code>plotK()</code>.</p>
+<p><a href="https://cran.r-project.org/web/packages/stpp/refman/stpp.html#STIKhat">STIKhat()</a> from <strong>stpp</strong> is used to compute the space-time inhomogeneous K-function.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>kbb_stik <span class="ot">&lt;-</span> <span class="fu">STIKhat</span>(fire_stpp)</span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plotK</span>(kbb_stik)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>kbb_stik <span class="ot">&lt;-</span> <span class="fu">STIKhat</span>(fire_stpp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The result can be visualised using <code>plotK()</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotK</span>(kbb_stik)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><img src="kbb_stik.png" class="img-fluid"></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Analysis:</strong></p>
+<p>No contour lines appear near the bottom-left of the plot (short spatial distance, short time lag), since the K-function values there fall below the lowest threshold shown. Contour lines begin to appear only at moderate distances and time lags, then fan out in a rippling pattern towards the top-right, with lines becoming more closely spaced as both u and v increase. This pattern is consistent with forest fire events in Kepulauan Bangka Belitung not being independent in space and time. A formal comparison against the theoretical K-function under spatial randomness would be needed to confirm this statistically.</p>
+</div>
 </div>
 </section>
 </section>
 <section id="reference" class="level2">
 <h2 class="anchored" data-anchor-id="reference">11 Reference</h2>
+<p>Peter Hall (1990) “<a href="http://www.sciencedirect.com/science/article/pii/0047-259X(90)90080-2">Using the Bootstrap to Estimate Mean Squared Error and Select Smoothing Parameter in Nonparametric Problems</a>”, <em>Journal of Multivariate Analysis</em>, Vol. 32, pp.&nbsp;177-203.</p>
 
 
 </section>

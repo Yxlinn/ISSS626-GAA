@@ -409,11 +409,27 @@ The cumulative number panel shows the total fire count increasing slowly from Ja
 
 ### 10.2 Computing spatio-temporal K-function
 
-[STIKhat()](https://cran.r-project.org/web/packages/stpp/refman/stpp.html#STIKhat) from **stpp** is used to compute the space-time inhomogeneous K-function. The result can be visualised using `plotK()`.
+[STIKhat()](https://cran.r-project.org/web/packages/stpp/refman/stpp.html#STIKhat) from **stpp** is used to compute the space-time inhomogeneous K-function.
 
 ```{r}
 kbb_stik <- STIKhat(fire_stpp)
+```
+
+The result can be visualised using `plotK()`.
+
+```{r}
+#| eval: false
 plotK(kbb_stik)
 ```
 
+![](kbb_stik.png)
+
+::: {.callout-note}
+**Analysis:** 
+
+No contour lines appear near the bottom-left of the plot (short spatial distance, short time lag), since the K-function values there fall below the lowest threshold shown. Contour lines begin to appear only at moderate distances and time lags, then fan out in a rippling pattern towards the top-right, with lines becoming more closely spaced as both u and v increase. This pattern is consistent with forest fire events in Kepulauan Bangka Belitung not being independent in space and time. A comparison against the theoretical K-function under spatial randomness would be needed to confirm this statistically.
+:::
+
 ## 11 Reference
+
+Peter Hall (1990) "[Using the Bootstrap to Estimate Mean Squared Error and Select Smoothing Parameter in Nonparametric Problems](http://www.sciencedirect.com/science/article/pii/0047-259X(90)90080-2)", *Journal of Multivariate Analysis*, Vol. 32, pp. 177-203.
