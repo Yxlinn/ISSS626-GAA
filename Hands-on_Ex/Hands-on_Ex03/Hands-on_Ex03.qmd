@@ -28,7 +28,7 @@ For this exercise, forest fire events recorded in Kepulauan Bangka Belitung, Ind
 ## 2 The Data
 
 | Dataset | Format | Source | Description |
-|---|---|---|---|
+|------------------|------------------|------------------|------------------|
 | **forestfires** | CSV | [Fire Information for Resource Management System (FIRMS)](https://firms.modaps.eosdis.nasa.gov/download/) | Provides locations of forest fires detected by the Moderate Resolution Imaging Spectroradiometer (MODIS) sensor. Only fires within Kepulauan Bangka Belitung are retained for this exercise. |
 | **Kepulauan_Bangka_Belitung** | ESRI Shapefile | [Indonesia Geospasial](https://www.indonesia-geospasial.com/2023/05/download-shapefile-batas-administrasi.html) | Provides sub-district (*kelurahan*) boundaries of Kepulauan Bangka Belitung. The source data covers the whole of Indonesia; only sub-districts within Kepulauan Bangka Belitung are extracted for this exercise. |
 
@@ -37,7 +37,7 @@ For this exercise, forest fire events recorded in Kepulauan Bangka Belitung, Ind
 Six R packages are used for this exercise:
 
 | Package | Purpose |
-|---|---|
+|------------------------------------|------------------------------------|
 | [**sf**](https://r-spatial.github.io/sf/) | Imports, processes, and wrangles geospatial vector data |
 | [**spatstat**](https://cran.r-project.org/web/packages/spatstat/index.html) | Performs spatial point pattern analysis, including cross-type functions such as *Kcross()* and *Lcross()* |
 | [**sparr**](https://tilmandavies.github.io/sparr/index.html) | Estimates fixed and adaptive kernel-smoothed spatial relative risk surfaces via the density-ratio method, performs subsequent inference, and supports fixed-bandwidth spatio-temporal density and relative risk estimation |
@@ -100,7 +100,7 @@ kbb_sf <- st_read(dsn = "data",
   st_transform(crs = 32748)
 ```
 
-::: {.callout-note}
+::: callout-note
 The coordinate reference system used here is EPSG:32748 (WGS 84 / UTM zone 48S), the appropriate projected CRS for Kepulauan Bangka Belitung's location in Indonesia.
 :::
 
@@ -137,14 +137,14 @@ fire_sf <- fire_raw %>%
   st_filter(kbb_sf)
 ```
 
-::: {.callout-note}
+::: callout-note
 The forest fire data was downloaded for the whole of Indonesia (53,128 records spanning multiple islands), so `st_filter()` is included here to retain only fire points within the study area.
 :::
 
-As spatstat's point pattern objects require numeric marks instead of date objects, three time-based fields are derived from acq_date using mutate(): 
+As spatstat's point pattern objects require numeric marks instead of date objects, three time-based fields are derived from acq_date using mutate():
 
 - **DayOfYear** (the numeric day of the year, 1–365)
-- **Month_num** (the calendar month as a number, 1–12) 
+- **Month_num** (the calendar month as a number, 1–12)
 - **Month_fac** (the calendar month as a labeled factor, e.g. "January")
 
 ```{r}
@@ -183,7 +183,7 @@ tm_facets(by="Month_fac",
           drop.units = TRUE)
 ```
 
-::: {.callout-note}
+::: callout-note
 **Analysis:**
 
 The pattern reflected is consistent with Indonesia's known dry season and fire cycle. The country's dry season typically spans from around April to October, with fire activity peaking between August and October. 2023 was especially severe, marking Indonesia's worst fire season since 2019, driven by an intense El Nino event that dried out vegetation nationwide. Since burning in Indonesia is more commonly linked to agricultural land clearing than to natural causes, the July to October spike observed here likely reflects both the seasonal dry conditions and land-clearing activity concentrated during that period.
@@ -217,7 +217,7 @@ The code below is used to confirm the object's structure and check for anything 
 summary(fire_month_ppp)
 ```
 
-::: {.callout-note}
+::: callout-note
 **Analysis:**
 
 From the above summary, it shows a mean of 8.644, indicating that the average fire event occurred slightly later in the year. This is consistent with the earlier monthly facet maps, where fire activity was concentrated in the July to October period, pulling the mean upward.
@@ -238,7 +238,7 @@ fire_month_owin <- fire_month_ppp[kbb_owin]
 summary(fire_month_owin)
 ```
 
-::: {.callout-note}
+::: callout-note
 The window consists of **536 separate polygons** instead of one connected polygon because Kepulauan Bangka Belitung is an archipelago. Its two main islands, Bangka and Belitung, along with many smaller surrounding islands, are all separated by open sea and do not share a land border. *st_union()* can only merge polygons that physically touch, so each island stays as its own separate piece within the combined boundary.
 :::
 
@@ -280,8 +280,8 @@ The KDE surfaces show a clear intensification and decline across the second half
 
 Belitung Island and the surrounding smaller islands generally show low density across the six months, though September and October show a modest increase. This indicates fire activity in 2023 was concentrated mainly on Bangka Island, with Belitung experiencing comparatively minor fire activity during the same period.
 
-::: {.callout-note}
-**Analysis:** 
+::: callout-note
+**Analysis:**
 
 October stands out as the single most intense month, consistent with the July to October fire season pattern identified in the earlier monthly forest fire maps.
 :::
@@ -326,15 +326,94 @@ kde_yday <- spattemp.density(fire_yday_owin)
 summary(kde_yday)
 ```
 
-::: {.callout-note}
+::: callout-note
 The spatial bandwidth (h = 19110) is identical to the monthly STKDE, since both use the same `kbb_owin` window. The temporal bandwidth (lambda = 6.4541) is much larger than the monthly version's lambda (0.0264), but this reflects the different scales used to measure time rather than a real difference in smoothing: `DayOfYear` spans a much wider numeric range (10 to 360) than `Month_num` (1 to 12), so a larger bandwidth value is expected.
 :::
+
+### 8.5 Plotting the Spatio-temporal KDE Object
 
 ```{r}
 plot(kde_yday)
 ```
 
+## 9 Computing STKDE by Day of Year (Improved Method)
 
+`BOOT.spattemp()` from **sparr** performs bootstrap-based bandwidth selection for spatio-temporal density estimation, optimizing both the spatial and temporal bandwidths by minimizing an estimate of the Mean Integrated Squared Error (MISE), rather than relying on the automatic bandwidth selection used in the previous sections. The spatial bandwidth returned is isotropic, meaning the same amount of smoothing is applied in every direction, rather than allowing smoothing to vary by direction.
 
+```{r}
+set.seed(123)  #ensure reproducible results
+BOOT.spattemp(fire_yday_owin)
+```
 
+### 9.1 Computing Spatio-temporal KDE
 
+The STKDE is derived using the h and lambda values obtained from `BOOT.spattemp()` in the previous step.
+
+```{r}
+kde_yday <- spattemp.density(fire_yday_owin,
+                              h = 45000,
+                              lambda = 19)
+summary(kde_yday)
+```
+
+### 9.2 Plotting the Spatio-temporal KDE Object
+
+The resulting spatio-temporal KDE surfaces are shown below.
+
+```{r}
+plot(kde_yday)
+```
+
+## 10 Spatio-temporal Point Patterns Analysis: stpp methods
+
+This section covers spatio-temporal point pattern analysis using functions from the [**stpp**](https://www.jstatsoft.org/article/view/v053i02) package.
+
+### 10.1 Preparing the Spatio-temporal Point Process Object for stpp
+
+**Step 1:** Extracting forest fire coordinates from the fire point events
+
+```{r}
+coords <- st_coordinates(fire_sf)
+```
+
+**Step 2:** Creating a data frame by combining the x- and y-coordinates and temporal event. *Note that the temporal event must be in integer.*
+
+```{r}
+fire_df <- data.frame(
+  x = coords[, 1],
+  y = coords[, 2],
+  t = fire_sf$DayOfYear
+)
+```
+
+**Step 3:** Creating stpp spatio-temporal object `as.3dpoints()` is used to convert the data frame into an stpp spatio-temporal object.
+
+```{r}
+fire_stpp <- as.3dpoints(fire_df)
+class(fire_stpp)
+```
+
+The result can be visualised below:
+
+```{r}
+plot(fire_stpp)
+```
+
+::: callout-note
+**Analysis:**
+
+The xy-locations plot shows fire events split into two separate clusters, one over Bangka Island and a smaller one over Belitung and its nearby islands, with a clear gap between them where the sea separates the two.
+
+The cumulative number panel shows the total fire count increasing slowly from January to May, then climbing sharply from around July to November, before levelling off toward the end of the year. This steep rise corresponds to the fire season identified in the earlier monthly maps and KDE surfaces.
+:::
+
+### 10.2 Computing spatio-temporal K-function
+
+[STIKhat()](https://cran.r-project.org/web/packages/stpp/refman/stpp.html#STIKhat) from **stpp** is used to compute the space-time inhomogeneous K-function. The result can be visualised using `plotK()`.
+
+```{r}
+kbb_stik <- STIKhat(fire_stpp)
+plotK(kbb_stik)
+```
+
+## 11 Reference
