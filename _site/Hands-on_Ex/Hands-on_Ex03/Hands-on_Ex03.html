@@ -226,6 +226,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#preparing-the-spatio-temporal-point-process-object-for-stpp" id="toc-preparing-the-spatio-temporal-point-process-object-for-stpp" class="nav-link" data-scroll-target="#preparing-the-spatio-temporal-point-process-object-for-stpp">10.1 Preparing the Spatio-temporal Point Process Object for stpp</a></li>
   <li><a href="#computing-spatio-temporal-k-function" id="toc-computing-spatio-temporal-k-function" class="nav-link" data-scroll-target="#computing-spatio-temporal-k-function">10.2 Computing spatio-temporal K-function</a></li>
+  <li><a href="#comparing-observed-and-theoretical-k-function-values" id="toc-comparing-observed-and-theoretical-k-function-values" class="nav-link" data-scroll-target="#comparing-observed-and-theoretical-k-function-values">10.3 Comparing observed and theoretical K-function values</a></li>
   </ul></li>
   <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">11 Reference</a></li>
   </ul>
@@ -7025,11 +7026,128 @@ Note
 <h3 class="anchored" data-anchor-id="computing-spatio-temporal-k-function">10.2 Computing spatio-temporal K-function</h3>
 <p><a href="https://cran.r-project.org/web/packages/stpp/refman/stpp.html#STIKhat">STIKhat()</a> from <strong>stpp</strong> is used to compute the space-time inhomogeneous K-function.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>kbb_stik <span class="ot">&lt;-</span> <span class="fu">STIKhat</span>(fire_stpp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>kbb_stik <span class="ot">&lt;-</span> <span class="fu">STIKhat</span>(fire_stpp)</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>kbb_stik</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$Khat
+              [,1]         [,2]         [,3]         [,4]         [,5]
+ [1,]  37946019696 4.556750e+10 5.613365e+10 6.202298e+10 6.799892e+10
+ [2,]  60904337762 8.215363e+10 1.092907e+11 1.294126e+11 1.506315e+11
+ [3,]  84057484169 1.229748e+11 1.708768e+11 2.045343e+11 2.420370e+11
+ [4,] 117773446360 1.873124e+11 2.646890e+11 3.209611e+11 3.771812e+11
+ [5,] 154586631238 2.584767e+11 3.786199e+11 4.589773e+11 5.403528e+11
+ [6,] 194982286125 3.318597e+11 4.952154e+11 6.064211e+11 7.139033e+11
+ [7,] 242581599342 4.179150e+11 6.300736e+11 7.769730e+11 9.167952e+11
+ [8,] 290556571400 5.023077e+11 7.622560e+11 9.423113e+11 1.119384e+12
+ [9,] 337581792488 5.813885e+11 8.895196e+11 1.107370e+12 1.317624e+12
+[10,] 388333406733 6.761528e+11 1.043120e+12 1.301113e+12 1.549133e+12
+[11,] 438227438877 7.700940e+11 1.194292e+12 1.495018e+12 1.781623e+12
+[12,] 486122206148 8.597191e+11 1.333466e+12 1.676344e+12 2.002371e+12
+[13,] 537405770305 9.517058e+11 1.471796e+12 1.857428e+12 2.218681e+12
+[14,] 589258890147 1.052096e+12 1.626898e+12 2.059787e+12 2.465876e+12
+[15,] 639546618021 1.148824e+12 1.771098e+12 2.245631e+12 2.699050e+12
+              [,6]         [,7]         [,8]         [,9]        [,10]
+ [1,] 7.371503e+10 7.674630e+10 8.150973e+10 8.396362e+10 8.742793e+10
+ [2,] 1.660188e+11 1.789004e+11 1.945375e+11 2.048728e+11 2.193363e+11
+ [3,] 2.736305e+11 2.975321e+11 3.298230e+11 3.533746e+11 3.795123e+11
+ [4,] 4.330638e+11 4.715584e+11 5.199107e+11 5.582194e+11 5.984233e+11
+ [5,] 6.212596e+11 6.781235e+11 7.478599e+11 8.033838e+11 8.684739e+11
+ [6,] 8.237649e+11 9.037456e+11 1.002656e+12 1.078179e+12 1.168349e+12
+ [7,] 1.056858e+12 1.159954e+12 1.287022e+12 1.391931e+12 1.508261e+12
+ [8,] 1.293468e+12 1.423757e+12 1.580997e+12 1.716882e+12 1.862302e+12
+ [9,] 1.527146e+12 1.686375e+12 1.877103e+12 2.041074e+12 2.214846e+12
+[10,] 1.796183e+12 1.993262e+12 2.225195e+12 2.416844e+12 2.625236e+12
+[11,] 2.064991e+12 2.297803e+12 2.570496e+12 2.793242e+12 3.038525e+12
+[12,] 2.323275e+12 2.590911e+12 2.903999e+12 3.155911e+12 3.435029e+12
+[13,] 2.585373e+12 2.887244e+12 3.243438e+12 3.525544e+12 3.838043e+12
+[14,] 2.879449e+12 3.217596e+12 3.614375e+12 3.929020e+12 4.273219e+12
+[15,] 3.155230e+12 3.522908e+12 3.954219e+12 4.302850e+12 4.685007e+12
+             [,11]        [,12]        [,13]        [,14]        [,15]
+ [1,] 8.895800e+10 9.014164e+10 9.236457e+10 9.441429e+10 9.600210e+10
+ [2,] 2.298158e+11 2.368888e+11 2.436837e+11 2.529219e+11 2.601727e+11
+ [3,] 3.998069e+11 4.190166e+11 4.316463e+11 4.483904e+11 4.621368e+11
+ [4,] 6.276139e+11 6.608251e+11 6.825492e+11 7.111298e+11 7.338954e+11
+ [5,] 9.100828e+11 9.605708e+11 9.930466e+11 1.034698e+12 1.065328e+12
+ [6,] 1.227019e+12 1.297261e+12 1.345934e+12 1.402926e+12 1.443497e+12
+ [7,] 1.584611e+12 1.679766e+12 1.749361e+12 1.826365e+12 1.883335e+12
+ [8,] 1.957685e+12 2.072751e+12 2.166219e+12 2.267526e+12 2.345242e+12
+ [9,] 2.330358e+12 2.472837e+12 2.594511e+12 2.724648e+12 2.817792e+12
+[10,] 2.767598e+12 2.945526e+12 3.089818e+12 3.246666e+12 3.356063e+12
+[11,] 3.209955e+12 3.418127e+12 3.587891e+12 3.770117e+12 3.895954e+12
+[12,] 3.634547e+12 3.873182e+12 4.070434e+12 4.278830e+12 4.423389e+12
+[13,] 4.065945e+12 4.335585e+12 4.565377e+12 4.804818e+12 4.970569e+12
+[14,] 4.531410e+12 4.834733e+12 5.092414e+12 5.361637e+12 5.555012e+12
+[15,] 4.969872e+12 5.301203e+12 5.586522e+12 5.890344e+12 6.109424e+12
+
+$Ktheo
+             [,1]         [,2]         [,3]         [,4]         [,5]
+ [1,]   376869257    753738514   1130607772   1507477029   1884346286
+ [2,]  1507477029   3014954058   4522431087   6029908116   7537385145
+ [3,]  3391823315   6783646630  10175469946  13567293261  16959116576
+ [4,]  6029908116  12059816232  18089724348  24119632464  30149540580
+ [5,]  9421731431  18843462862  28265194293  37686925724  47108657156
+ [6,] 13567293261  27134586522  40701879782  54269173043  67836466304
+ [7,] 18466593605  36933187210  55399780815  73866374420  92332968025
+ [8,] 24119632464  48239264927  72358897391  96478529855 120598162318
+ [9,] 30526409837  61052819674  91579229511 122105639347 152632049184
+[10,] 37686925724  75373851449 113060777173 150747702898 188434628622
+[11,] 45601180127  91202360253 136803540380 182404720507 228005900633
+[12,] 54269173043 108538346087 162807519130 217076692173 271345865216
+[13,] 63690904474 127381808949 191072713423 254763617898 318454522372
+[14,] 73866374420 147732748840 221599123260 295465497680 369331872100
+[15,] 84795582880 169591165760 254386748640 339182331520 423977914401
+              [,6]         [,7]         [,8]         [,9]        [,10]
+ [1,]   2261215543   2638084801   3014954058   3391823315   3768692572
+ [2,]   9044862174  10552339203  12059816232  13567293261  15074770290
+ [3,]  20350939891  23742763206  27134586522  30526409837  33918233152
+ [4,]  36179448696  42209356811  48239264927  54269173043  60299081159
+ [5,]  56530388587  65952120018  75373851449  84795582880  94217314311
+ [6,]  81403759565  94971052826 108538346087 122105639347 135672932608
+ [7,] 110799561630 129266155235 147732748840 166199342445 184665936050
+ [8,] 144717794782 168837427246 192957059709 217076692173 241196324637
+ [9,] 183158459021 213684868858 244211278695 274737688532 305264098368
+[10,] 226121554347 263808480071 301495405796 339182331520 376869257245
+[11,] 273607080760 319208260886 364809441013 410410621140 456011801266
+[12,] 325615038260 379884211303 434153384346 488422557389 542691730433
+[13,] 382145426846 445836331321 509527235795 573218140270 636909044744
+[14,] 443198246520 517064620940 590930995360 664797369780 738663744200
+[15,] 508773497281 593569080161 678364663041 763160245921 847955828801
+             [,11]        [,12]        [,13]        [,14]        [,15]
+ [1,]   4145561830 4.522431e+09 4.899300e+09 5.276170e+09 5.653039e+09
+ [2,]  16582247319 1.808972e+10 1.959720e+10 2.110468e+10 2.261216e+10
+ [3,]  37310056467 4.070188e+10 4.409370e+10 4.748553e+10 5.087735e+10
+ [4,]  66328989275 7.235890e+10 7.838881e+10 8.441871e+10 9.044862e+10
+ [5,] 103639045742 1.130608e+11 1.224825e+11 1.319042e+11 1.413260e+11
+ [6,] 149240225869 1.628075e+11 1.763748e+11 1.899421e+11 2.035094e+11
+ [7,] 203132529655 2.215991e+11 2.400657e+11 2.585323e+11 2.769989e+11
+ [8,] 265315957100 2.894356e+11 3.135552e+11 3.376749e+11 3.617945e+11
+ [9,] 335790508205 3.663169e+11 3.968433e+11 4.273697e+11 4.578961e+11
+[10,] 414556182969 4.522431e+11 4.899300e+11 5.276170e+11 5.653039e+11
+[11,] 501612981393 5.472142e+11 5.928153e+11 6.384165e+11 6.840177e+11
+[12,] 596960903476 6.512301e+11 7.054992e+11 7.597684e+11 8.140376e+11
+[13,] 700599949218 7.642909e+11 8.279818e+11 8.916727e+11 9.553636e+11
+[14,] 812530118620 8.863965e+11 9.602629e+11 1.034129e+12 1.107996e+12
+[15,] 932751411681 1.017547e+12 1.102343e+12 1.187138e+12 1.271934e+12
+
+$dist
+ [1]  3175.023  6350.047  9525.070 12700.094 15875.117 19050.141 22225.164
+ [8] 25400.188 28575.211 31750.235 34925.258 38100.282 41275.305 44450.328
+[15] 47625.352
+
+$times
+ [1]  5.95 11.90 17.85 23.80 29.75 35.70 41.65 47.60 53.55 59.50 65.45 71.40
+[13] 77.35 83.30 89.25
+
+$correction
+[1] "isotropic"
+
+$infectious
+[1] FALSE</code></pre>
+</div>
 </div>
 <p>The result can be visualised using <code>plotK()</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotK</span>(kbb_stik)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotK</span>(kbb_stik)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p><img src="kbb_stik.png" class="img-fluid"></p>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -7043,7 +7161,34 @@ Note
 </div>
 <div class="callout-body-container callout-body">
 <p><strong>Analysis:</strong></p>
-<p>No contour lines appear near the bottom-left of the plot (short spatial distance, short time lag), since the K-function values there fall below the lowest threshold shown. Contour lines begin to appear only at moderate distances and time lags, then fan out in a rippling pattern towards the top-right, with lines becoming more closely spaced as both u and v increase. This pattern is consistent with forest fire events in Kepulauan Bangka Belitung not being independent in space and time. A formal comparison against the theoretical K-function under spatial randomness would be needed to confirm this statistically.</p>
+<p>No contour lines appear near the bottom-left of the plot (short spatial distance, short time lag), since the K-function values there fall below the lowest threshold shown. Contour lines begin to appear only at moderate distances and time lags, then fan out in a rippling pattern towards the top-right, with lines becoming more closely spaced as both u and v increase. This pattern is consistent with forest fire events in Kepulauan Bangka Belitung not being independent in space and time. A comparison against the theoretical K-function under spatial randomness would be needed to confirm this statistically.</p>
+</div>
+</div>
+</section>
+<section id="comparing-observed-and-theoretical-k-function-values" class="level3">
+<h3 class="anchored" data-anchor-id="comparing-observed-and-theoretical-k-function-values">10.3 Comparing observed and theoretical K-function values</h3>
+<p>While the contour plot visually suggests spatio-temporal clustering, a more rigorous check compares the observed K-function (<code>Khat</code>) against the theoretical K-function expected under complete spatial randomness (CSR) (<code>Ktheo</code>). A ratio greater than 1 indicates observed clustering exceeds what randomness alone would predict.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>k_ratio <span class="ot">&lt;-</span> kbb_stik<span class="sc">$</span>Khat <span class="sc">/</span> kbb_stik<span class="sc">$</span>Ktheo</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">as.vector</span>(k_ratio))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  4.803   6.751   8.222  10.935  11.315 100.687 </code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Analysis:</strong></p>
+<p>Every value in the Khat/Ktheo ratio exceeds 1, ranging from a minimum of 4.80 to a maximum of 100.69, with a median of 8.22. This confirms that forest fire events in Kepulauan Bangka Belitung are not spatially and temporally independent, the observed K-function consistently exceeds what would be expected under CSR, at every distance and time lag examined.</p>
+<p>This answers the exercise’s first question: forest fire locations are spatially and spatio-temporally clustered, not independent. The second question, where and when fires tend to cluster, is addressed by the KDE surfaces from earlier sections: the density surfaces consistently showed the highest concentration of fire activity on Bangka Island’s western side, with intensity peaking during the July to October period.</p>
 </div>
 </div>
 </section>

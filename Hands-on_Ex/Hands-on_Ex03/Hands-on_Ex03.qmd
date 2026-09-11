@@ -413,6 +413,7 @@ The cumulative number panel shows the total fire count increasing slowly from Ja
 
 ```{r}
 kbb_stik <- STIKhat(fire_stpp)
+kbb_stik
 ```
 
 The result can be visualised using `plotK()`.
@@ -428,6 +429,23 @@ plotK(kbb_stik)
 **Analysis:** 
 
 No contour lines appear near the bottom-left of the plot (short spatial distance, short time lag), since the K-function values there fall below the lowest threshold shown. Contour lines begin to appear only at moderate distances and time lags, then fan out in a rippling pattern towards the top-right, with lines becoming more closely spaced as both u and v increase. This pattern is consistent with forest fire events in Kepulauan Bangka Belitung not being independent in space and time. A comparison against the theoretical K-function under spatial randomness would be needed to confirm this statistically.
+:::
+
+### 10.3 Comparing observed and theoretical K-function values
+
+While the contour plot visually suggests spatio-temporal clustering, a more rigorous check compares the observed K-function (`Khat`) against the theoretical K-function expected under complete spatial randomness (CSR) (`Ktheo`). A ratio greater than 1 indicates observed clustering exceeds what randomness alone would predict.
+
+```{r}
+k_ratio <- kbb_stik$Khat / kbb_stik$Ktheo
+summary(as.vector(k_ratio))
+```
+
+::: {.callout-note}
+**Analysis:** 
+
+Every value in the Khat/Ktheo ratio exceeds 1, ranging from a minimum of 4.80 to a maximum of 100.69, with a median of 8.22. This confirms that forest fire events in Kepulauan Bangka Belitung are not spatially and temporally independent, the observed K-function consistently exceeds what would be expected under CSR, at every distance and time lag examined. 
+
+This answers the exercise's first question: forest fire locations are spatially and spatio-temporally clustered, not independent. The second question, where and when fires tend to cluster, is addressed by the KDE surfaces from earlier sections: the density surfaces consistently showed the highest concentration of fire activity on Bangka Island's western side, with intensity peaking during the July to October period.
 :::
 
 ## 11 Reference
