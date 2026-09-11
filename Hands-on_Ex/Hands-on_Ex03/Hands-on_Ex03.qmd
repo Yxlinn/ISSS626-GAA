@@ -413,7 +413,6 @@ The cumulative number panel shows the total fire count increasing slowly from Ja
 
 ```{r}
 kbb_stik <- STIKhat(fire_stpp)
-kbb_stik
 ```
 
 The result can be visualised using `plotK()`.
