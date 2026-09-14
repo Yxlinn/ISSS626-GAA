@@ -1,0 +1,19 @@
+---
+title: "Hands-on Exercise 4: Spatial Weights and Applications"
+date: "September 14, 2026"
+date-modified: "last-modified"
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
+---
+
+## 1 Overview
+
+
+
+
