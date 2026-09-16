@@ -14,6 +14,286 @@ editor: visual
 
 ## 1 Overview
 
+This exercise covers computing spatial weights in R and using them to derive spatially lagged variables.
 
+A spatial weights matrix is the rule that decides which areal units count as neighbours of which, and how much weight each neighbour carries. Every measure of spatial autocorrelation is calculated from that rule, so changing it can change the result: a pattern that appears clustered under one definition of neighbourhood may not under another. The choice is part of the analysis rather than a step that precedes it.
 
+The following will be covered during the exercise:
+
+- importing geospatial data with **sf** package,
+- importing an aspatial csv file with **readr** package,
+- performing a relational join with **dplyr** package,
+- computing contiguity-based, distance-based, and inverse-distance spatial weights with **spdep** package, and
+- deriving spatially lagged variables with **spdep** package.
+
+## 2 The Study Area and Data
+
+Two data sets are used:
+
+| Data set | Format | Description |
+|------------------------|------------------------|------------------------|
+| Hunan | ESRI shapefile | County boundary layer for Hunan province |
+| Hunan_2012.csv | csv | Selected local development indicators for Hunan's counties in 2012 |
+
+### 2.1 Getting Started
+
+The code chunk below loads the packages required for this exercise:
+
+```{r}
+pacman::p_load(sf, spdep, tmap, tidyverse, knitr)
+```
+
+## 3 Getting the Data into R
+
+### 3.1 Importing the shapefile
+
+The county boundary layer is imported with *st_read()* of **sf**:
+
+```{r}
+hunan <- st_read(dsn = "data/geospatial",
+                 layer = "Hunan")
+```
+
+```{r}
+class(hunan)
+```
+
+### 3.2 Importing the csv file
+
+The 2012 development indicators are imported with *read_csv()* of **readr**:
+
+```{r}
+hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv")
+```
+
+```{r}
+class(hunan2012)
+```
+
+The file contains 88 rows and 29 columns.
+
+### 3.3 Performing relational join
+
+Before joining, the columns available in each source are inspected:
+
+```{r}
+colnames(hunan)
+```
+
+```{r}
+colnames(hunan2012)
+```
+
+The join is performed with *left_join()* of **dplyr**, matched on `County`:
+
+```{r}
+hunan_joined <- left_join(hunan, hunan2012, by = "County")
+colnames(hunan_joined)
+```
+
+```{r}
+hunan <- hunan_joined %>%
+  select(NAME_2, ID_3, NAME_3, ENGTYPE_3, County, GDPPC)
+```
+
+::: callout-note
+Named columns are used here instead of position. `select(1:4, 7, 15)` produces the same result for these particular files, but it depends on the exact column order of both `hunan` and `hunan2012` remaining unchanged. If either source were reordered or extended, the same code would silently select a different column with no error, so naming the columns removes that dependency.
+:::
+
+## 4 Visualising Regional Development Indicator
+
+A basemap with county labels and a choropleth of GDPPC are prepared with **tmap**.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 9
+basemap <- tm_shape(hunan) +
+  tm_polygons(fill = "grey90") +
+  tm_text("NAME_3", size=0.5)
+
+gdppc <- qtm(hunan, "GDPPC") +
+  tm_layout(
+    legend.position = c("left", "bottom"))
+tmap_arrange(basemap, gdppc, asp=1, ncol=2)
+```
+
+::: callout-note
+**Analysis:**
+
+Counties are shaded from light blue to dark blue according to GDP per capita, with darker shades indicating higher values. The resulting pattern shows where economic activity is concentrated across Hunan's counties.
+
+Most of the province sits in the lowest bracket. The dominant shade is the lightest blue (0–=19,999), indicating that the bulk of Hunan's counties cluster at the low end of the GDPPC range. Wealth is concentrated rather than evenly spread.
+
+The darker cluster (60,000–79,999 and 80,000-100,000) sits in the northeast, and it is a tight group of adjacent counties rather than a single outlier. Changsha has the highest GDPPC in the Hunan province.
+
+- **One hotspot:** Changsha, Wangcheng, Liuyang, Ningxiang
+- **Two separate outliers:** Zixing and Lengshuijiang
+:::
+
+## 5 Computing Contiguity Spatial Weights
+
+[poly2nb()](https://r-spatial.github.io/spdep/reference/poly2nb.html) of **spdep** package can be used to compute contiguity weight matrices for the study area. This function builds a neighbours list based on regions with contiguous boundaries. The `queen` argument controls what counts as sharing a boundary: under Queen contiguity a single shared vertex is sufficient, whereas Rook contiguity requires a shared edge. The argument defaults to **TRUE**, so calling the function without specifying queen returns Queen contiguity neighbours.
+
+### 5.1 Computing QUEEN contiguity
+
+```{r}
+wm_q <- poly2nb(hunan, queen = TRUE)
+summary(wm_q)
+```
+
+```{r}
+hunan$County[c(30, 65, 85)]
+```
+
+::: callout-note
+**Interpretation:**
+
+All 88 counties have at least one neighbour, so no county is spatially isolated under the Queen criterion. The number of non-zero links is 448, with an average of 5.09 links per county. The link distribution is concentrated in the middle of its range, with most counties having between three and seven neighbours.
+
+Taoyuan is the most connected county with 11 neighbours, while Xinhuang and Linxiang have the least connected counties, each with a single neighbour.
+:::
+
+The neighbours of Taoyuan can be examined using the code below:
+
+```{r}
+wm_q[[85]]
+```
+
+The corresponding county names:
+
+```{r}
+hunan$NAME_3[wm_q[[85]]]
+```
+
+::: callout-note
+The neighbour identifiers are row positions in `hunan`, not county codes, so they need to be resolved against the data frame before being interpreted.
+:::
+
+The GDPPC of the above 11 neighbouring counties:
+
+```{r}
+nb85 <- hunan$GDPPC[wm_q[[85]]]
+nb85
+```
+
+The structure of the full neighbours list can be inspected with `str()`.
+
+```{r}
+str(wm_q)
+```
+
+### 5.2 Computing ROOK contiguity
+
+```{r}
+wm_r <- poly2nb(hunan, queen = FALSE)
+summary(wm_r)
+```
+
+```{r}
+hunan$County[c(30, 65, 85)]
+```
+
+```{r}
+hunan$NAME_3[wm_r[[85]]]
+```
+
+**Nan** is excluded from Taoyuan's neighbours under Rook contiguity.
+
+::: callout-note
+**Interpretation:**
+
+All 88 counties have at least one neighbour under Rook contiguity, so no county becomes isolated when point-only contacts are excluded. The number of non-zero links is 440, with an average of 5.0 links per county. The link distribution is concentrated in the middle of its range, with most counties having between three and seven neighbours.
+
+Taoyuan is the most connected county with 10 neighbours, while Xinhuang and Linxiang have the least connected counties, each with a single neighbour.
+:::
+
+### 5.3 Comparing Queen and Rook contiguity
+
+Rook contiguity produces fewer links than Queen, with an average of 5.0 links per county compared to 5.09 under Queen. This is expected, since every Rook neighbour is also a Queen neighbour, a shared edge always implies at least a shared vertex, but the reverse does not hold.
+
+The county-level neighbour lists make this concrete: Taoyuan has 11 neighbours under Queen and 10 under Rook, losing exactly one, Nan. Checking the shared geometry between the two counties confirms the contact is a single point rather than an edge, so it satisfies Queen contiguity but not Rook's stricter requirement, exactly the case the two criteria are meant to distinguish. Xinhuang and Linxiang remain least connected under both criteria, showing that their isolation reflects their position on the map rather than an artefact of which contiguity rule is applied.
+
+### 5.4 Visualising contiguity weights
+
+A connectivity graph draws a line between points, not between whole polygon shapes, so each polygon first needs a single point to represent it. A centroid, the geometric centre of a shape, serves this purpose. Simply calling `st_centroid()` on the geometry column would return sf point objects, but the connectivity graph's plotting function needs plain coordinate values in a two-column table instead, so an extra step is needed to get from one format to the other.
+
+To do this, a mapping function is used: `map_dbl()` from **purrr**. A mapping function takes a function and applies it separately to every item in a list, then collects all the results together into one vector. Here, the list being worked through is hunan's geometry column, which holds one polygon shape per county, and the function applied to each shape is `st_centroid()`.
+
+Longitude is extracted first:
+
+```{r}
+longitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[1]])
+```
+
+::: callout-note
+`.x` stands for whichever polygon is currently being processed as *map_dbl()* works through the geometry column one element at a time. *st_centroid(.x)* computes that polygon's centroid, and `[[1]]` retrieves the first coordinate value, longitude, from the result.
+:::
+
+Latitude is obtained the same way, differing only in which coordinate is retrieved:
+
+```{r}
+latitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[2]])
+```
+
+::: callout-note
+`[[2]]` retrieves the second coordinate value, latitude, from each centroid.
+:::
+
+The two vectors are then combined into a single object with `cbind()`:
+
+```{r}
+coords <- cbind(longitude, latitude)
+```
+
+The first few rows are checked to confirm the result is formatted correctly:
+
+```{r}
+head(coords)
+```
+
+### 5.5 Plotting Queen and Rook Contiguity Maps
+
+Queen and Rook contiguity are plotted side by side:
+
+```{r}
+par(mfrow = c(1, 2))
+plot(hunan$geometry, border = "lightgrey", main = "Queen Contiguity")
+plot(wm_q, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
+plot(hunan$geometry, border = "lightgrey", main = "Rook Contiguity")
+plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
+```
+
+```{r}
+#| include: false
+par(mfrow = c(1, 1))
+```
+
+The two graphs are visually near-identical, consistent with the small difference in link counts reported above.
+
+## 6 Computing Distance-based Neighbours
+
+[`dnearneigh()`](https://search.r-project.org/CRAN/refmans/spdep/html/dnearneigh.html) of **spdep** identifies neighbouring region points based on their Euclidean distance, controlled by two separate arguments: a lower bound (d1) and an upper bound (d2).
+
+If the coordinates are not projected (i.e., in latitude and longitude), whether provided as a spatial coordinates object or as a plain two-column matrix, with longlat = TRUE, the function will calculate great circle distances in kilometres, assuming the WGS84 reference ellipsoid.
+
+### 6.1 Determining the cut-off distance
+
+Firstly, the upper limit for distance band needs to be determined. This can be done through the following steps:
+
+- Return a matrix with the indices of points belonging to the set of the k nearest neighbours of each other by using [knearneigh()](https://r-spatial.github.io/spdep/reference/knearneigh.html) of **spdep**.
+- Convert the knn object returned by `knearneigh()` into a neighbours list of class **nb** with a list of integer vectors containing neighbour region number ids by using [knn2nb()](https://r-spatial.github.io/spdep/reference/knn2nb.html).
+- Return the length of neighbour relationship edges by using [nbdists()](https://r-spatial.github.io/spdep/reference/nbdists.html) of **spdep**. If the coordinates are projected, the function returns distances in the units of the coordinates; otherwise, in km.
+- Remove the list structure of the returned object by using [unlist()](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/unlist).
+
+```{r}
+k1 <- knn2nb(knearneigh(coords))
+k1dists <- unlist(nbdists(k1, coords, longlat = TRUE))
+summary(k1dists)
+```
+
+::: {.callout-note}
+The above output shows that the maximum first-neighbour distance is 61.79km. Using this value as the upper threshold gives certainty that all units will have at least one neighbour.
+:::
+
+### 6.2 Computing fixed distance weight matrix
 
