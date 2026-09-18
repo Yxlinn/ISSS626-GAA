@@ -235,7 +235,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#spatial-window-average" id="toc-spatial-window-average" class="nav-link" data-scroll-target="#spatial-window-average">9.3 Spatial window average</a></li>
   <li><a href="#spatial-window-sum" id="toc-spatial-window-sum" class="nav-link" data-scroll-target="#spatial-window-sum">9.4 Spatial window sum</a></li>
   </ul></li>
-  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">10 Reference</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">10 Conclusion</a></li>
+  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">11 Reference</a></li>
   </ul>
 </nav>
     </div>
@@ -448,9 +449,9 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p><strong>Analysis:</strong></p>
+<p><strong>Interpretation:</strong></p>
 <p>Counties are shaded from light blue to dark blue according to GDP per capita, with darker shades indicating higher values. The resulting pattern shows where economic activity is concentrated across Hunan’s counties.</p>
-<p>Most of the province sits in the lowest bracket. The dominant shade is the lightest blue (0–=19,999), indicating that the bulk of Hunan’s counties cluster at the low end of the GDPPC range. Wealth is concentrated rather than evenly spread.</p>
+<p>Most of the province sits in the lowest bracket. The dominant shade is the lightest blue (0–19,999), indicating that the bulk of Hunan’s counties cluster at the low end of the GDPPC range. Wealth is concentrated rather than evenly spread.</p>
 <p>The darker cluster (60,000–79,999 and 80,000-100,000) sits in the northeast, and it is a tight group of adjacent counties rather than a single outlier. Changsha has the highest GDPPC in the Hunan province.</p>
 <ul>
 <li><strong>One hotspot:</strong> Changsha, Wangcheng, Liuyang, Ningxiang</li>
@@ -3222,8 +3223,14 @@ Note
 </div>
 </section>
 </section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">10 Conclusion</h2>
+<p>This exercise applied several different neighbour criteria to the same 88 Hunan counties: Queen contiguity and Rook contiguity, based on shared boundaries; a fixed distance band, based on how far apart county centroids are; and an adaptive k-nearest-neighbour scheme, which fixes the neighbour count instead of a distance threshold. Even though they started from the exact same geography, the different criteria did not agree on who counts as a neighbour to whom. Contiguity and the fixed distance band produced different neighbour lists for the same counties, and the adaptive scheme gave every county exactly six neighbours, but at the cost of no longer guaranteeing that the relationship goes both ways.</p>
+<p>On top of this, two further choices were layered in: whether weights are row-standardised or binary, and whether a county counts itself as one of its own neighbours. Combining these two choices produced four different spatial lag measures from the same GDPPC variable - a plain average, a plain sum, a window average, and a window sum, each telling a different story about the same 88 counties, as shown throughout this exercise.</p>
+<p>A key takeaway from this exercise is that no single neighbour criterion or weighting scheme is correct in every situation, and the right choice depends on what is actually being measured.</p>
+</section>
 <section id="reference" class="level2">
-<h2 class="anchored" data-anchor-id="reference">10 Reference</h2>
+<h2 class="anchored" data-anchor-id="reference">11 Reference</h2>
 <ul>
 <li><a href="https://cran.r-project.org/web/packages/spdep/vignettes/nb_sf.html">Creating Neighbours using sf objects</a></li>
 </ul>
