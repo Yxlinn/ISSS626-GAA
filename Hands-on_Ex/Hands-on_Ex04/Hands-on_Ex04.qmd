@@ -118,11 +118,11 @@ tmap_arrange(basemap, gdppc, asp=1, ncol=2)
 ```
 
 ::: callout-note
-**Analysis:**
+**Interpretation:**
 
 Counties are shaded from light blue to dark blue according to GDP per capita, with darker shades indicating higher values. The resulting pattern shows where economic activity is concentrated across Hunan's counties.
 
-Most of the province sits in the lowest bracket. The dominant shade is the lightest blue (0–=19,999), indicating that the bulk of Hunan's counties cluster at the low end of the GDPPC range. Wealth is concentrated rather than evenly spread.
+Most of the province sits in the lowest bracket. The dominant shade is the lightest blue (0–19,999), indicating that the bulk of Hunan's counties cluster at the low end of the GDPPC range. Wealth is concentrated rather than evenly spread.
 
 The darker cluster (60,000–79,999 and 80,000-100,000) sits in the northeast, and it is a tight group of adjacent counties rather than a single outlier. Changsha has the highest GDPPC in the Hunan province.
 
@@ -667,6 +667,73 @@ tmap_arrange(lag_gdppc, w_avg_gdppc, asp = 1, ncol = 2)
 ::: {.callout-note}
 **Interpretation:**
 
-The two maps show different counties with the darker shade. Under plain lag, Pingjiang ranks highest at 55,157.75, since its four neighbours are, on average, very wealthy. Under window average, Pingjiang drops to 47,576.60. This is because Pingjiang's own GDPPC is only 17,252, well below its neighbours' average, so adding its own lower value to the average pulls the result down sharply, now that five values are being averaged instead of four. This highlights the effect that fewer neighbours means a county's own value carries disproportionate weight.
+The two maps show different counties with the darker shade. Under plain lag, Pingjiang ranks highest at 55,157.75, since its four neighbours are, on average, very wealthy. Under window average, Pingjiang drops to 47,576.60. This is because Pingjiang's own GDPPC is only 17,252, well below its neighbours' average, so adding its own lower value to the average pulls the result down, now that five values are being averaged instead of four. This highlights the effect that fewer neighbours would mean that a county's own value carries more significant weight than it would with more neighbours.
 :::
 
+### 9.4 Spatial window sum
+
+The spatial window sum is the counter part of the window average, but without using row-standardized weights.
+
+To add the diagonal element to the neighbour list, `include.self()` of **spdep** will be used.
+
+```{r}
+wm_qs <- include.self(wm_q)
+wm_qs
+```
+
+Next, binary weights are assigned to the neighbour structure, giving every entry, including the county's own added position, a weight of 1:
+
+```{r}
+b_weights <- lapply(wm_qs, function(x) 0 * x + 1)
+b_weights[1]
+```
+
+Position 1 now returns six 1s instead of five, one more than under `wm_q`, confirming the diagonal element has been included in the weighting.
+
+```{r}
+b_weights2 <- nb2listw(wm_qs, glist = b_weights, style = "B")
+b_weights2
+```
+
+The lag variable is computed the same way as `lag_sum` earlier, using the new weight structure:
+
+```{r}
+w_sum_gdppc <- lag.listw(b_weights2, hunan$GDPPC)
+w_sum_gdppc
+```
+
+The w_sum GDPPC field is appended into the `hunan` sf data frame:
+
+```{r}
+w_sum_gdppc_list <- list(hunan$NAME_3, w_sum_gdppc)
+w_sum_gdppc.res <- as.data.frame(w_sum_gdppc_list)
+colnames(w_sum_gdppc.res) <- c("NAME_3", "w_sum GDPPC")
+hunan <- left_join(hunan, w_sum_gdppc.res, by = "NAME_3")
+```
+
+To compare the values of lag sum GDPPC and spatial window sum, `kable()` of **knitr** package is used.
+
+```{r}
+hunan %>%
+  select(County, `lag_sum GDPPC`, `w_sum GDPPC`) %>%
+  kable()
+```
+
+`qtm()` of **tmap** is used to plot `lag_sum_gdppc` and `w_sum_gdppc` for comparison:
+
+```{r}
+w_sum_gdppc_map <- qtm(hunan, "w_sum GDPPC")
+tmap_arrange(lag_sum_gdppc, w_sum_gdppc_map, asp = 1, ncol = 2)
+```
+
+::: {.callout-note}
+**Interpretation:**
+
+The two maps look similar as Xiangtan dominates both, rising from 404,456 under `lag_sum` to 431,516 under `w_sum`.
+
+The window sum possesses the same limitation as lag sum: it mixes neighbourhood size and neighbourhood wealth into a single total. Adding the county's own value does not fix this. It just adds a third factor into the mix. A county can rank highly for any of these reasons: it has many neighbours, one of its neighbours is very wealthy, or the county itself is wealthy. The total alone does not show which of these is actually happening.
+:::
+
+## 10 Reference
+
+- [Creating Neighbours using sf objects](https://cran.r-project.org/web/packages/spdep/vignettes/nb_sf.html)
