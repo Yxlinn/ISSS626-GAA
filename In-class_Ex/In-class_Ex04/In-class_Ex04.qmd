@@ -1,0 +1,213 @@
+---
+title: "In-class Exercise 4: Spatial Weights and Applications"
+date: "September 18, 2026"
+date-modified: today
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
+---
+
+## 1 Overview
+
+This exercise covers computing spatial weights in R and using them to derive spatially lagged variables.
+
+A spatial weights matrix is the rule that decides which areal units count as neighbours of which, and how much weight each neighbour carries. Every measure of spatial autocorrelation is calculated from that rule, so changing it can change the result: a pattern that appears clustered under one definition of neighbourhood may not under another. The choice is part of the analysis rather than a step that precedes it.
+
+The following will be covered during the exercise:
+
+- importing geospatial data with **sf** package,
+- importing an aspatial csv file with **readr** package,
+- performing a relational join with **dplyr** package,
+- computing contiguity-based, distance-based, and inverse-distance spatial weights with **spdep** package, and
+- deriving spatially lagged variables with **spdep** package.
+
+## 2 The Study Area and Data
+
+Two data sets are used:
+
+| Data set | Format | Description |
+|------------------------|------------------------|------------------------|
+| Hunan | ESRI shapefile | County boundary layer for Hunan province |
+| Hunan_2012.csv | csv | Selected local development indicators for Hunan's counties in 2012 |
+
+### 2.1 Getting Started
+
+The code chunk below loads the packages required for this exercise:
+
+```{r}
+pacman::p_load(sf, ggstatsplot, tmap, tidyverse, knitr, GWmodel)
+```
+
+## 3 Getting the Data into R
+
+### 3.1 Importing the shapefile
+
+The county boundary layer is imported with *st_read()* of **sf**:
+
+```{r}
+hunan <- st_read(dsn = "data/geospatial",
+                 layer = "Hunan")
+```
+
+### 3.2 Importing the csv file
+
+The 2012 development indicators are imported with *read_csv()* of **readr**:
+
+```{r}
+hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv")
+```
+
+### 3.3 Performing relational join
+
+The join is performed with *left_join()* of **dplyr**, matched on `County`:
+
+```{r}
+hunan_joined <- left_join(hunan, hunan2012, by = "County")
+colnames(hunan_joined)
+```
+
+```{r}
+hunan_sf <- hunan_joined %>%
+  select(NAME_2, ID_3, NAME_3, County, GDPPC, GIO, Agri, Service) 
+```
+
+## 4 Visualising Regional Development Indicator
+
+A basemap with county labels and a choropleth of GDPPC are prepared with **tmap**.
+
+```{r}
+#| fig-width: 16
+#| fig-height: 8
+basemap <- tm_shape(hunan_sf) +
+  tm_polygons(fill = "grey90") +
+  tm_text("NAME_3", size=0.5)
+
+gdppc <- qtm(hunan_sf, "GDPPC") +
+  tm_layout(
+    legend.position = c("left", "bottom"))
+tmap_arrange(basemap, gdppc, asp=1, ncol=2)
+```
+
+## 5 Converting to Spatial Polygon DataFrame
+
+```{r}
+hunan_sp <- hunan_sf %>%
+  as_Spatial()
+```
+
+## 6 Geographically Weighted Summary Statistics (GSWW) with Adaptive Bandwidth
+
+### 6.1 Determine Adaptive Bandwidth
+
+::: panel-tabset
+
+## Cross-validation
+
+```{r}
+bw_CV <- bw.gwr(GDPPC ~ 1,
+                data = hunan_sp,
+                approach = "CV",
+                adaptive = TRUE,
+                kernel = "bisquare",
+                longlat = T)
+
+bw_CV
+```
+
+## AICc
+
+```{r}
+bw_AIC <- bw.gwr(GDPPC ~ 1,
+                data = hunan_sp,
+                approach = "AICc",
+                adaptive = TRUE,
+                kernel = "bisquare",
+                longlat = T)
+
+bw_AIC
+```
+:::
+
+### 6.2 Determine Fixed Bandwidth
+
+::: panel-tabset
+
+## Cross-validation
+
+```{r}
+bw_CV <- bw.gwr(GDPPC ~ 1,
+                data = hunan_sp,
+                approach = "CV",
+                adaptive = FALSE,
+                kernel = "bisquare",
+                longlat = T)
+
+bw_CV
+```
+
+## AICc
+
+```{r}
+bw_AIC <- bw.gwr(GDPPC ~ 1,
+                data = hunan_sp,
+                approach = "AICc",
+                adaptive = FALSE,
+                kernel = "bisquare",
+                longlat = T)
+
+bw_AIC
+```
+:::
+
+### 6.3 Computing Geographically Weighted Summary Statistics
+
+The code chunk below computes geographically weighted summary statistics by using `gwss()` of GWmodel package. The analysis is performed using adaptive distance weighted. The distance is derived using AICc method and the kernel method used is **bisquare**.
+
+```{r}
+gwstat <- gwss(data = hunan_sp,
+               vars = "GDPPC",
+               bw = bw_AIC,
+               kernel = "bisquare",
+               quantile = TRUE,
+               adaptive = TRUE,
+               longlat = T)
+```
+
+::: callout-note
+gwss support five kernel methods, namely gaussian, exponential, bisquare, tricube, and boxcar.
+:::
+
+The code chunk below is used to extract **SDF** data table from **gwss** object output from `gwss()` for subsequent geovisualisation. It will be converted into data.frame by using `as.data.frame()`.
+
+```{r}
+gwstat_df <- as.data.frame(gwstat$SDF)
+```
+
+Next, `cbind()` is used to append the newly derived data.frame onto *hunan_sf* sf data.frame.
+
+```{r}
+hunan_gstat <- cbind(hunan_sf, gwstat_df)
+```
+
+### 6.4 Visualising geographically weighted summary statistics
+
+```{r}
+#| fig-width: 12
+#| fig-height: 8
+tm_shape(hunan_gstat) +
+  tm_polygons(fill = "GDPPC_LM",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "brewer.blues"),
+              fill.legend = tm_legend(
+                title = "local Mean")) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Distribution of geographically weighted mean") +
+  tm_layout(legend.position = c("left", "bottom"))
+```
