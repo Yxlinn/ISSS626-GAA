@@ -224,12 +224,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#visualising-regional-development-indicator" id="toc-visualising-regional-development-indicator" class="nav-link" data-scroll-target="#visualising-regional-development-indicator">4 Visualising Regional Development Indicator</a></li>
   <li><a href="#converting-to-spatial-polygon-dataframe" id="toc-converting-to-spatial-polygon-dataframe" class="nav-link" data-scroll-target="#converting-to-spatial-polygon-dataframe">5 Converting to Spatial Polygon DataFrame</a></li>
-  <li><a href="#geographically-weighted-summary-statistics-gsww-with-adaptive-bandwidth" id="toc-geographically-weighted-summary-statistics-gsww-with-adaptive-bandwidth" class="nav-link" data-scroll-target="#geographically-weighted-summary-statistics-gsww-with-adaptive-bandwidth">6 Geographically Weighted Summary Statistics (GSWW) with Adaptive Bandwidth</a>
+  <li><a href="#geographically-weighted-summary-statistics-gwss" id="toc-geographically-weighted-summary-statistics-gwss" class="nav-link" data-scroll-target="#geographically-weighted-summary-statistics-gwss">6 Geographically Weighted Summary Statistics (GWSS)</a>
   <ul>
   <li><a href="#determine-adaptive-bandwidth" id="toc-determine-adaptive-bandwidth" class="nav-link" data-scroll-target="#determine-adaptive-bandwidth">6.1 Determine Adaptive Bandwidth</a></li>
   <li><a href="#determine-fixed-bandwidth" id="toc-determine-fixed-bandwidth" class="nav-link" data-scroll-target="#determine-fixed-bandwidth">6.2 Determine Fixed Bandwidth</a></li>
-  <li><a href="#computing-geographically-weighted-summary-statistics" id="toc-computing-geographically-weighted-summary-statistics" class="nav-link" data-scroll-target="#computing-geographically-weighted-summary-statistics">6.3 Computing Geographically Weighted Summary Statistics</a></li>
-  <li><a href="#visualising-geographically-weighted-summary-statistics" id="toc-visualising-geographically-weighted-summary-statistics" class="nav-link" data-scroll-target="#visualising-geographically-weighted-summary-statistics">6.4 Visualising geographically weighted summary statistics</a></li>
+  <li><a href="#computing-gwss" id="toc-computing-gwss" class="nav-link" data-scroll-target="#computing-gwss">6.3 Computing GWSS</a></li>
+  <li><a href="#visualising-gwss" id="toc-visualising-gwss" class="nav-link" data-scroll-target="#visualising-gwss">6.4 Visualising GWSS</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -396,8 +396,8 @@ Geodetic CRS:  WGS 84</code></pre>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_Spatial</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="geographically-weighted-summary-statistics-gsww-with-adaptive-bandwidth" class="level2">
-<h2 class="anchored" data-anchor-id="geographically-weighted-summary-statistics-gsww-with-adaptive-bandwidth">6 Geographically Weighted Summary Statistics (GSWW) with Adaptive Bandwidth</h2>
+<section id="geographically-weighted-summary-statistics-gwss" class="level2">
+<h2 class="anchored" data-anchor-id="geographically-weighted-summary-statistics-gwss">6 Geographically Weighted Summary Statistics (GWSS)</h2>
 <section id="determine-adaptive-bandwidth" class="level3">
 <h3 class="anchored" data-anchor-id="determine-adaptive-bandwidth">6.1 Determine Adaptive Bandwidth</h3>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
@@ -405,7 +405,7 @@ Geodetic CRS:  WGS 84</code></pre>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>bw_CV <span class="ot">&lt;-</span> <span class="fu">bw.gwr</span>(GDPPC <span class="sc">~</span> <span class="dv">1</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>abw_CV <span class="ot">&lt;-</span> <span class="fu">bw.gwr</span>(GDPPC <span class="sc">~</span> <span class="dv">1</span>,</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">data =</span> hunan_sp,</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">approach =</span> <span class="st">"CV"</span>,</span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">adaptive =</span> <span class="cn">TRUE</span>,</span>
@@ -420,7 +420,7 @@ Adaptive bandwidth: 26 CV score: 13898800611
 Adaptive bandwidth: 22 CV score: 13662299974 
 Adaptive bandwidth: 22 CV score: 13662299974 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>bw_CV</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>abw_CV</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 22</code></pre>
 </div>
@@ -428,7 +428,7 @@ Adaptive bandwidth: 22 CV score: 13662299974 </code></pre>
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>bw_AIC <span class="ot">&lt;-</span> <span class="fu">bw.gwr</span>(GDPPC <span class="sc">~</span> <span class="dv">1</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>abw_AIC <span class="ot">&lt;-</span> <span class="fu">bw.gwr</span>(GDPPC <span class="sc">~</span> <span class="dv">1</span>,</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">data =</span> hunan_sp,</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">approach =</span> <span class="st">"AICc"</span>,</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">adaptive =</span> <span class="cn">TRUE</span>,</span>
@@ -443,7 +443,7 @@ Adaptive bandwidth (number of nearest neighbours): 26 AICc value: 1914.897
 Adaptive bandwidth (number of nearest neighbours): 22 AICc value: 1914.045 
 Adaptive bandwidth (number of nearest neighbours): 22 AICc value: 1914.045 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>bw_AIC</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>abw_AIC</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 22</code></pre>
 </div>
@@ -459,7 +459,7 @@ Adaptive bandwidth (number of nearest neighbours): 22 AICc value: 1914.045 </cod
 <div class="tab-content">
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>bw_CV <span class="ot">&lt;-</span> <span class="fu">bw.gwr</span>(GDPPC <span class="sc">~</span> <span class="dv">1</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fbw_CV <span class="ot">&lt;-</span> <span class="fu">bw.gwr</span>(GDPPC <span class="sc">~</span> <span class="dv">1</span>,</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">data =</span> hunan_sp,</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">approach =</span> <span class="st">"CV"</span>,</span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">adaptive =</span> <span class="cn">FALSE</span>,</span>
@@ -501,7 +501,7 @@ Fixed bandwidth: 76.29138 CV score: 13442844676
 Fixed bandwidth: 76.29126 CV score: 13442844676 
 Fixed bandwidth: 76.29123 CV score: 13442844676 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>bw_CV</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fbw_CV</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 76.29126</code></pre>
 </div>
@@ -509,7 +509,7 @@ Fixed bandwidth: 76.29123 CV score: 13442844676 </code></pre>
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>bw_AIC <span class="ot">&lt;-</span> <span class="fu">bw.gwr</span>(GDPPC <span class="sc">~</span> <span class="dv">1</span>,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fbw_AIC <span class="ot">&lt;-</span> <span class="fu">bw.gwr</span>(GDPPC <span class="sc">~</span> <span class="dv">1</span>,</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">data =</span> hunan_sp,</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">approach =</span> <span class="st">"AICc"</span>,</span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">adaptive =</span> <span class="cn">FALSE</span>,</span>
@@ -530,7 +530,7 @@ Fixed bandwidth: 159.4419 AICc value: 1919.393
 Fixed bandwidth: 162.3475 AICc value: 1919.394 
 Fixed bandwidth: 160.5517 AICc value: 1919.391 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>bw_AIC</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>fbw_AIC</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 160.5517</code></pre>
 </div>
@@ -539,13 +539,13 @@ Fixed bandwidth: 160.5517 AICc value: 1919.391 </code></pre>
 </div>
 </div>
 </section>
-<section id="computing-geographically-weighted-summary-statistics" class="level3">
-<h3 class="anchored" data-anchor-id="computing-geographically-weighted-summary-statistics">6.3 Computing Geographically Weighted Summary Statistics</h3>
+<section id="computing-gwss" class="level3">
+<h3 class="anchored" data-anchor-id="computing-gwss">6.3 Computing GWSS</h3>
 <p>The code chunk below computes geographically weighted summary statistics by using <code>gwss()</code> of GWmodel package. The analysis is performed using adaptive distance weighted. The distance is derived using AICc method and the kernel method used is <strong>bisquare</strong>.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>gwstat <span class="ot">&lt;-</span> <span class="fu">gwss</span>(<span class="at">data =</span> hunan_sp,</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">vars =</span> <span class="st">"GDPPC"</span>,</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">bw =</span> bw_AIC,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">bw =</span> abw_AIC,</span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">kernel =</span> <span class="st">"bisquare"</span>,</span>
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">quantile =</span> <span class="cn">TRUE</span>,</span>
 <span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">adaptive =</span> <span class="cn">TRUE</span>,</span>
@@ -561,7 +561,7 @@ Note
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>gwss support five kernel methods, namely gaussian, exponential, bisquare, tricube, and boxcar.</p>
+<p><code>gwss()</code> supports five kernel methods, namely gaussian, exponential, bisquare, tricube, and boxcar.</p>
 </div>
 </div>
 <p>The code chunk below is used to extract <strong>SDF</strong> data table from <strong>gwss</strong> object output from <code>gwss()</code> for subsequent geovisualisation. It will be converted into data.frame by using <code>as.data.frame()</code>.</p>
@@ -573,8 +573,8 @@ Note
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>hunan_gstat <span class="ot">&lt;-</span> <span class="fu">cbind</span>(hunan_sf, gwstat_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="visualising-geographically-weighted-summary-statistics" class="level3">
-<h3 class="anchored" data-anchor-id="visualising-geographically-weighted-summary-statistics">6.4 Visualising geographically weighted summary statistics</h3>
+<section id="visualising-gwss" class="level3">
+<h3 class="anchored" data-anchor-id="visualising-gwss">6.4 Visualising GWSS</h3>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(hunan_gstat) <span class="sc">+</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"GDPPC_LM"</span>,</span>

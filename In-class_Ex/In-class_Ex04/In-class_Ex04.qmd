@@ -100,7 +100,7 @@ hunan_sp <- hunan_sf %>%
   as_Spatial()
 ```
 
-## 6 Geographically Weighted Summary Statistics (GSWW) with Adaptive Bandwidth
+## 6 Geographically Weighted Summary Statistics (GWSS)
 
 ### 6.1 Determine Adaptive Bandwidth
 
@@ -109,27 +109,27 @@ hunan_sp <- hunan_sf %>%
 ## Cross-validation
 
 ```{r}
-bw_CV <- bw.gwr(GDPPC ~ 1,
+abw_CV <- bw.gwr(GDPPC ~ 1,
                 data = hunan_sp,
                 approach = "CV",
                 adaptive = TRUE,
                 kernel = "bisquare",
                 longlat = T)
 
-bw_CV
+abw_CV
 ```
 
 ## AICc
 
 ```{r}
-bw_AIC <- bw.gwr(GDPPC ~ 1,
+abw_AIC <- bw.gwr(GDPPC ~ 1,
                 data = hunan_sp,
                 approach = "AICc",
                 adaptive = TRUE,
                 kernel = "bisquare",
                 longlat = T)
 
-bw_AIC
+abw_AIC
 ```
 :::
 
@@ -140,38 +140,38 @@ bw_AIC
 ## Cross-validation
 
 ```{r}
-bw_CV <- bw.gwr(GDPPC ~ 1,
+fbw_CV <- bw.gwr(GDPPC ~ 1,
                 data = hunan_sp,
                 approach = "CV",
                 adaptive = FALSE,
                 kernel = "bisquare",
                 longlat = T)
 
-bw_CV
+fbw_CV
 ```
 
 ## AICc
 
 ```{r}
-bw_AIC <- bw.gwr(GDPPC ~ 1,
+fbw_AIC <- bw.gwr(GDPPC ~ 1,
                 data = hunan_sp,
                 approach = "AICc",
                 adaptive = FALSE,
                 kernel = "bisquare",
                 longlat = T)
 
-bw_AIC
+fbw_AIC
 ```
 :::
 
-### 6.3 Computing Geographically Weighted Summary Statistics
+### 6.3 Computing GWSS
 
 The code chunk below computes geographically weighted summary statistics by using `gwss()` of GWmodel package. The analysis is performed using adaptive distance weighted. The distance is derived using AICc method and the kernel method used is **bisquare**.
 
 ```{r}
 gwstat <- gwss(data = hunan_sp,
                vars = "GDPPC",
-               bw = bw_AIC,
+               bw = abw_AIC,
                kernel = "bisquare",
                quantile = TRUE,
                adaptive = TRUE,
@@ -179,7 +179,7 @@ gwstat <- gwss(data = hunan_sp,
 ```
 
 ::: callout-note
-gwss support five kernel methods, namely gaussian, exponential, bisquare, tricube, and boxcar.
+`gwss()` supports five kernel methods, namely gaussian, exponential, bisquare, tricube, and boxcar.
 :::
 
 The code chunk below is used to extract **SDF** data table from **gwss** object output from `gwss()` for subsequent geovisualisation. It will be converted into data.frame by using `as.data.frame()`.
@@ -194,7 +194,7 @@ Next, `cbind()` is used to append the newly derived data.frame onto *hunan_sf* s
 hunan_gstat <- cbind(hunan_sf, gwstat_df)
 ```
 
-### 6.4 Visualising geographically weighted summary statistics
+### 6.4 Visualising GWSS
 
 ```{r}
 #| fig-width: 12
