@@ -8,7 +8,7 @@
 
 <meta name="dcterms.date" content="2026-09-19">
 
-<title>Take-home Exercise 1 – ISSS626 Geospatial Analytics</title>
+<title>Take-home Exercise 1: Geospatial Analytics for Public Safety – ISSS626 Geospatial Analytics</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -171,15 +206,33 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">1 Overview</a></li>
+  <li><a href="#analytical-questions" id="toc-analytical-questions" class="nav-link" data-scroll-target="#analytical-questions">2 Analytical Questions</a></li>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">3 The Data</a></li>
+  <li><a href="#installing-and-loading-the-r-packages" id="toc-installing-and-loading-the-r-packages" class="nav-link" data-scroll-target="#installing-and-loading-the-r-packages">4 Installing and Loading the R Packages</a></li>
+  <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">5 Reproducibility</a></li>
+  <li><a href="#importing-and-preparing-the-data" id="toc-importing-and-preparing-the-data" class="nav-link" data-scroll-target="#importing-and-preparing-the-data">6 Importing and Preparing the Data</a>
+  <ul>
+  <li><a href="#thailand-road-accident-data" id="toc-thailand-road-accident-data" class="nav-link" data-scroll-target="#thailand-road-accident-data">6.1 Thailand Road Accident Data</a></li>
+  <li><a href="#administrative-boundaries-bangkok-metropolitan-region-bmr" id="toc-administrative-boundaries-bangkok-metropolitan-region-bmr" class="nav-link" data-scroll-target="#administrative-boundaries-bangkok-metropolitan-region-bmr">6.2 Administrative Boundaries: Bangkok Metropolitan Region (BMR)</a></li>
+  <li><a href="#road-network" id="toc-road-network" class="nav-link" data-scroll-target="#road-network">6.3 Road Network</a></li>
+  </ul></li>
+  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">Reference</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Take-home Exercise 1</h1>
+<h1 class="title">Take-home Exercise 1: Geospatial Analytics for Public Safety</h1>
+<p class="subtitle lead">Spatial and Spatio-Temporal Point Pattern Analysis of Road Traffic Accidents in the Bangkok Metropolitan Region</p>
 </div>
 
 
@@ -197,7 +250,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">September 19, 2026</p>
+      <p class="date-modified">September 21, 2026</p>
     </div>
   </div>
     
@@ -208,8 +261,572 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">1 Overview</h2>
+<p>Public safety planning increasingly relies on location-based evidence to identify where and when incidents concentrate, so that enforcement, engineering, and policy responses can be targeted rather than applied uniformly across a region. Road traffic accidents are a point event well suited to this type of analysis: each incident carries a location and a time, and the accumulated pattern of incidents can reveal whether risk is randomly scattered or systematically concentrated in identifiable places and periods.</p>
+<p>This exercise applies spatial and spatio-temporal point pattern analysis to road traffic accident data for the <a href="https://en.wikipedia.org/wiki/Bangkok_Metropolitan_Region">Bangkok Metropolitan Region (BMR)</a>, Thailand, covering Bangkok and the five adjacent provinces of Nonthaburi, Nakhon Pathom, Pathum Thani, Samut Prakan, and Samut Sakhon.</p>
+</section>
+<section id="analytical-questions" class="level2">
+<h2 class="anchored" data-anchor-id="analytical-questions">2 Analytical Questions</h2>
+<ol type="1">
+<li>How is the intensity of road traffic accidents distributed across space and time within the BMR?</li>
+<li>Do accidents exhibit statistically significant spatial and spatio-temporal clustering, beyond what would be expected under complete spatial randomness?</li>
+<li>Does accounting for the road network materially change the interpretation of accident concentration, compared to treating accidents as freely distributed in planar space?</li>
+<li>What do the resulting patterns imply for public safety planning and resource allocation within the region?</li>
+</ol>
+</section>
+<section id="the-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-data">3 The Data</h2>
+<p>Three datasets are used in this exercise:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Dataset</th>
+<th>Description</th>
+<th>Format</th>
+<th>Source</th>
+<th>Date Accessed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Thailand Road Accident (2019 to 2022)</td>
+<td>Accident-level records with location, timing, severity, and contributing-factor fields, sourced from the Ministry of Transport’s TRAMS dashboard. <strong>Only the 2022 subset is used for this study.</strong></td>
+<td>CSV</td>
+<td><a href="https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022">Kaggle</a></td>
+<td>20 Sep 2026</td>
+</tr>
+<tr class="even">
+<td>Thailand Administrative Boundaries, ADM2</td>
+<td>District-level administrative boundaries for Thailand</td>
+<td>GeoJSON</td>
+<td><a href="https://www.geoboundaries.org">geoBoundaries</a></td>
+<td>20 Sep 2026</td>
+</tr>
+<tr class="odd">
+<td>Thailand Road Network (OpenStreetMap extract)</td>
+<td>Line-based road network for Thailand, classified by highway type under the <code>fclass</code> field</td>
+<td>Shapefile</td>
+<td><a href="https://download.geofabrik.de/asia/thailand.html">Geofabrik</a></td>
+<td>20 Sep 2026</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="installing-and-loading-the-r-packages" class="level2">
+<h2 class="anchored" data-anchor-id="installing-and-loading-the-r-packages">4 Installing and Loading the R Packages</h2>
+<p>The following R packages are used across this exercise:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Package</th>
+<th>Purpose</th>
+<th>Use Case in This Exercise</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>tidyverse</strong></td>
+<td>Collection of packages for data import, manipulation, and visualisation</td>
+<td>Importing, cleaning, and transforming the accident dataset</td>
+</tr>
+<tr class="even">
+<td><strong>sf</strong></td>
+<td>Imports, manages, and processes vector-based geospatial data</td>
+<td>Handling the administrative boundary and road network data, and constructing spatial point objects from the accident coordinates</td>
+</tr>
+<tr class="odd">
+<td><strong>spatstat</strong></td>
+<td>Toolkit for spatial point pattern analysis</td>
+<td>First-order (KDE, quadrat) and second-order (G, F, K, L functions) analysis of accident intensity and clustering</td>
+</tr>
+<tr class="even">
+<td><strong>sparr</strong></td>
+<td>Kernel estimation of spatial and spatio-temporal densities</td>
+<td>Spatio-temporal KDE of accident intensity across months in 2022</td>
+</tr>
+<tr class="odd">
+<td><strong>stpp</strong></td>
+<td>Analysis of second-order properties of spatio-temporal point processes</td>
+<td>Testing for space-time interaction beyond what spatial and temporal clustering alone would predict</td>
+</tr>
+<tr class="even">
+<td><strong>spNetwork</strong></td>
+<td>Spatial analysis constrained to a network</td>
+<td>Network-constrained kernel density estimation (NKDE) of accidents along the road network</td>
+</tr>
+<tr class="odd">
+<td><strong>tmap</strong></td>
+<td>Static and interactive thematic mapping</td>
+<td>Choropleth maps, KDE surfaces, and accident point maps throughout the report</td>
+</tr>
+<tr class="even">
+<td><strong>knitr</strong></td>
+<td>Dynamic report generation</td>
+<td>Rendering tables and controlling code chunk output in this document</td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(tidyverse, sf, spatstat, sparr, stpp, </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>               spNetwork, tmap, knitr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="reproducibility" class="level2">
+<h2 class="anchored" data-anchor-id="reproducibility">5 Reproducibility</h2>
+<p>A fixed seed value of 123 is set for reproducibility of any simulation-based procedure used later in this exercise.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="importing-and-preparing-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="importing-and-preparing-the-data">6 Importing and Preparing the Data</h2>
+<p>This section imports and prepares each of the three datasets described above. The study area for this exercise is the Bangkok Metropolitan Region (BMR), operationalised at the district (ADM2) level, and the study period is restricted to 2022.</p>
+<section id="thailand-road-accident-data" class="level3">
+<h3 class="anchored" data-anchor-id="thailand-road-accident-data">6.1 Thailand Road Accident Data</h3>
+<p>The accident dataset is imported using <em>read_csv()</em> of the <strong>readr</strong> package:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>rdacc <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/thai_road_accident_2019_2022.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Null values are checked across every column:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">is.na</span>(rdacc))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                   acc_code           incident_datetime 
+                          0                           0 
+            report_datetime                 province_th 
+                          0                           0 
+                province_en                      agency 
+                          0                           0 
+                      route                vehicle_type 
+                          0                           0 
+             presumed_cause               accident_type 
+                          0                           0 
+number_of_vehicles_involved        number_of_fatalities 
+                          0                           0 
+         number_of_injuries           weather_condition 
+                          0                           0 
+                   latitude                   longitude 
+                        359                         359 
+           road_description           slope_description 
+                          0                           0 </code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Analysis:</strong></p>
+<p>Of the 359 rows with missing coordinates, 350 are attributed to a single agency, the Expressway Authority of Thailand. The other two agencies, Department of Highways and Department of Rural Roads, have almost none missing. The affected rows are concentrated in Bangkok and in the 2021 to 2022 period. These rows cannot be placed spatially, so they are dropped from the point pattern analysis. As a result, accidents attributed to the Expressway Authority, largely Bangkok’s controlled-access expressway network, are undercounted relative to the other two agencies.</p>
+</div>
+</div>
+<p>Exact duplicate rows are checked next:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(rdacc))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>The set of provinces represented in the data is inspected, since only accidents within the six BMR provinces are relevant to this exercise:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">unique</span>(rdacc<span class="sc">$</span>province_en))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Amnat Charoen"            "Ang Thong"               
+ [3] "Bangkok"                  "buogkan"                 
+ [5] "Buri Ram"                 "Chachoengsao"            
+ [7] "Chai Nat"                 "Chaiyaphum"              
+ [9] "Chanthaburi"              "Chiang Mai"              
+[11] "Chiang Rai"               "Chon Buri"               
+[13] "Chumphon"                 "Kalasin"                 
+[15] "Kamphaeng Phet"           "Kanchanaburi"            
+[17] "Khon Kaen"                "Krabi"                   
+[19] "Lampang"                  "Lamphun"                 
+[21] "Loburi"                   "Loei"                    
+[23] "Mae Hong Son"             "Maha Sarakham"           
+[25] "Mukdahan"                 "Nakhon Nayok"            
+[27] "Nakhon Pathom"            "Nakhon Phanom"           
+[29] "Nakhon Ratchasima"        "Nakhon Sawan"            
+[31] "Nakhon Si Thammarat"      "Nan"                     
+[33] "Narathiwat"               "Nong Bua Lam Phu"        
+[35] "Nong Khai"                "Nonthaburi"              
+[37] "Pathum Thani"             "Pattani"                 
+[39] "Phangnga"                 "Phatthalung"             
+[41] "Phayao"                   "Phetchabun"              
+[43] "Phetchaburi"              "Phichit"                 
+[45] "Phitsanulok"              "Phra Nakhon Si Ayutthaya"
+[47] "Phrae"                    "Phuket"                  
+[49] "Prachin Buri"             "Prachuap Khiri Khan"     
+[51] "Ranong"                   "Ratchaburi"              
+[53] "Rayong"                   "Roi Et"                  
+[55] "Sa Kaeo"                  "Sakon Nakhon"            
+[57] "Samut Prakan"             "Samut Sakhon"            
+[59] "Samut Songkhram"          "Saraburi"                
+[61] "Satun"                    "Si Sa Ket"               
+[63] "Sing Buri"                "Songkhla"                
+[65] "Sukhothai"                "Suphan Buri"             
+[67] "Surat Thani"              "Surin"                   
+[69] "Tak"                      "Trang"                   
+[71] "Trat"                     "Ubon Ratchathani"        
+[73] "Udon Thani"               "unknown"                 
+[75] "Uthai Thani"              "Uttaradit"               
+[77] "Yala"                     "Yasothon"                </code></pre>
+</div>
+</div>
+<p>The six BMR province names are confirmed to appear exactly as expected in the list above (Bangkok, Nonthaburi, Nakhon Pathom, Pathum Thani, Samut Prakan, Samut Sakhon).</p>
+<p>The dataset is filtered to the study area (BMR) and study period (2022), and limited to rows with valid coordinates. It is then converted into a spatial point object.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>bmr_provinces <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Bangkok"</span>, <span class="st">"Nonthaburi"</span>, <span class="st">"Nakhon Pathom"</span>, </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"Pathum Thani"</span>, <span class="st">"Samut Prakan"</span>, <span class="st">"Samut Sakhon"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>accidents_bmr <span class="ot">&lt;-</span> rdacc <span class="sc">%&gt;%</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(province_en <span class="sc">%in%</span> bmr_provinces,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>         <span class="fu">year</span>(incident_datetime) <span class="sc">==</span> <span class="dv">2022</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>         <span class="sc">!</span><span class="fu">is.na</span>(latitude), <span class="sc">!</span><span class="fu">is.na</span>(longitude)) <span class="sc">%&gt;%</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"longitude"</span>, <span class="st">"latitude"</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32647</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><a href="https://epsg.io/4326">crs = 4326</a> labels the coordinates as WGS84 decimal degrees</li>
+<li><a href="crs = 32647">crs = 32647</a> then reprojects them into UTM Zone 47N (metres). EPSG:32647 specifically covers 96°E to 102°E, the zone the BMR provinces fall within; this reprojection is needed for the distance- and area-based methods used later.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="administrative-boundaries-bangkok-metropolitan-region-bmr" class="level3">
+<h3 class="anchored" data-anchor-id="administrative-boundaries-bangkok-metropolitan-region-bmr">6.2 Administrative Boundaries: Bangkok Metropolitan Region (BMR)</h3>
+<p>Thailand’s administrative boundaries run from country (ADM0), through province (ADM1), district (ADM2), to sub-district (ADM3).</p>
+<p>This exercise uses both ADM1 and ADM2: ADM1 identifies the six provinces that make up the BMR by name, and ADM2 supplies the actual study area boundary at finer district resolution, needed later for the network-constrained analysis. ADM2’s own attribute table does not record which province each district belongs to, so the two levels are combined through a spatial join.</p>
+<p>ADM1 is imported first, since it supplies the province names needed to define the BMR.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>tha_adm1 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/geoBoundaries-THA-ADM1.geojson"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `geoBoundaries-THA-ADM1' from data source 
+  `C:\yxlinn\ISSS626-GAA\Take-home_Ex\Take-home_Ex01\data\geoBoundaries-THA-ADM1.geojson' 
+  using driver `GeoJSON'
+Simple feature collection with 77 features and 5 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 97.34381 ymin: 5.612851 xmax: 105.6368 ymax: 20.46483
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(tha_adm1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 6 features and 5 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 99.08799 ymin: 13.17157 xmax: 104.3559 ymax: 19.73551
+Geodetic CRS:  WGS 84
+                  shapeName shapeISO                 shapeID shapeGroup
+1           Roi Et Province    TH-45 36821470B96343765829948        THA
+2           Phayao Province    TH-56 36821470B12194119812739        THA
+3     Nakhon Sawan Province    TH-60 36821470B58837026258254        THA
+4 Nong Bua Lam Phu Province    TH-39 36821470B48254980905782        THA
+5     Chachoengsao Province    TH-24 36821470B91271468807469        THA
+6            Surin Province    TH-32 36821470B33660676013176        THA
+  shapeType                       geometry
+1      ADM1 MULTIPOLYGON (((103.5111 16...
+2      ADM1 MULTIPOLYGON (((99.68719 19...
+3      ADM1 MULTIPOLYGON (((99.08899 15...
+4      ADM1 MULTIPOLYGON (((102.0808 17...
+5      ADM1 MULTIPOLYGON (((100.849 13....
+6      ADM1 MULTIPOLYGON (((103.4048 15...</code></pre>
+</div>
+</div>
+<p>The full list of province names is checked before filtering:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">unique</span>(tha_adm1<span class="sc">$</span>shapeName))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "Amnat Charoen Province"            "Ang Thong Province"               
+ [3] "Bangkok"                           "Bueng Kan Province"               
+ [5] "Buri Ram Province"                 "Chachoengsao Province"            
+ [7] "Chai Nat Province"                 "Chaiyaphum Province"              
+ [9] "Chanthaburi Province"              "Chiang Mai Province"              
+[11] "Chiang Rai Province"               "Chon Buri Province"               
+[13] "Chumphon Province"                 "Kalasin"                          
+[15] "Kamphaeng Phet Province"           "Kanchanaburi Province"            
+[17] "Khon Kaen Province"                "Krabi Province"                   
+[19] "Lampang Province"                  "Lamphun Province"                 
+[21] "Loei Province"                     "Lopburi Province"                 
+[23] "Mae Hong Son Province"             "Maha Sarakham Province"           
+[25] "Mukdahan Province"                 "Nakhon Nayok Province"            
+[27] "Nakhon Pathom Province"            "Nakhon Phanom Province"           
+[29] "Nakhon Ratchasima Province"        "Nakhon Sawan Province"            
+[31] "Nakhon Si Thammarat Province"      "Nan Province"                     
+[33] "Narathiwat Province"               "Nong Bua Lam Phu Province"        
+[35] "Nong Khai Province"                "Nonthaburi Province"              
+[37] "Pathum Thani Province"             "Pattani Province"                 
+[39] "Phangnga Province"                 "Phatthalung Province"             
+[41] "Phayao Province"                   "Phetchabun Province"              
+[43] "Phetchaburi Province"              "Phichit Province"                 
+[45] "Phitsanulok Province"              "Phra Nakhon Si Ayutthaya Province"
+[47] "Phrae Province"                    "Phuket Province"                  
+[49] "Prachin Buri Province"             "Prachuap Khiri Khan Province"     
+[51] "Ranong Province"                   "Ratchaburi Province"              
+[53] "Rayong Province"                   "Roi Et Province"                  
+[55] "Sa Kaeo Province"                  "Sakon Nakhon Province"            
+[57] "Samut Prakan Province"             "Samut Sakhon Province"            
+[59] "Samut Songkhram Province"          "Saraburi Province"                
+[61] "Satun Province"                    "Si Sa Ket Province"               
+[63] "Sing Buri Province"                "Songkhla Province"                
+[65] "Sukhothai Province"                "Suphan Buri Province"             
+[67] "Surat Thani Province"              "Surin Province"                   
+[69] "Tak Province"                      "Trang Province"                   
+[71] "Trat Province"                     "Ubon Ratchathani Province"        
+[73] "Udon Thani Province"               "Uthai Thani Province"             
+[75] "Uttaradit Province"                "Yala Province"                    
+[77] "Yasothon Province"                </code></pre>
+</div>
+</div>
+<p>Next, ADM2 is imported to supply the actual study area boundary.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>tha_adm2 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/geoBoundaries-THA-ADM2.geojson"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `geoBoundaries-THA-ADM2' from data source 
+  `C:\yxlinn\ISSS626-GAA\Take-home_Ex\Take-home_Ex01\data\geoBoundaries-THA-ADM2.geojson' 
+  using driver `GeoJSON'
+Simple feature collection with 928 features and 5 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 97.34336 ymin: 5.613038 xmax: 105.637 ymax: 20.46507
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(tha_adm2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 6 features and 5 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 98.6116 ymin: 6.471538 xmax: 104.0843 ymax: 17.82245
+Geodetic CRS:  WGS 84
+      shapeName shapeISO                 shapeID shapeGroup shapeType
+1   Akat Amnuai          78962969B83463915016953        THA      ADM2
+2       Amphawa          78962969B68169586280131        THA      ADM2
+3       Ao Luek          78962969B54777225393770        THA      ADM2
+4 Aranyaprathet          78962969B18658138340114        THA      ADM2
+5      At Samat          78962969B71289419444255        THA      ADM2
+6         Bacho          78962969B22586560209583        THA      ADM2
+                        geometry
+1 MULTIPOLYGON (((104.0122 17...
+2 MULTIPOLYGON (((100.0144 13...
+3 MULTIPOLYGON (((98.69051 8....
+4 MULTIPOLYGON (((102.5356 13...
+5 MULTIPOLYGON (((103.8999 15...
+6 MULTIPOLYGON (((101.7093 6....</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>tha_adm2</code> has 928 features and five attribute fields: shapeName, shapeISO, shapeID, shapeGroup, and shapeType. None of the fields represent a parent province. The BMR district set therefore cannot be filtered by attribute and is derived spatially against ADM1.</p>
+</div>
+</div>
+<p>Both boundaries are reprojected to EPSG:32647.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>tha_adm1 <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(tha_adm1, <span class="at">crs =</span> <span class="dv">32647</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>tha_adm2 <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(tha_adm2, <span class="at">crs =</span> <span class="dv">32647</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The six BMR provinces are filtered out of ADM1:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>bmr_provinces_adm1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Bangkok"</span>, </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"Nonthaburi Province"</span>,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"Nakhon Pathom Province"</span>,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"Pathum Thani Province"</span>,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"Samut Prakan Province"</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"Samut Sakhon Province"</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>adm1_bmr <span class="ot">&lt;-</span> tha_adm1 <span class="sc">%&gt;%</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(shapeName <span class="sc">%in%</span> bmr_provinces_adm1) <span class="sc">%&gt;%</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">province_name =</span> shapeName)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(adm1_bmr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 6</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>shapeName</code> is renamed to <code>province_name</code> to avoid a duplicate column when joined to <code>tha_adm2</code>, which carries its own <code>shapeName</code> field for district names.</p>
+</div>
+</div>
+<p>Each ADM2 district is then assigned to whichever ADM1 province it overlaps most with, and only those districts assigned to one of the six BMR provinces are kept.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>adm2_bmr <span class="ot">&lt;-</span> <span class="fu">st_join</span>(tha_adm2, adm1_bmr, </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">join =</span> st_intersects, </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">largest =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(province_name)) <span class="sc">%&gt;%</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(shapeName, province_name, geometry)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>adm2_bmr <span class="sc">%&gt;%</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(province_name)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           province_name  n
+1                Bangkok 52
+2 Nakhon Pathom Province 11
+3    Nonthaburi Province  7
+4  Pathum Thani Province 14
+5  Samut Prakan Province  8
+6  Samut Sakhon Province  5</code></pre>
+</div>
+</div>
+<p>The resulting <code>adm2_bmr</code> is the study area boundary used for the remainder of this exercise.</p>
+<p>As a visual check, the boundary is plotted and coloured by province. This shows whether the districts form one connected region, or whether any district ended up misplaced or disconnected, something the count above could not reveal.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(adm2_bmr) <span class="sc">+</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"province_name"</span>,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>(<span class="at">title =</span> <span class="st">"Province"</span>, <span class="at">na.show =</span> <span class="cn">FALSE</span>)) <span class="sc">+</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">main.title =</span> <span class="st">"BMR Study Area by Province"</span>,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">main.title.position =</span> <span class="st">"center"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="road-network" class="level3">
+<h3 class="anchored" data-anchor-id="road-network">6.3 Road Network</h3>
+<p>The road network is imported and inspected:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>roads <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/gis_osm_roads_free_1.shp"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `gis_osm_roads_free_1' from data source 
+  `C:\yxlinn\ISSS626-GAA\Take-home_Ex\Take-home_Ex01\data\gis_osm_roads_free_1.shp' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 2930769 features and 10 fields
+Geometry type: LINESTRING
+Dimension:     XY
+Bounding box:  xmin: 97.31354 ymin: 5.643645 xmax: 105.6481 ymax: 20.47168
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(roads)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 2,930,769
+Columns: 11
+$ osm_id   &lt;chr&gt; "4270622", "4828442", "4828443", "4828444", "4828446", "85607…
+$ code     &lt;int&gt; 5122, 5122, 5122, 5122, 5122, 5122, 5122, 5122, 5122, 5153, 5…
+$ fclass   &lt;chr&gt; "residential", "residential", "residential", "residential", "…
+$ name     &lt;chr&gt; "ถนนศิริมังคลาจารย์ ซอย1", "Soi Ruam- U-Thit", "Soi Ruam- U-Thit"…
+$ ref      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…
+$ oneway   &lt;chr&gt; "B", "B", "B", "B", "B", "B", "F", "B", "F", "B", "F", "F", "…
+$ maxspeed &lt;int&gt; 0, 0, 0, 0, 0, 30, 30, 0, 0, 0, 50, 0, 60, 0, 0, 60, 60, 60, …
+$ layer    &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 1, 0, 0, 2…
+$ bridge   &lt;chr&gt; "F", "F", "F", "F", "F", "F", "F", "F", "F", "F", "F", "T", "…
+$ tunnel   &lt;chr&gt; "F", "F", "F", "F", "F", "F", "F", "F", "F", "F", "F", "F", "…
+$ geometry &lt;LINESTRING [°]&gt; LINESTRING (98.97274 18.796..., LINESTRING (98.341…</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(roads)<span class="sc">$</span>input</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "WGS 84"</code></pre>
+</div>
+</div>
+<p>The highway classification is inspected via the <code>fclass</code> field:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">unique</span>(roads<span class="sc">$</span>fclass))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "bridleway"      "busway"         "cycleway"       "footway"       
+ [5] "living_street"  "motorway"       "motorway_link"  "path"          
+ [9] "pedestrian"     "primary"        "primary_link"   "residential"   
+[13] "secondary"      "secondary_link" "service"        "steps"         
+[17] "tertiary"       "tertiary_link"  "track"          "track_grade1"  
+[21] "track_grade2"   "track_grade3"   "track_grade4"   "track_grade5"  
+[25] "trunk"          "trunk_link"     "unclassified"   "unknown"       </code></pre>
+</div>
+</div>
+<p>The road network is reprojected to EPSG:32647.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>roads <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(roads, <span class="at">crs =</span> <span class="dv">32647</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>For the purpose of this study, the network is filtered to the intercity highway classes based on the <a href="https://wiki.openstreetmap.org/wiki/Thailand/Conventions">WikiProject Thailand highway classification convention</a>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>highway_types <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"motorway"</span>, <span class="st">"motorway_link"</span>, </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"trunk"</span>,<span class="st">"trunk_link"</span>, </span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"primary"</span>, <span class="st">"primary_link"</span>,</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"secondary"</span>, <span class="st">"secondary_link"</span>,</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"tertiary"</span>, <span class="st">"tertiary_link"</span>, </span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"unclassified"</span>)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>roads_filtered <span class="ot">&lt;-</span> roads <span class="sc">%&gt;%</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(fclass <span class="sc">%in%</span> highway_types)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The 28 <code>fclass</code> values include a <code>_link</code> variant for five of the six target classes, representing ramps and interchange connectors rather than a separate road type. These are kept alongside their base class, since dropping them would leave a gap at every interchange, breaking the network needed for the network-constrained analysis later. The rest are excluded as non-vehicular, local, or unclassifiable.</p>
+</div>
+</div>
+<p>The filtered network is then clipped to the BMR study area:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>roads_bmr <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(roads_filtered, adm2_bmr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Clipping lines against polygons with <code>st_intersection()</code> can change geometry types. For example, a line that only touches a polygon boundary at a single point can come out as a point instead of a line. Therefore, the geometry types present in <code>roads_bmr</code> are checked.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_geometry_type</span>(roads_bmr) <span class="sc">|&gt;</span> <span class="fu">unique</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] LINESTRING      MULTILINESTRING
+18 Levels: GEOMETRY POINT LINESTRING POLYGON MULTIPOINT ... TRIANGLE</code></pre>
+</div>
+</div>
+<p>The result is a mix of <code>LINESTRING</code> and <code>MULTILINESTRING</code>.</p>
+<p>Since more than one geometry type is present, <code>roads_bmr</code> is cast to a single consistent type, <code>LINESTRING</code>, which <strong>spNetwork</strong> requires.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>roads_bmr <span class="ot">&lt;-</span> <span class="fu">st_cast</span>(roads_bmr, <span class="st">"LINESTRING"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The resulting <code>roads_bmr</code> is the road network used for the network-constrained kernel density estimation later in this exercise.</p>
+</section>
+</section>
+<section id="reference" class="level2">
+<h2 class="anchored" data-anchor-id="reference">Reference</h2>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

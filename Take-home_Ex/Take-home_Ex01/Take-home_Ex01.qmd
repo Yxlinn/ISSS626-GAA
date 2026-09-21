@@ -1,5 +1,6 @@
 ---
-title: "Take-home Exercise 1"
+title: "Take-home Exercise 1: Geospatial Analytics for Public Safety"
+subtitle: "Spatial and Spatio-Temporal Point Pattern Analysis of Road Traffic Accidents in the Bangkok Metropolitan Region"
 date: "September 19, 2026"
 date-modified: "last-modified"
 format: html
@@ -12,4 +13,263 @@ execute:
 editor: visual
 ---
 
+## 1 Overview
 
+Public safety planning increasingly relies on location-based evidence to identify where and when incidents concentrate, so that enforcement, engineering, and policy responses can be targeted rather than applied uniformly across a region. Road traffic accidents are a point event well suited to this type of analysis: each incident carries a location and a time, and the accumulated pattern of incidents can reveal whether risk is randomly scattered or systematically concentrated in identifiable places and periods.
+
+This exercise applies spatial and spatio-temporal point pattern analysis to road traffic accident data for the [Bangkok Metropolitan Region (BMR)](https://en.wikipedia.org/wiki/Bangkok_Metropolitan_Region), Thailand, covering Bangkok and the five adjacent provinces of Nonthaburi, Nakhon Pathom, Pathum Thani, Samut Prakan, and Samut Sakhon.
+
+## 2 Analytical Questions
+
+1. How is the intensity of road traffic accidents distributed across space and time within the BMR?
+2. Do accidents exhibit statistically significant spatial and spatio-temporal clustering, beyond what would be expected under complete spatial randomness?
+3. Does accounting for the road network materially change the interpretation of accident concentration, compared to treating accidents as freely distributed in planar space?
+4. What do the resulting patterns imply for public safety planning and resource allocation within the region?
+
+## 3 The Data
+
+Three datasets are used in this exercise:
+
+| Dataset | Description | Format | Source | Date Accessed |
+|---|---|---|---|---|
+| Thailand Road Accident (2019 to 2022) | Accident-level records with location, timing, severity, and contributing-factor fields, sourced from the Ministry of Transport's TRAMS dashboard. **Only the 2022 subset is used for this study.** | CSV | [Kaggle](https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022) | 20 Sep 2026 |
+| Thailand Administrative Boundaries, ADM2 | District-level administrative boundaries for Thailand | GeoJSON | [geoBoundaries](https://www.geoboundaries.org) | 20 Sep 2026 |
+| Thailand Road Network (OpenStreetMap extract) | Line-based road network for Thailand, classified by highway type under the `fclass` field | Shapefile | [Geofabrik](https://download.geofabrik.de/asia/thailand.html) | 20 Sep 2026 |
+
+## 4 Installing and Loading the R Packages
+
+The following R packages are used across this exercise:
+
+| Package | Purpose | Use Case in This Exercise |
+|---|---|---|
+| **tidyverse** | Collection of packages for data import, manipulation, and visualisation | Importing, cleaning, and transforming the accident dataset |
+| **sf** | Imports, manages, and processes vector-based geospatial data | Handling the administrative boundary and road network data, and constructing spatial point objects from the accident coordinates |
+| **spatstat** | Toolkit for spatial point pattern analysis | First-order (KDE, quadrat) and second-order (G, F, K, L functions) analysis of accident intensity and clustering |
+| **sparr** | Kernel estimation of spatial and spatio-temporal densities | Spatio-temporal KDE of accident intensity across months in 2022 |
+| **stpp** | Analysis of second-order properties of spatio-temporal point processes | Testing for space-time interaction beyond what spatial and temporal clustering alone would predict |
+| **spNetwork** | Spatial analysis constrained to a network | Network-constrained kernel density estimation (NKDE) of accidents along the road network |
+| **tmap** | Static and interactive thematic mapping | Choropleth maps, KDE surfaces, and accident point maps throughout the report |
+| **knitr** | Dynamic report generation | Rendering tables and controlling code chunk output in this document |
+
+```{r}
+pacman::p_load(tidyverse, sf, spatstat, sparr, stpp, 
+               spNetwork, tmap, knitr)
+```
+
+## 5 Reproducibility
+
+A fixed seed value of 123 is set for reproducibility of any simulation-based procedure used later in this exercise.
+
+```{r}
+set.seed(123)
+```
+
+## 6 Importing and Preparing the Data
+
+This section imports and prepares each of the three datasets described above. The study area for this exercise is the Bangkok Metropolitan Region (BMR), operationalised at the district (ADM2) level, and the study period is restricted to 2022.
+
+### 6.1 Thailand Road Accident Data
+
+The accident dataset is imported using *read_csv()* of the **readr** package:
+
+```{r}
+rdacc <- read_csv("data/thai_road_accident_2019_2022.csv")
+```
+
+Null values are checked across every column:
+
+```{r}
+colSums(is.na(rdacc))
+```
+
+::: callout-note
+**Analysis:**
+
+Of the 359 rows with missing coordinates, 350 are attributed to a single agency, the Expressway Authority of Thailand. The other two agencies, Department of Highways and Department of Rural Roads, have almost none missing. The affected rows are concentrated in Bangkok and in the 2021 to 2022 period. These rows cannot be placed spatially, so they are dropped from the point pattern analysis. As a result, accidents attributed to the Expressway Authority, largely Bangkok's controlled-access expressway network, are undercounted relative to the other two agencies.
+:::
+
+Exact duplicate rows are checked next:
+
+```{r}
+sum(duplicated(rdacc))
+```
+
+The set of provinces represented in the data is inspected, since only accidents within the six BMR provinces are relevant to this exercise:
+
+```{r}
+sort(unique(rdacc$province_en))
+```
+
+The six BMR province names are confirmed to appear exactly as expected in the list above (Bangkok, Nonthaburi, Nakhon Pathom, Pathum Thani, Samut Prakan, Samut Sakhon).
+
+The dataset is filtered to the study area (BMR) and study period (2022), and limited to rows with valid coordinates. It is then converted into a spatial point object.
+
+```{r}
+bmr_provinces <- c("Bangkok", "Nonthaburi", "Nakhon Pathom", 
+                   "Pathum Thani", "Samut Prakan", "Samut Sakhon")
+
+accidents_bmr <- rdacc %>%
+  filter(province_en %in% bmr_provinces,
+         year(incident_datetime) == 2022,
+         !is.na(latitude), !is.na(longitude)) %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
+  st_transform(crs = 32647)
+```
+
+::: callout-note
+- [crs = 4326](https://epsg.io/4326) labels the coordinates as WGS84 decimal degrees
+- [crs = 32647](crs = 32647) then reprojects them into UTM Zone 47N (metres). EPSG:32647 specifically covers 96°E to 102°E, the zone the BMR provinces fall within; this reprojection is needed for the distance- and area-based methods used later.
+:::
+
+### 6.2 Administrative Boundaries: Bangkok Metropolitan Region (BMR)
+
+Thailand's administrative boundaries run from country (ADM0), through province (ADM1), district (ADM2), to sub-district (ADM3).
+
+This exercise uses both ADM1 and ADM2: ADM1 identifies the six provinces that make up the BMR by name, and ADM2 supplies the actual study area boundary at finer district resolution, needed later for the network-constrained analysis. ADM2's own attribute table does not record which province each district belongs to, so the two levels are combined through a spatial join.
+
+ADM1 is imported first, since it supplies the province names needed to define the BMR.
+
+```{r}
+tha_adm1 <- st_read("data/geoBoundaries-THA-ADM1.geojson")
+head(tha_adm1)
+```
+
+The full list of province names is checked before filtering:
+
+```{r}
+sort(unique(tha_adm1$shapeName))
+```
+
+Next, ADM2 is imported to supply the actual study area boundary.
+
+```{r}
+tha_adm2 <- st_read("data/geoBoundaries-THA-ADM2.geojson")
+head(tha_adm2)
+```
+
+::: callout-note
+`tha_adm2` has 928 features and five attribute fields: shapeName, shapeISO, shapeID, shapeGroup, and shapeType. None of the fields represent a parent province. The BMR district set therefore cannot be filtered by attribute and is derived spatially against ADM1.
+:::
+
+Both boundaries are reprojected to EPSG:32647.
+
+```{r}
+tha_adm1 <- st_transform(tha_adm1, crs = 32647)
+tha_adm2 <- st_transform(tha_adm2, crs = 32647)
+```
+
+The six BMR provinces are filtered out of ADM1:
+
+```{r}
+bmr_provinces_adm1 <- c("Bangkok", 
+                        "Nonthaburi Province",
+                        "Nakhon Pathom Province",
+                        "Pathum Thani Province",
+                        "Samut Prakan Province",
+                        "Samut Sakhon Province")
+
+adm1_bmr <- tha_adm1 %>%
+  filter(shapeName %in% bmr_provinces_adm1) %>%
+  rename(province_name = shapeName)
+
+nrow(adm1_bmr)
+```
+
+::: callout-note
+`shapeName` is renamed to `province_name` to avoid a duplicate column when joined to `tha_adm2`, which carries its own `shapeName` field for district names.
+:::
+
+Each ADM2 district is then assigned to whichever ADM1 province it overlaps most with, and only those districts assigned to one of the six BMR provinces are kept.
+
+```{r}
+adm2_bmr <- st_join(tha_adm2, adm1_bmr, 
+                    join = st_intersects, 
+                    largest = TRUE) %>% 
+  filter(!is.na(province_name)) %>%
+  select(shapeName, province_name, geometry)
+```
+
+```{r}
+adm2_bmr %>%
+  st_drop_geometry() %>%
+  count(province_name)
+```
+
+The resulting `adm2_bmr` is the study area boundary used for the remainder of this exercise.
+
+As a visual check, the boundary is plotted and coloured by province. This shows whether the districts form one connected region, or whether any district ended up misplaced or disconnected, something the count above could not reveal.
+
+```{r}
+tm_shape(adm2_bmr) +
+  tm_polygons(fill = "province_name",
+              fill.legend = tm_legend(title = "Province", na.show = FALSE)) +
+  tm_layout(main.title = "BMR Study Area by Province",
+            main.title.position = "center")
+```
+
+### 6.3 Road Network
+
+The road network is imported and inspected:
+
+```{r}
+roads <- st_read("data/gis_osm_roads_free_1.shp")
+glimpse(roads)
+```
+
+```{r}
+st_crs(roads)$input
+```
+
+The highway classification is inspected via the `fclass` field:
+
+```{r}
+sort(unique(roads$fclass))
+```
+
+The road network is reprojected to EPSG:32647.
+
+```{r}
+roads <- st_transform(roads, crs = 32647)
+```
+
+For the purpose of this study, the network is filtered to the intercity highway classes based on the [WikiProject Thailand highway classification convention](https://wiki.openstreetmap.org/wiki/Thailand/Conventions).
+
+```{r}
+highway_types <- c("motorway", "motorway_link", 
+                   "trunk","trunk_link", 
+                   "primary", "primary_link",
+                   "secondary", "secondary_link",
+                   "tertiary", "tertiary_link", 
+                   "unclassified")
+
+roads_filtered <- roads %>%
+  filter(fclass %in% highway_types)
+```
+
+::: callout-note
+The 28 `fclass` values include a `_link` variant for five of the six target classes, representing ramps and interchange connectors rather than a separate road type. These are kept alongside their base class, since dropping them would leave a gap at every interchange, breaking the network needed for the network-constrained analysis later. The rest are excluded as non-vehicular, local, or unclassifiable.
+:::
+
+The filtered network is then clipped to the BMR study area:
+
+```{r}
+roads_bmr <- st_intersection(roads_filtered, adm2_bmr)
+```
+
+Clipping lines against polygons with `st_intersection()` can change geometry types. For example, a line that only touches a polygon boundary at a single point can come out as a point instead of a line. Therefore, the geometry types present in `roads_bmr` are checked.
+
+```{r}
+st_geometry_type(roads_bmr) |> unique()
+```
+
+The result is a mix of `LINESTRING` and `MULTILINESTRING`. 
+
+Since more than one geometry type is present, `roads_bmr` is cast to a single consistent type, `LINESTRING`, which **spNetwork** requires.
+
+```{r}
+roads_bmr <- st_cast(roads_bmr, "LINESTRING")
+```
+
+The resulting `roads_bmr` is the road network used for the network-constrained kernel density estimation later in this exercise.
+
+## Reference
