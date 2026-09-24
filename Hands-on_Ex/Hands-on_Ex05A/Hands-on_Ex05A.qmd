@@ -1,0 +1,469 @@
+---
+title: "Hands-on Exercise 5A: Global Measures of Spatial Autocorrelation"
+date: "September 24, 2026"
+date-modified: "last-modified"
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
+---
+
+## 1 Overview
+
+Spatial autocorrelation describes whether values at nearby locations resemble one another more than would be expected if values were assigned to locations at random. Similar values that sit close together produce positive spatial autocorrelation, while dissimilar values that sit close together produce negative spatial autocorrelation. Global measures condense this tendency into a single statistic for the whole study area. They indicate whether spatial dependence exists, but not where it is concentrated.
+
+This exercise covers the following:
+
+- import geospatial data using appropriate function(s) of **sf** package
+- import csv file using appropriate function of **readr** package
+- perform relational join using appropriate join function of **dplyr** package
+- compute Global Spatial Autocorrelation (GSA) statistics by using appropriate functions of **spdep** package, plot Moran scatterplot, and compute and plot spatial correlogram using appropriate function of **spdep** package
+- provide statistically correct interpretation of GSA statistics
+
+## 2 Analytical Questions
+
+In spatial policy, one of the main development objectives of the local government and planners is to ensure equal distribution of development in the province. 
+
+This exercise examines the spatial pattern of a selected development indicator, GDP per capita ("GDPPC"), of Hunan Province, China. Three questions are addressed in sequence:
+
+1. Is `GDPPC` evenly distributed across the counties of Hunan?
+2. If not, is there evidence of spatial clustering?
+3. If so, where are the clusters located?
+
+The first two questions are answered in this exercise using global measures of spatial autocorrelation. The third is addressed in **Hands-on Exercise 5B** using local measures.
+
+## 3 The Study Area and Data
+
+Two data sets are used:
+
+| Data set | Format | Description |
+|-----|-----|-----|
+| Hunan | ESRI shapefile | County boundary layer for Hunan province |
+| Hunan_2012.csv | csv | Selected local development indicators for Hunan's counties in 2012 |
+
+## 4 Installing and Loading R Packages
+
+Four packages are used in this exercise:
+
+- **sf** imports and handles the geospatial data
+- **tidyverse** supports attribute data handling
+- **spdep** computes the spatial weights and the global spatial autocorrelation statistics
+- **tmap** produces the choropleth maps
+
+```{r}
+pacman::p_load(sf, spdep, tmap, tidyverse)
+```
+
+## 5 Reproducibility
+
+The Monte Carlo tests in this exercise, `moran.mc()` and `geary.mc()`, rely on random permutations of the data. A seed is set so that the simulated results are identical across renders.
+
+```{r}
+set.seed(123)
+```
+
+## 6 Getting the Data into R
+
+The boundary layer and the indicator table are imported separately and then combined through a relational join.
+
+### 6.1 Importing the Shapefile
+
+The shapefile is imported with `st_read()` of **sf**, which returns a simple features object.
+
+```{r}
+hunan <- st_read(dsn = "data/geospatial",
+                 layer = "Hunan")
+```
+
+### 6.2 Importing the CSV File
+
+`Hunan_2012.csv` is imported with `read_csv()` of **readr**, which returns a data frame class.
+
+```{r}
+hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv")
+```
+
+### 6.3 Performing relational join
+
+The attribute table of `hunan` is extended with the fields of `hunan2012` using `left_join()` of **dplyr**.
+
+```{r}
+hunan <- left_join(hunan, hunan2012) %>%
+  select(1:4, 7, 15)
+```
+
+### 6.4 Visualising Regional Development Indicator
+
+The distribution of GDPPC 2012 is mapped as two choropleth maps using **tmap**, one with equal interval classification and the other with quantile classification.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 8
+
+equal <- tm_shape(hunan) +
+  tm_polygons(fill = "GDPPC",
+              fill.scale = tm_scale_intervals(
+                style = "equal",
+                n = 5,
+                values = "brewer.blues")) +
+  tm_layout(legend.position = c("left", "bottom"),
+            main.title = "Equal interval classification")
+
+quantile <- tm_shape(hunan) +
+  tm_polygons(fill = "GDPPC",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "brewer.blues")) +
+  tm_layout(legend.position = c("left", "bottom"),
+            main.title = "Quantile classification")
+
+tmap_arrange(equal,
+             quantile,
+             asp = 1,
+             ncol = 2)
+```
+
+::: callout-note
+**Interpretation:**
+
+In both maps, high-value counties tend to sit next to other high-value counties, and low-value counties next to low-value ones.
+
+Under **equal interval classification**, most counties fall in the lowest class (GDPPC up to 24,528). Only a handful of counties reach the upper classes, and a single county in the east-central part of the province falls in the highest class (72,624 to 88,656). Counties in the middle classes lie next to it, mainly in the northeast and east. As the classes are of equal width and the highest value is far above the rest, the map separates the few high-value counties from the many low-value ones but shows little variation among the majority.
+
+Under **quantile classification**, each class holds roughly the same number of counties, so the differences among the majority become visible. The higher classes are mainly concentrated in the northeast, east, and southeast of the province, while the west and southwest are mostly in the lower classes. A few isolated counties in the west fall in the top class despite lighter neighbours. The top class spans a wide range from 30,673 to 88,656.
+:::
+
+## 7 Global Measures of Spatial Autocorrelation
+
+This section computes global spatial autocorrelation statistics and performs a test of complete spatial randomness for global spatial autocorrelation.
+
+### 7.1 Computing Contiguity Spatial Weights
+
+Before the global spatial autocorrelation statistics can be computed, spatial weights must be constructed for the study area. The spatial weights define the neighbourhood relationships between the geographical units, which are the counties in this case.
+
+`poly2nb() `of **spdep** computes contiguity weight matrices for the study area. The function builds a neighbours list from regions with contiguous boundaries. It takes a `queen` argument that accepts `TRUE` or `FALSE`. If the argument is not specified, the default is `TRUE`, and the function returns a list of first order neighbours under the Queen criterion.
+
+The code chunk below computes the Queen contiguity weight matrix:
+
+```{r}
+wm_q <- poly2nb(hunan,
+                queen = TRUE)
+summary(wm_q)
+```
+
+The summary report shows that there are 88 area units in Hunan. The most connected area unit has 11 neighbours (Region 85). There are two area units (Region 30 and 65) with only one neighbour.
+
+### 7.2 Row-standardised Weights Matrix
+
+Each neighbouring polygon is then assigned a weight. Here, all neighbours receive equal weight (style = "W"). This is done by assigning the fraction 1 / (number of neighbours) to each neighbouring county, and then summing the weighted GDPPC values. While this is the most intuitive way to summarise the neighbouring values, it has one drawback: polygons along the edge of the study area base their lagged values on fewer neighbours, which can over- or understate the true spatial autocorrelation in the data. Row-standardised weights are used here for simplicity, although other more robust options are available, notably style = "B".
+
+The code chunk below converts the neighbours list into a weights list using `nb2listw()`:
+
+```{r}
+rswm_q <- nb2listw(wm_q,
+                   style = "W",
+                   zero.policy = TRUE)
+rswm_q
+```
+
+::: callout-tip
+## Learning Points
+
+- The input of `nb2listw()` must be an object of class **nb**, which is what `poly2nb()` returns. Its two main arguments are `style` and `zero.policy`.
+- `style` sets how weights are assigned to neighbours. It takes the values "W", "B", "C", "U", "minmax" and "S":
+  - "B" is binary coding, where every neighbour receives a weight of 1.
+  - "W" is row-standardised, where the weights of each county's neighbours sum to 1, so all weights together sum to the number of counties.
+  - "C" is globally standardised, where all weights together sum to the number of counties.
+  - "U" is "C" divided by the number of neighbours, so all weights together sum to 1.
+  - "minmax" divides the weights by the smaller of the largest row sum and the largest column sum of the input weights.
+  - "S" is the variance-stabilising coding scheme of Tiefelsdorf et al. (1999), where all weights together sum to the number of counties.
+- `zero.policy` controls how counties without neighbours are handled. If `FALSE`, the function stops with an error for any such county. If `TRUE`, the county stays in the weights list with an empty weights vector, and its spatially lagged value is zero, which may or may not be a sensible choice. Every county in `hunan` has at least one neighbour, so the argument has no effect here.
+:::
+
+## 8 Global Measures of Spatial Autocorrelation: Moran's I
+
+This section performs Moran's I statistical testing by using `moran.test()` and `moran.mc()` of **spdep**. 
+
+Moran's I compares the value of each county with the average value of its neighbours. The null hypothesis is that GDPPC is randomly distributed across the counties of Hunan, so that there is no spatial autocorrelation. The alternative hypothesis is that similar values are found near one another, which is positive spatial autocorrelation.
+
+### 8.1 Moran's I Test
+
+The code chunk below performs Moran’s I statistical testing using [`moran.test()`](https://r-spatial.github.io/spdep/reference/moran.test.html) of **spdep**.
+
+```{r}
+moran.test(hunan$GDPPC,
+           listw = rswm_q,
+           zero.policy = TRUE,
+           na.action = na.omit)
+```
+
+::: callout-note
+**Interpretation:**
+
+The Moran's I statistic is 0.30075, above its expected value of -0.0115 under the null hypothesis of spatial randomness. The standard deviate is 4.7351 and the p-value is 1.095e-06, so the null hypothesis is rejected at the 95% confidence level since the p-value is less than 0.05.
+
+Therefore, GDPPC shows statistically significant positive spatial autocorrelation. Counties with similar GDPPC values tend to be located near one another.
+:::
+
+### 8.2 Computing Monte Carlo Moran's I
+
+The code chunk below performs permutation test for Moran’s I statistic by using `moran.mc()` of **spdep**. A total of 1000 simulation is performed.
+
+```{r}
+bperm <- moran.mc(hunan$GDPPC,
+                     listw = rswm_q,
+                     nsim = 999,
+                     zero.policy = TRUE,
+                     na.action = na.omit)
+bperm
+```
+
+::: callout-note
+**Interpretation:**
+
+The Moran's I statistic is 0.30075, the same value as in the Moran's I test under randomisation. It ranks 999th among the 1,000 values, made up of the 999 simulated statistics and the observed one, so it lies at the upper end of the simulated distribution. The p-value is 0.001, which is less than 0.05, so the null hypothesis of spatial randomness is rejected at the 95% confidence level.
+
+This agrees with the Moran's I test under randomisation, where GDPPC shows statistically significant positive spatial autocorrelation.
+:::
+
+### 8.3 Visualising Monte Carlo Moran's I
+
+The distribution of the simulated statistics is examined in more detail. The mean, variance and summary statistics are computed.
+
+```{r}
+mean(bperm$res[1:999])
+```
+
+```{r}
+var(bperm$res[1:999])
+```
+
+```{r}
+summary(bperm$res[1:999])
+```
+
+The distribution is then plotted as a histogram using `hist()` and `abline()` of base R, with the red line marking zero:
+
+```{r}
+hist(bperm$res,
+     freq = TRUE,
+     breaks = 20,
+     xlab = "Simulated Moran's I")
+abline(v = 0,
+       col = "red")
+```
+
+::: callout-note
+
+The 999 simulated values of Moran's I have a mean of -0.01116 and a variance of 0.004622. Half of the simulated values lie between -0.05839 and 0.02738.
+
+The distribution is unimodal, with the tallest bars just to the left of the red line at zero, and it is right-skewed. The median of -0.01751 is below the mean, and the maximum of 0.35101 lies further from the median than the minimum of -0.18019. The histogram shows the same pattern, with the right tail thinning out gradually and a few isolated bars beyond 0.2.
+
+The Moran's I statistic of 0.30075 is well above the third quartile of the simulated values, and it ranks 999th of the 1,000 values. Very few random arrangements of GDPPC produce a statistic this large, which supports rejecting the null hypothesis of spatial randomness.
+:::
+
+#### 8.3.1 Challenge: Histogram with ggplot2
+
+The same histogram is drawn with **ggplot2**. The blue line marks the observed statistic, which makes the comparison with the simulated distribution visible on the plot.
+
+```{r}
+ggplot(data.frame(x = bperm$res), aes(x = x)) +
+  geom_histogram(binwidth = diff(range(bperm$res)) / 20,
+                 fill = "grey",
+                 color = "black") +
+  geom_vline(xintercept = 0,
+             color = "red",
+             linetype = "solid") +
+  geom_vline(xintercept = unname(bperm$statistic),
+             color = "blue",
+             linetype = "solid") +
+  labs(x = "Simulated Moran's I",
+       y = "Frequency",
+       title = "Histogram of Simulated Moran's I Values",
+       caption = paste0("Blue line: observed Moran's I of ",
+                        round(unname(bperm$statistic), 5), "."))
+```
+
+## 9 Global Measures of Spatial Autocorrelation: Geary's C
+
+This section performs Geary's C statistical testing using `geary.test()` and `geary.mc()` of **spdep**. 
+
+The null hypothesis is that GDPPC is randomly distributed across the counties of Hunan, and hence there is no spatial autocorrelation. Under the null hypothesis, the expected value of Geary's C is 1. A value below 1 indicates positive spatial autocorrelation, and a value above 1 indicates negative spatial autocorrelation. This is the reverse of Moran's I, where larger values indicate positive spatial autocorrelation.
+
+### 9.1 Geary's C Test
+
+The code chunk below performs Geary’s C test for spatial autocorrelation by using `geary.test()` of **spdep**.
+
+```{r}
+geary.test(hunan$GDPPC, listw = rswm_q)
+```
+
+::: callout-note
+**Interpretation:**
+
+The Geary's C statistic is 0.6907, which is below its expected value of 1. The standard deviate is 3.6108 and the p-value is 0.0001526. The null hypothesis is therefore rejected at the 95% confidence level since p-value is less than 0.05.
+
+GDPPC shows statistically significant positive spatial autocorrelation. Counties with similar GDPPC values tend to be located near one another. This agrees with the Moran's I test under randomisation.
+:::
+
+### 9.2 Computing Monte Carlo Geary's C
+
+The code chunk below performs permutation test for Geary’s C statistic by using `geary.mc()` of **spdep**.
+
+```{r}
+bperm <- geary.mc(hunan$GDPPC,
+                  listw = rswm_q,
+                  nsim = 999)
+bperm
+```
+
+::: callout-note
+**Interpretation:**
+
+The Geary's C statistic is 0.69072, the same value as in the Geary's C test under randomisation. It ranks 3rd among the 1,000 values. Small values of Geary's C indicate positive spatial autocorrelation. The p-value is 0.003, which is less than 0.05, so the null hypothesis of spatial randomness is rejected at the 95% confidence level.
+
+This agrees with the Geary's C test under randomisation. GDPPC shows statistically significant positive spatial autocorrelation.
+:::
+
+### 9.3 Visualising the Monte Carlo Geary's C
+
+The distribution of the simulated statistics is examined in more detail. The mean, variance and summary statistics are computed.
+
+```{r}
+mean(bperm$res[1:999])
+```
+
+```{r}
+var(bperm$res[1:999])
+```
+
+```{r}
+summary(bperm$res[1:999])
+```
+
+The distribution is then plotted as a histogram, with the red line marking 1, the expected value under the null hypothesis:
+
+```{r}
+hist(bperm$res,
+     freq = TRUE,
+     breaks = 20,
+     xlab = "Simulated Geary's C")
+abline(v = 1,
+       col = "red")
+```
+
+::: callout-note
+**Interpretation:**
+
+The 999 simulated values of Geary's C have a mean of 0.99916 and a median of 1.0005, both are close to the expected value of 1 under the null hypothesis. The variance is 0.007740. The distribution is approximately symmetric and bell-shaped, centred near the red line at 1.
+
+The Geary's C statistic is 0.69072, which lies below the first quartile of the simulated values (0.9396) and is only slightly above the simulated minimum. A statistic this small is rarely produced by a random arrangement of GDPPC across the counties. Since small values of Geary's C indicate positive spatial autocorrelation, this supports rejecting the null hypothesis of spatial randomness.
+:::
+
+#### 9.3.1 Challenge: Histogram with ggplot2
+
+The same histogram is drawn with **ggplot2**. The red line marks 1, the expected value under the null hypothesis, and the blue line marks the observed Geary's C.
+
+```{r}
+ggplot(data.frame(x = bperm$res), aes(x = x)) +
+  geom_histogram(binwidth = diff(range(bperm$res)) / 20,
+                 fill = "grey",
+                 color = "black") +
+  geom_vline(xintercept = 1,
+             color = "red",
+             linetype = "solid") +
+  geom_vline(xintercept = unname(bperm$statistic),
+             color = "blue",
+             linetype = "solid") +
+  labs(x = "Simulated Geary's C",
+       y = "Frequency",
+       title = "Histogram of Simulated Geary's C Values",
+       caption = paste0("Blue line: observed Geary's C of ",
+                        round(unname(bperm$statistic), 5), "."))
+```
+
+## 10 Spatial Correlogram
+
+A spatial correlogram shows how spatial autocorrelation changes as the separation between observations increases. It plots an index of autocorrelation, Moran's I or Geary's C, against the lag, so that the direction and strength of the autocorrelation can be read at each lag. Correlograms can be applied to a variable or to the residuals of a model. They are less fundamental than variograms, a core tool of geostatistics, but they are useful as an exploratory and descriptive tool for seeing how far spatial dependence extends.
+
+### 10.1 Moran's I Correlogram
+
+`sp.correlogram()` of **spdep** computes a spatial correlogram. The code chunk below computes a 6-lag correlogram of GDPPC using Moran's I, and `plot()` of base R plots the result:
+
+```{r}
+MI_corr <- sp.correlogram(wm_q,
+                          hunan$GDPPC,
+                          order = 6,
+                          method = "I",
+                          style = "W")
+plot(MI_corr)
+```
+
+The plot alone does not show which of the autocorrelation values are statistically significant. Hence, it is important to examine the full analysis report by printing out the analysis results.
+
+```{r}
+print(MI_corr)
+```
+
+::: callout-note
+**Interpretation:**
+
+The spatial correlogram shows how Moran's I changes as the lag between counties increases. Lag 1 refers to the immediate neighbours, and each further lag steps one county further out.
+
+**1. Significant positive spatial autocorrelation at short lags (lags 1 to 3)**
+
+- At lags 1 and 2, Moran's I is positive (0.30075 and 0.20601) and highly significant (p-values of 2.189e-06 and 2.029e-06, both below 0.05). Counties tend to have GDPPC values similar to those of nearby counties at these short lags.
+- At lag 3, Moran's I is smaller (0.06683), and its p-value of 0.0404 is below 0.05, so it is significant at the 5% level.
+
+**2. No significant spatial autocorrelation at lag 4**
+
+- Moran's I is 0.02995 and the p-value is 0.226. The null hypothesis of spatial randomness is not rejected at this lag since p-value is greater than 0.05. The autocorrelation at this lag cannot be distinguished from spatial randomness.
+
+**3. Significant negative spatial autocorrelation at long lags (lags 5 and 6)**
+
+- Moran's I is negative (-0.15305 and -0.11871) and significant (p-values of 5.984e-05 and 0.008886, both below 0.05), indicating statistically significant negative spatial autocorrelation.
+
+Overall, the positive spatial autocorrelation weakens as the lag increases, and turns significantly negative at lags 5 and 6.
+:::
+
+### 10.2 Compute Geary's C Correlogram and Plot
+
+The code chunk below computes a 6-lag spatial correlogram of GDPPC using Geary's C, with `sp.correlogram()` of **spdep**. The result is plotted with `plot()` of base R.
+
+```{r}
+GC_corr <- sp.correlogram(wm_q,
+                          hunan$GDPPC,
+                          order = 6,
+                          method = "C",
+                          style = "W")
+plot(GC_corr)
+```
+
+The full results for Geary's C are printed in the code chunk below:
+
+```{r}
+print(GC_corr)
+```
+
+::: callout-note
+**Interpretation:**
+
+The spatial correlogram shows how Geary's C changes as the lag between counties increases. Small values of Geary's C, below 1, indicate positive spatial autocorrelation, and large values, above 1, indicate negative spatial autocorrelation.
+
+**1. Significant positive spatial autocorrelation at short lags (lags 1 and 2)**
+
+- Geary's C is below 1 (0.69072 and 0.76302) and significant (p-values of 0.0003052 and 0.0007220, both below 0.05), indicating statistically significant positive spatial autocorrelation. Counties tend to have GDPPC values similar to those of nearby counties at these short lags.
+
+**2. No significant spatial autocorrelation at lags 3, 4 and 6**
+
+- Geary's C is 0.93973 (lag 3), 1.00985 (lag 4) and 1.07734 (lag 6), with p-values of 0.3893, 0.8757 and 0.3100 respectively, all above 0.05. Since p-value is greater than 0.05, the null hypothesis is not rejected. The autocorrelation at these lags cannot be distinguished from spatial randomness.
+
+**3. Significant negative spatial autocorrelation at lag 5**
+
+- Geary's C is above 1 (1.20082) and significant (p-value of 0.0007592, below 0.05), indicating statistically significant negative spatial autocorrelation. Counties tend to have GDPPC values that differ from those of the counties at lag 5.
+:::
