@@ -30,7 +30,7 @@ In spatial policy, one of the main development objectives of the local governmen
 
 This exercise examines the spatial pattern of a selected development indicator, GDP per capita ("GDPPC"), of Hunan Province, China. Three questions are addressed in sequence:
 
-1. Is `GDPPC` evenly distributed across the counties of Hunan?
+1. Is GDPPC evenly distributed across the counties of Hunan?
 2. If not, is there evidence of spatial clustering?
 3. If so, where are the clusters located?
 
@@ -50,9 +50,9 @@ Two data sets are used:
 Four packages are used in this exercise:
 
 - **sf** imports and handles the geospatial data
-- **tidyverse** supports attribute data handling
 - **spdep** computes the spatial weights and the global spatial autocorrelation statistics
 - **tmap** produces the choropleth maps
+- **tidyverse** supports attribute data handling
 
 ```{r}
 pacman::p_load(sf, spdep, tmap, tidyverse)

@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="dcterms.date" content="2026-09-24">
 
-<title>Hands-on_Ex05B – ISSS626 Geospatial Analytics</title>
+<title>Hands-on Exercise 5B: Local Measures of Spatial Autocorrelation – ISSS626 Geospatial Analytics</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -25,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -178,15 +214,32 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">1 Overview</a></li>
+  <li><a href="#analytical-questions" id="toc-analytical-questions" class="nav-link" data-scroll-target="#analytical-questions">2 Analytical Questions</a></li>
+  <li><a href="#the-study-area-and-data" id="toc-the-study-area-and-data" class="nav-link" data-scroll-target="#the-study-area-and-data">3 The Study Area and Data</a></li>
+  <li><a href="#installing-and-loading-r-packages" id="toc-installing-and-loading-r-packages" class="nav-link" data-scroll-target="#installing-and-loading-r-packages">4 Installing and Loading R Packages</a></li>
+  <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">5 Reproducibility</a></li>
+  <li><a href="#getting-the-data-into-r" id="toc-getting-the-data-into-r" class="nav-link" data-scroll-target="#getting-the-data-into-r">6 Getting the Data into R</a>
+  <ul>
+  <li><a href="#importing-the-shapefile" id="toc-importing-the-shapefile" class="nav-link" data-scroll-target="#importing-the-shapefile">6.1 Importing the Shapefile</a></li>
+  <li><a href="#importing-the-csv-file" id="toc-importing-the-csv-file" class="nav-link" data-scroll-target="#importing-the-csv-file">6.2 Importing the CSV File</a></li>
+  <li><a href="#performing-relational-join" id="toc-performing-relational-join" class="nav-link" data-scroll-target="#performing-relational-join">6.3 Performing relational join</a></li>
+  <li><a href="#visualising-regional-development-indicator" id="toc-visualising-regional-development-indicator" class="nav-link" data-scroll-target="#visualising-regional-development-indicator">6.4 Visualising Regional Development Indicator</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Hands-on_Ex05B</h1>
+<h1 class="title">Hands-on Exercise 5B: Local Measures of Spatial Autocorrelation</h1>
 </div>
 
 
@@ -194,7 +247,19 @@ ul.task-list li input[type="checkbox"] {
 <div class="quarto-title-meta">
 
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 24, 2026</p>
+    </div>
+  </div>
   
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">September 25, 2026</p>
+    </div>
+  </div>
     
   </div>
   
@@ -203,8 +268,185 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">1 Overview</h2>
+<p>Local Measures of Spatial Autocorrelation (LMSA) focus on the relationship between each observation and its surroundings. They are not summary statistics but scores, one per location, that reveal where the spatial structure occurs. The intuition is similar to that of the global measures, and some are mathematically connected: a global statistic can be decomposed into a collection of local ones. Local Indicators of Spatial Association (LISA) are one such example, while the Getis-Ord’s Gi-statistics is an alternative LMSA that provides complementary or similar insights on the same data.</p>
+<p>This exercise focuses on computing Local Measures of Spatial Autocorrelation (LMSA) using the <strong>sfdep</strong> package. It covers the following:</p>
+<ul>
+<li>importing the geospatial data with <strong>sf</strong></li>
+<li>importing the csv file with <strong>readr</strong></li>
+<li>performing a relational join with <strong>dplyr</strong></li>
+<li>computing LISA statistics to detect clusters and outliers</li>
+<li>computing Getis-Ord’s Gi-statistics to detect hot spots and cold spots</li>
+<li>visualising the results with <strong>tmap</strong></li>
+</ul>
+</section>
+<section id="analytical-questions" class="level2">
+<h2 class="anchored" data-anchor-id="analytical-questions">2 Analytical Questions</h2>
+<p>In spatial policy, one of the main development objectives of the local government and planners is to ensure equal distribution of development in the province.</p>
+<p>This exercise examines the spatial pattern of a selected development indicator, GDP per capita (“GDPPC”), of Hunan Province, China. Three questions are addressed in sequence:</p>
+<ol type="1">
+<li>Is GDPPC evenly distributed across the counties of Hunan?</li>
+<li>If not, is there evidence of spatial clustering?</li>
+<li>If so, where are the clusters located?</li>
+</ol>
+<p>The first two questions were answered in <strong>Hands-on Exercise 5A</strong> using global measures of spatial autocorrelation. This exercise addresses the third using local measures.</p>
+</section>
+<section id="the-study-area-and-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-study-area-and-data">3 The Study Area and Data</h2>
+<p>Two data sets are used:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Data set</th>
+<th>Format</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Hunan</td>
+<td>ESRI shapefile</td>
+<td>County boundary layer for Hunan province</td>
+</tr>
+<tr class="even">
+<td>Hunan_2012.csv</td>
+<td>csv</td>
+<td>Selected local development indicators for Hunan’s counties in 2012</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="installing-and-loading-r-packages" class="level2">
+<h2 class="anchored" data-anchor-id="installing-and-loading-r-packages">4 Installing and Loading R Packages</h2>
+<p>Four packages are used in this exercise:</p>
+<ul>
+<li><strong>sf</strong> imports and handles the geospatial data</li>
+<li><strong>sfdep</strong> computes the spatial weights and the local spatial autocorrelation statistics</li>
+<li><strong>tmap</strong> produces the choropleth maps</li>
+<li><strong>tidyverse</strong> supports attribute data handling</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, sfdep, tmap, tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="reproducibility" class="level2">
+<h2 class="anchored" data-anchor-id="reproducibility">5 Reproducibility</h2>
+<p>The local Moran’s I and Getis-Ord’s Gi-statistics computations rely on random permutations of the data. A seed is set so that the simulated results are identical across renders.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="getting-the-data-into-r" class="level2">
+<h2 class="anchored" data-anchor-id="getting-the-data-into-r">6 Getting the Data into R</h2>
+<p>The boundary layer and the indicator table are imported separately and then combined through a relational join.</p>
+<section id="importing-the-shapefile" class="level3">
+<h3 class="anchored" data-anchor-id="importing-the-shapefile">6.1 Importing the Shapefile</h3>
+<p>The shapefile is imported with <code>st_read()</code> of <strong>sf</strong>, which returns a simple features object.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>hunan <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial"</span>,</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">layer =</span> <span class="st">"Hunan"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32650</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `Hunan' from data source 
+  `C:\yxlinn\ISSS626-GAA\Hands-on_Ex\Hands-on_Ex05B\data\geospatial' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 88 features and 7 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: 108.7831 ymin: 24.6342 xmax: 114.2544 ymax: 30.12812
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The raw data is in WGS 84 geographic coordinates system. For geospatial analysis, it is appropriate to use projected coordinates system. In the code chunk above, <code>st_transform()</code> is used to transform Hunan geospatial data from WGS 84 to UTM zone 50N (i.e.&nbsp;EPSG: 32650).</p>
+</div>
+</div>
+</section>
+<section id="importing-the-csv-file" class="level3">
+<h3 class="anchored" data-anchor-id="importing-the-csv-file">6.2 Importing the CSV File</h3>
+<p><code>Hunan_2012.csv</code> is imported with <code>read_csv()</code> of <strong>readr</strong>, which returns a data frame class.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>hunan2012 <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/Hunan_2012.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="performing-relational-join" class="level3">
+<h3 class="anchored" data-anchor-id="performing-relational-join">6.3 Performing relational join</h3>
+<p>The attribute table of <code>hunan</code> is extended with the fields of <code>hunan2012</code> using <code>left_join()</code> of <strong>dplyr</strong>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>hunan <span class="ot">&lt;-</span> <span class="fu">left_join</span>(hunan, hunan2012) <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">7</span>, <span class="dv">15</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="visualising-regional-development-indicator" class="level3">
+<h3 class="anchored" data-anchor-id="visualising-regional-development-indicator">6.4 Visualising Regional Development Indicator</h3>
+<p>The distribution of GDPPC 2012 is mapped as two choropleth maps using <strong>tmap</strong>, one with equal interval classification and the other with quantile classification.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>equal <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(hunan) <span class="sc">+</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"GDPPC"</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.scale =</span> <span class="fu">tm_scale_intervals</span>(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">style =</span> <span class="st">"equal"</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">n =</span> <span class="dv">5</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">values =</span> <span class="st">"brewer.blues"</span>)) <span class="sc">+</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">legend.position =</span> <span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">main.title =</span> <span class="st">"Equal interval classification"</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>quantile <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(hunan) <span class="sc">+</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"GDPPC"</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.scale =</span> <span class="fu">tm_scale_intervals</span>(</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>                <span class="at">style =</span> <span class="st">"quantile"</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>                <span class="at">n =</span> <span class="dv">5</span>,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>                <span class="at">values =</span> <span class="st">"brewer.blues"</span>)) <span class="sc">+</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">legend.position =</span> <span class="fu">c</span>(<span class="st">"left"</span>, <span class="st">"bottom"</span>),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">main.title =</span> <span class="st">"Quantile classification"</span>)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_arrange</span>(equal,</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>             quantile,</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>             <span class="at">asp =</span> <span class="dv">1</span>,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>             <span class="at">ncol =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Hands-on_Ex05B_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Interpretation:</strong></p>
+<p><strong>Outliers and clusters:</strong></p>
+<p>Both maps suggest clustering and possible outliers in GDPPC. In the <strong>equal interval</strong> map, most counties fall in the lowest class, while a group of adjacent counties in the east part of the province holds the highest classes. A small county near the centre and a county in the south-east stand out from their neighbours and are possible outliers. In the <strong>quantile</strong> map, the high classes extend across the east and north-east, with a second group in the south-east.</p>
+<p><strong>Hot spots and cold spots:</strong></p>
+<p>The east group appears to be a hot spot, since counties with high GDPPC sit next to one another. The west and north-west appear to be a cold spot, most visibly in the quantile map, where these counties fall mainly in the lowest classes. The equal interval map is less informative for cold spots, as most of the province falls in the lowest class.</p>
+</div>
+</div>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

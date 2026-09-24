@@ -1,5 +1,147 @@
 ---
-title: "Hands-on_Ex05B"
+title: "Hands-on Exercise 5B: Local Measures of Spatial Autocorrelation"
+date: "September 24, 2026"
+date-modified: "last-modified"
 format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
 ---
 
+## 1 Overview
+
+Local Measures of Spatial Autocorrelation (LMSA) focus on the relationship between each observation and its surroundings. They are not summary statistics but scores, one per location, that reveal where the spatial structure occurs. The intuition is similar to that of the global measures, and some are mathematically connected: a global statistic can be decomposed into a collection of local ones. Local Indicators of Spatial Association (LISA) are one such example, while the Getis-Ord's Gi-statistics is an alternative LMSA that provides complementary or similar insights on the same data.
+
+This exercise focuses on computing Local Measures of Spatial Autocorrelation (LMSA) using the **sfdep** package. It covers the following:
+
+- importing the geospatial data with **sf** 
+- importing the csv file with **readr**
+- performing a relational join with **dplyr**
+- computing LISA statistics to detect clusters and outliers
+- computing Getis-Ord's Gi-statistics to detect hot spots and cold spots
+- visualising the results with **tmap**
+
+## 2 Analytical Questions
+
+In spatial policy, one of the main development objectives of the local government and planners is to ensure equal distribution of development in the province. 
+
+This exercise examines the spatial pattern of a selected development indicator, GDP per capita ("GDPPC"), of Hunan Province, China. Three questions are addressed in sequence:
+
+1. Is GDPPC evenly distributed across the counties of Hunan?
+2. If not, is there evidence of spatial clustering?
+3. If so, where are the clusters located?
+
+The first two questions were answered in **Hands-on Exercise 5A** using global measures of spatial autocorrelation. This exercise addresses the third using local measures.
+
+## 3 The Study Area and Data
+
+Two data sets are used:
+
+| Data set | Format | Description |
+|-----|-----|-----|
+| Hunan | ESRI shapefile | County boundary layer for Hunan province |
+| Hunan_2012.csv | csv | Selected local development indicators for Hunan's counties in 2012 |
+
+## 4 Installing and Loading R Packages
+
+Four packages are used in this exercise:
+
+- **sf** imports and handles the geospatial data
+- **sfdep** computes the spatial weights and the local spatial autocorrelation statistics
+- **tmap** produces the choropleth maps
+- **tidyverse** supports attribute data handling
+
+```{r}
+pacman::p_load(sf, sfdep, tmap, tidyverse)
+```
+
+## 5 Reproducibility
+
+The local Moran's I and Getis-Ord's Gi-statistics computations rely on random permutations of the data. A seed is set so that the simulated results are identical across renders.
+
+```{r}
+set.seed(123)
+```
+
+## 6 Getting the Data into R
+
+The boundary layer and the indicator table are imported separately and then combined through a relational join.
+
+### 6.1 Importing the Shapefile
+
+The shapefile is imported with `st_read()` of **sf**, which returns a simple features object.
+
+```{r}
+hunan <- st_read(dsn = "data/geospatial",
+                 layer = "Hunan") %>%
+  st_transform(crs = 32650)
+```
+
+::: callout-tip
+The raw data is in WGS 84 geographic coordinates system. For geospatial analysis, it is appropriate to use projected coordinates system. In the code chunk above, `st_transform()` is used to transform Hunan geospatial data from WGS 84 to UTM zone 50N (i.e. EPSG: 32650).
+:::
+
+### 6.2 Importing the CSV File
+
+`Hunan_2012.csv` is imported with `read_csv()` of **readr**, which returns a data frame class.
+
+```{r}
+hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv")
+```
+
+### 6.3 Performing relational join
+
+The attribute table of `hunan` is extended with the fields of `hunan2012` using `left_join()` of **dplyr**.
+
+```{r}
+hunan <- left_join(hunan, hunan2012) %>%
+  select(1:4, 7, 15)
+```
+
+### 6.4 Visualising Regional Development Indicator
+
+The distribution of GDPPC 2012 is mapped as two choropleth maps using **tmap**, one with equal interval classification and the other with quantile classification.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 8
+
+equal <- tm_shape(hunan) +
+  tm_polygons(fill = "GDPPC",
+              fill.scale = tm_scale_intervals(
+                style = "equal",
+                n = 5,
+                values = "brewer.blues")) +
+  tm_layout(legend.position = c("left", "bottom"),
+            main.title = "Equal interval classification")
+
+quantile <- tm_shape(hunan) +
+  tm_polygons(fill = "GDPPC",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "brewer.blues")) +
+  tm_layout(legend.position = c("left", "bottom"),
+            main.title = "Quantile classification")
+
+tmap_arrange(equal,
+             quantile,
+             asp = 1,
+             ncol = 2)
+```
+
+::: callout-note
+**Interpretation:**
+
+**Outliers and clusters:** 
+
+Both maps suggest clustering and possible outliers in GDPPC. In the **equal interval** map, most counties fall in the lowest class, while a group of adjacent counties in the east part of the province holds the highest classes. A small county near the centre and a county in the south-east stand out from their neighbours and are possible outliers. In the **quantile** map, the high classes extend across the east and north-east, with a second group in the south-east.
+
+**Hot spots and cold spots:** 
+
+The east group appears to be a hot spot, since counties with high GDPPC sit next to one another. The west and north-west appear to be a cold spot, most visibly in the quantile map, where these counties fall mainly in the lowest classes. The equal interval map is less informative for cold spots, as most of the province falls in the lowest class.
+:::
