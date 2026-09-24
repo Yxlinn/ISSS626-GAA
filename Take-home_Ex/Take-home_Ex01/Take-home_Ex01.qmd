@@ -272,4 +272,131 @@ roads_bmr <- st_cast(roads_bmr, "LINESTRING")
 
 The resulting `roads_bmr` is the road network used for the network-constrained kernel density estimation later in this exercise.
 
+## 7 Feature Engineering
+
+`accidents_bmr` currently only has a single timestamp column, `incident_datetime`. This section derives temporal and contextual variables from it, which is needed to examine how accidents vary over time.
+
+**1. Temporal Variables**
+
+Temporal variables are extracted first:
+
+```{r}
+accidents_bmr <- accidents_bmr %>%
+  mutate(month = month(incident_datetime),
+         month_label = month(incident_datetime, label = TRUE, abbr = TRUE),
+         day_of_week = wday(incident_datetime, label = TRUE, week_start = 1),
+         day_of_year = yday(incident_datetime))
+```
+
+**2. Season**
+
+Season is derived based on Thailand's official three-season year - hot, rainy, and cool ([Government Public Relations Department](https://thailand.go.th/event-detail/009_142)):
+
+```{r}
+accidents_bmr <- accidents_bmr %>%
+  mutate(
+    md = format(incident_datetime, "%m-%d"),
+    season = case_when(
+      md >= "02-15" & md < "05-15" ~ "Hot",
+      md >= "05-15" & md < "10-15" ~ "Rainy",
+      TRUE ~ "Cool"
+    )
+  ) %>%
+  select(-md)
+```
+
+**3. Peak Period**
+
+Peak period is derived based on Bangkok's known morning and evening rush hours. The exact cutoffs used here are a reasonable estimate rather than an official rule.
+
+```{r}
+accidents_bmr <- accidents_bmr %>%
+  mutate(
+    hms = format(incident_datetime, "%H:%M:%S"),
+    peak_period = case_when(
+      hms >= "07:00:00" & hms <= "09:00:00" ~ "Morning Peak",
+      hms >= "16:00:00" & hms <= "19:00:00" ~ "Evening Peak",
+      TRUE ~ "Off-Peak"
+    )
+  ) %>%
+  select(-hms)
+```
+
+**4. Songkran: "Seven Dangerous Days"**
+
+Songkran's "Seven Dangerous Days" is Thailand's annual road-safety campaign, covering the week surrounding the Songkran New Year holiday, a period nationally recognised for a sharp rise in road accidents. Since this study covers 2022, the relevant campaign dates are 11 to 17 April that year ([The Phuket News](https://www.pressreader.com/thailand/the-phuket-news/20220422/281560884348253)).
+
+```{r}
+accidents_bmr <- accidents_bmr %>% 
+  mutate(songkran_dangerous_days = 
+           incident_datetime >= as.Date("2022-04-11") & 
+           incident_datetime < as.Date("2022-04-18"))
+```
+
+Finally, unused columns are dropped: `province_th` (same information as `province_en`), `report_datetime` (reporting lag), and `route` (unused free text).
+
+```{r}
+accidents_bmr <- accidents_bmr %>%
+  select(-province_th, -report_datetime, -route)
+```
+
+```{r}
+glimpse(accidents_bmr)
+```
+
+## 8 Spatial Point Pattern Analysis (SPPA)
+
+This section applies spatial point pattern analysis (SPPA) using **spatstat** to quantify how road traffic accidents are distributed across the BMR, and to test whether the distribution departs from the Complete Spatial Randomness (CSR) hypothesis, which assumes that accidents occur independently and uniformly across the study area. 
+
+Three methods are applied:
+
+1. **First-order analysis:** Examine how accident intensity varies across the region, using kernel density estimation to identify areas of concentration
+
+2. **Second-order analysis:** Use Ripley's G, F, K, and L functions to test whether accidents are more clustered, more regular, or consistent with CSR at varying distances
+
+3. **Network-constrained analysis:** Account for accidents being restricted to the road network rather than free to occur anywhere in planar space
+
+### 8.1 Constructing the Point Pattern Objects
+
+Before SPPA can begin, the `sf` objects prepared above are converted into `ppp` (point pattern) and `owin` (observation window) objects, so that they are in the formats **spatstat** works with.
+
+The observation window is built first, from `adm2_bmr`:
+
+```{r}
+adm2_owin <- as.owin(adm2_bmr)
+adm2_owin
+```
+
+The point pattern is then built from `accidents_bmr`, using the above observation window:
+
+```{r}
+accidents_ppp <- as.ppp(accidents_bmr, W = adm2_owin)
+accidents_ppp
+```
+
+Next, the point pattern is checked for duplicated points, since accidents recorded at identical coordinates are treated differently by **spatstat** than by **sf**:
+
+```{r}
+any(duplicated(accidents_ppp))
+```
+
+::: callout-note
+Since no duplicated points are found, `rjitter()` will not be needed.
+:::
+
+`accidents_ppp` and `adm2`_owin are rescaled from metres to kilometres as this keeps the intensity and area readable.
+
+```{r}
+accidents_ppp_km <- rescale(accidents_ppp, 1000, "km")
+adm2_owin_km <- rescale(adm2_owin, 1000, "km")
+```
+
+The rescaled point pattern is plotted against its window, confirming the points fall within the study area:
+
+```{r}
+#| fig-width: 12
+#| fig-height: 8
+plot(unmark(accidents_ppp_km), main = "Road Accidents in the BMR (2022)")
+```
+
 ## Reference

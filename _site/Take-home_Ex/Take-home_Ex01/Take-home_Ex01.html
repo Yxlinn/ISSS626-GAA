@@ -222,6 +222,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#administrative-boundaries-bangkok-metropolitan-region-bmr" id="toc-administrative-boundaries-bangkok-metropolitan-region-bmr" class="nav-link" data-scroll-target="#administrative-boundaries-bangkok-metropolitan-region-bmr">6.2 Administrative Boundaries: Bangkok Metropolitan Region (BMR)</a></li>
   <li><a href="#road-network" id="toc-road-network" class="nav-link" data-scroll-target="#road-network">6.3 Road Network</a></li>
   </ul></li>
+  <li><a href="#feature-engineering" id="toc-feature-engineering" class="nav-link" data-scroll-target="#feature-engineering">7 Feature Engineering</a></li>
+  <li><a href="#spatial-point-pattern-analysis-sppa" id="toc-spatial-point-pattern-analysis-sppa" class="nav-link" data-scroll-target="#spatial-point-pattern-analysis-sppa">8 Spatial Point Pattern Analysis (SPPA)</a>
+  <ul>
+  <li><a href="#constructing-the-point-pattern-objects" id="toc-constructing-the-point-pattern-objects" class="nav-link" data-scroll-target="#constructing-the-point-pattern-objects">8.1 Constructing the Point Pattern Objects</a></li>
+  </ul></li>
   <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">Reference</a></li>
   </ul>
 </nav>
@@ -250,7 +255,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">September 21, 2026</p>
+      <p class="date-modified">September 22, 2026</p>
     </div>
   </div>
     
@@ -820,6 +825,162 @@ Note
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>roads_bmr <span class="ot">&lt;-</span> <span class="fu">st_cast</span>(roads_bmr, <span class="st">"LINESTRING"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The resulting <code>roads_bmr</code> is the road network used for the network-constrained kernel density estimation later in this exercise.</p>
+</section>
+</section>
+<section id="feature-engineering" class="level2">
+<h2 class="anchored" data-anchor-id="feature-engineering">7 Feature Engineering</h2>
+<p><code>accidents_bmr</code> currently only has a single timestamp column, <code>incident_datetime</code>. This section derives temporal and contextual variables from it, which is needed to examine how accidents vary over time.</p>
+<p><strong>1. Temporal Variables</strong></p>
+<p>Temporal variables are extracted first:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>accidents_bmr <span class="ot">&lt;-</span> accidents_bmr <span class="sc">%&gt;%</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">month =</span> <span class="fu">month</span>(incident_datetime),</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">month_label =</span> <span class="fu">month</span>(incident_datetime, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">abbr =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">day_of_week =</span> <span class="fu">wday</span>(incident_datetime, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">week_start =</span> <span class="dv">1</span>),</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">day_of_year =</span> <span class="fu">yday</span>(incident_datetime))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>2. Season</strong></p>
+<p>Season is derived based on Thailand’s official three-season year - hot, rainy, and cool (<a href="https://thailand.go.th/event-detail/009_142">Government Public Relations Department</a>):</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>accidents_bmr <span class="ot">&lt;-</span> accidents_bmr <span class="sc">%&gt;%</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">md =</span> <span class="fu">format</span>(incident_datetime, <span class="st">"%m-%d"</span>),</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">season =</span> <span class="fu">case_when</span>(</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>      md <span class="sc">&gt;=</span> <span class="st">"02-15"</span> <span class="sc">&amp;</span> md <span class="sc">&lt;</span> <span class="st">"05-15"</span> <span class="sc">~</span> <span class="st">"Hot"</span>,</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>      md <span class="sc">&gt;=</span> <span class="st">"05-15"</span> <span class="sc">&amp;</span> md <span class="sc">&lt;</span> <span class="st">"10-15"</span> <span class="sc">~</span> <span class="st">"Rainy"</span>,</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Cool"</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>md)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>3. Peak Period</strong></p>
+<p>Peak period is derived based on Bangkok’s known morning and evening rush hours. The exact cutoffs used here are a reasonable estimate rather than an official rule.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>accidents_bmr <span class="ot">&lt;-</span> accidents_bmr <span class="sc">%&gt;%</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">hms =</span> <span class="fu">format</span>(incident_datetime, <span class="st">"%H:%M:%S"</span>),</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">peak_period =</span> <span class="fu">case_when</span>(</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>      hms <span class="sc">&gt;=</span> <span class="st">"07:00:00"</span> <span class="sc">&amp;</span> hms <span class="sc">&lt;=</span> <span class="st">"09:00:00"</span> <span class="sc">~</span> <span class="st">"Morning Peak"</span>,</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>      hms <span class="sc">&gt;=</span> <span class="st">"16:00:00"</span> <span class="sc">&amp;</span> hms <span class="sc">&lt;=</span> <span class="st">"19:00:00"</span> <span class="sc">~</span> <span class="st">"Evening Peak"</span>,</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Off-Peak"</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>hms)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>4. Songkran: “Seven Dangerous Days”</strong></p>
+<p>Songkran’s “Seven Dangerous Days” is Thailand’s annual road-safety campaign, covering the week surrounding the Songkran New Year holiday, a period nationally recognised for a sharp rise in road accidents. Since this study covers 2022, the relevant campaign dates are 11 to 17 April that year (<a href="https://www.pressreader.com/thailand/the-phuket-news/20220422/281560884348253">The Phuket News</a>).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>accidents_bmr <span class="ot">&lt;-</span> accidents_bmr <span class="sc">%&gt;%</span> </span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">songkran_dangerous_days =</span> </span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>           incident_datetime <span class="sc">&gt;=</span> <span class="fu">as.Date</span>(<span class="st">"2022-04-11"</span>) <span class="sc">&amp;</span> </span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>           incident_datetime <span class="sc">&lt;</span> <span class="fu">as.Date</span>(<span class="st">"2022-04-18"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Finally, unused columns are dropped: <code>province_th</code> (same information as <code>province_en</code>), <code>report_datetime</code> (reporting lag), and <code>route</code> (unused free text).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>accidents_bmr <span class="ot">&lt;-</span> accidents_bmr <span class="sc">%&gt;%</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>province_th, <span class="sc">-</span>report_datetime, <span class="sc">-</span>route)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(accidents_bmr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 3,593
+Columns: 21
+$ acc_code                    &lt;dbl&gt; 5652876, 5484851, 6566824, 5485786, 549368…
+$ incident_datetime           &lt;dttm&gt; 2022-01-01 01:00:00, 2022-01-01 02:30:00,…
+$ province_en                 &lt;chr&gt; "Nonthaburi", "Samut Prakan", "Samut Sakho…
+$ agency                      &lt;chr&gt; "department of highways", "department of h…
+$ vehicle_type                &lt;chr&gt; "private/passenger car", "4-wheel pickup t…
+$ presumed_cause              &lt;chr&gt; "speeding", "speeding", "driving under the…
+$ accident_type               &lt;chr&gt; "rollover/fallen on straight road", "colli…
+$ number_of_vehicles_involved &lt;dbl&gt; 1, 2, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 6, 2, …
+$ number_of_fatalities        &lt;dbl&gt; 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ number_of_injuries          &lt;dbl&gt; 0, 0, 1, 0, 0, 1, 1, 0, 2, 2, 0, 2, 0, 1, …
+$ weather_condition           &lt;chr&gt; "clear", "clear", "clear", "clear", "clear…
+$ road_description            &lt;chr&gt; "straight road", "straight road", "straigh…
+$ slope_description           &lt;chr&gt; "no slope", "no slope", "no slope", "no sl…
+$ geometry                    &lt;POINT [m]&gt; POINT (665062.3 1540262), POINT (677…
+$ month                       &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+$ month_label                 &lt;ord&gt; Jan, Jan, Jan, Jan, Jan, Jan, Jan, Jan, Ja…
+$ day_of_week                 &lt;ord&gt; Sat, Sat, Sat, Sat, Sat, Sat, Sat, Sat, Sa…
+$ day_of_year                 &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+$ season                      &lt;chr&gt; "Cool", "Cool", "Cool", "Cool", "Cool", "C…
+$ peak_period                 &lt;chr&gt; "Off-Peak", "Off-Peak", "Off-Peak", "Off-P…
+$ songkran_dangerous_days     &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, …</code></pre>
+</div>
+</div>
+</section>
+<section id="spatial-point-pattern-analysis-sppa" class="level2">
+<h2 class="anchored" data-anchor-id="spatial-point-pattern-analysis-sppa">8 Spatial Point Pattern Analysis (SPPA)</h2>
+<p>This section applies spatial point pattern analysis (SPPA) using <strong>spatstat</strong> to quantify how road traffic accidents are distributed across the BMR, and to test whether the distribution departs from the Complete Spatial Randomness (CSR) hypothesis, which assumes that accidents occur independently and uniformly across the study area.</p>
+<p>Three methods are applied:</p>
+<ol type="1">
+<li><p><strong>First-order analysis:</strong> Examine how accident intensity varies across the region, using kernel density estimation to identify areas of concentration</p></li>
+<li><p><strong>Second-order analysis:</strong> Use Ripley’s G, F, K, and L functions to test whether accidents are more clustered, more regular, or consistent with CSR at varying distances</p></li>
+<li><p><strong>Network-constrained analysis:</strong> Account for accidents being restricted to the road network rather than free to occur anywhere in planar space</p></li>
+</ol>
+<section id="constructing-the-point-pattern-objects" class="level3">
+<h3 class="anchored" data-anchor-id="constructing-the-point-pattern-objects">8.1 Constructing the Point Pattern Objects</h3>
+<p>Before SPPA can begin, the <code>sf</code> objects prepared above are converted into <code>ppp</code> (point pattern) and <code>owin</code> (observation window) objects, so that they are in the formats <strong>spatstat</strong> works with.</p>
+<p>The observation window is built first, from <code>adm2_bmr</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>adm2_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(adm2_bmr)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>adm2_owin</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>window: polygonal boundary
+enclosing rectangle: [565545.8, 743060.3] x [1468709.7, 1599777.2] units</code></pre>
+</div>
+</div>
+<p>The point pattern is then built from <code>accidents_bmr</code>, using the above observation window:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>accidents_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(accidents_bmr, <span class="at">W =</span> adm2_owin)</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>accidents_ppp</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Marked planar point pattern: 3593 points
+Mark variables: 
+   acc_code incident_datetime province_en agency vehicle_type presumed_cause 
+accident_type number_of_vehicles_involved number_of_fatalities 
+number_of_injuries weather_condition road_description slope_description month 
+month_label day_of_week day_of_year season peak_period songkran_dangerous_days
+window: polygonal boundary
+enclosing rectangle: [565545.8, 743060.3] x [1468709.7, 1599777.2] units</code></pre>
+</div>
+</div>
+<p>Next, the point pattern is checked for duplicated points, since accidents recorded at identical coordinates are treated differently by <strong>spatstat</strong> than by <strong>sf</strong>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(accidents_ppp))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] FALSE</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Since no duplicated points are found, <code>rjitter()</code> will not be needed.</p>
+</div>
+</div>
+<p><code>accidents_ppp</code> and <code>adm2</code>_owin are rescaled from metres to kilometres as this keeps the intensity and area readable.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>accidents_ppp_km <span class="ot">&lt;-</span> <span class="fu">rescale</span>(accidents_ppp, <span class="dv">1000</span>, <span class="st">"km"</span>)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>adm2_owin_km <span class="ot">&lt;-</span> <span class="fu">rescale</span>(adm2_owin, <span class="dv">1000</span>, <span class="st">"km"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The rescaled point pattern is plotted against its window, confirming the points fall within the study area:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">unmark</span>(accidents_ppp_km), <span class="at">main =</span> <span class="st">"Road Accidents in the BMR (2022)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 </section>
 <section id="reference" class="level2">
