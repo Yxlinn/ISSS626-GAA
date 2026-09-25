@@ -139,9 +139,342 @@ tmap_arrange(equal,
 
 **Outliers and clusters:** 
 
-Both maps suggest clustering and possible outliers in GDPPC. In the **equal interval** map, most counties fall in the lowest class, while a group of adjacent counties in the east part of the province holds the highest classes. A small county near the centre and a county in the south-east stand out from their neighbours and are possible outliers. In the **quantile** map, the high classes extend across the east and north-east, with a second group in the south-east.
+Both maps suggest clustering and possible outliers from GDPPC. In the **equal interval** map, most counties fall in the lowest class, while a group of adjacent counties in the east part of the province holds the highest classes. A small county near the centre and a county in the south-east stand out from their neighbours and are possible outliers. In the **quantile** map, the high classes extend across the east and north-east, with a second group in the south-east.
 
 **Hot spots and cold spots:** 
 
 The east group appears to be a hot spot, since counties with high GDPPC sit next to one another. The west and north-west appear to be a cold spot, most visibly in the quantile map, where these counties fall mainly in the lowest classes. The equal interval map is less informative for cold spots, as most of the province falls in the lowest class.
 :::
+
+## 7 Local Indicators of Spatial Association (LISA)
+
+Local Indicators of Spatial Association (LISA) are statistics that evaluate the existence of clusters and outliers in the spatial arrangement of a variable. A local cluster in GDPPC means that a group of neighbouring counties has higher or lower values than would be expected under a random spatial distribution.
+
+This section applies local Moran's I, a LISA statistic, to detect clusters and outliers from GDPPC across the counties of Hunan Province.
+
+### 7.1 Computing Contiguity Spatial Weights
+
+Before the global spatial autocorrelation statistics can be computed, spatial weights must be constructed for the study area. The spatial weights define the neighbourhood relationships between the geographical units, which are the counties in this case.
+
+In the code chunk below, `st_contiguity()` of **sfdep** is used to compute contiguity weight matrices for the study area. This function builds a neighbour list based on counties that share a boundary. Its `queen` argument controls the contiguity criterion: `TRUE` (default) uses the Queen criterion (shared edges or corners count as neighbours), while `FALSE` uses the stricter Rook criterion (shared edges only).
+
+`st_weights()` then calculates the weights from the neighbour list, using three arguments:
+
+- `nb`: The neighbour list, as created by `st_contiguity()`.
+- `style`: The weighting scheme. "W" (default), is row standardised, so each county's weights sum to one across its neighbours. Other schemes ("B", "C", "U", "S") are available for cases needing a different standardisation.
+- `allow_zero`: If `TRUE`, assigns a weight of zero rather than an error to a county without neighbours.
+
+```{r}
+wm_q <- hunan %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb, style = "W"),
+         .before = 1)
+```
+
+::: callout-tip
+`mutate()` is used to write the computed `nb` and `wt` columns back into `hunan`.
+:::
+
+Below code chunk reveals the neighbour list.
+
+```{r}
+summary(wm_q$nb)
+```
+
+The summary report shows that there are 88 area units in Hunan. The most connected area unit has 11 neighbours (Region 85). There are two area units (Region 30 and 65) with only one neighbour.
+
+::: callout-important
+Unlike the two-step process in Hands-on Exercise 5A (`poly2nb()` then `nb2listw()`), row-standardisation here is already applied within `st_weights()`, since style = "W" was passed as an argument inside the same `mutate()` call that built `wm_q`. No separate conversion step is needed.
+:::
+
+### 7.2 Computing local Moran's I
+
+To compute local Moran's I, the *local_moran()* function of **sfdep** is used. It computes Ii values, given the variable of interest, the neighbour list and the weights list for the polygon associated with each Ii value.
+
+The code chunk below computes local Moran's I of GDPPC at the county level.
+
+```{r}
+lisa <- wm_q %>%
+  mutate(local_moran = local_moran(
+    GDPPC, nb, wt, nsim = 99),
+    .before = 1) %>%
+  unnest(local_moran)
+```
+
+`local_moran()` returns a data frame with one row per county. The key columns are:
+
+- ii: the local Moran's I statistic.
+- eii: the expected value of local Moran statistic under the randomisation hypothesis.
+- var_ii: the variance of local Moran statistic under the randomisation hypothesis.
+- z_ii: the standardised value of local Moran statistic
+- p_ii: the p-value under the randomisation hypothesis
+
+```{r}
+glimpse(lisa)
+```
+
+#### 7.2.1 Mapping local Moran's I values
+
+The local Moran's I values can be plotted using choropleth mapping functions of the **tmap** package, as shown in the code chunk below.
+
+```{r}
+tm_shape(lisa) +
+  tm_polygons(fill = "ii",
+              fill.scale = tm_scale_intervals(
+                style = "pretty",
+                n = 5,
+                values = "brewer.RdBu"),
+              fill.legend = tm_legend(
+                title = "Local Moran's I",
+                position = tm_pos_out())) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Local Moran's I of GDPPC (Queen's method)")
+```
+
+::: callout-note
+**Interpretation:**
+
+The map shows a cluster of strongly positive local Moran's I values (dark blue, reaching 3.0 to 5.0) in the east and north-east of the province, indicating counties whose GDPPC closely resembles their neighbours' values. Most of the remaining counties show weak positive values (pale blue), suggesting little local spatial structure. A scattering of counties with negative values (orange) appear across the province rather than forming a cluster.
+:::
+
+#### 7.2.2 Mapping local Moran's I p-values
+
+The map of local Moran's I values shows evidence of both positive and negative ii, but it does not indicate which of these are statistically significant. The p-values for each county are mapped below for that purpose.
+
+```{r}
+tm_shape(lisa) +
+  tm_polygons(fill = "p_ii", 
+              fill.scale = tm_scale_intervals(
+                breaks = c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+                values = "-brewer.Reds"),
+              fill.legend = tm_legend(
+                title = "p-value",
+                position = tm_pos_out())) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("p-values of local Moran's I of GDPPC (Queen's method)")
+```
+
+::: callout-note
+**Interpretation:**
+
+Two areas stand out with low p-values. The north-east cluster reaches the darkest class (p < 0.001) and lines up with the strongly positive local Moran's I values identified earlier, indicating a statistically significant High-High cluster: counties with high GDPPC surrounded by other high GDPPC counties. 
+
+A second cluster of low p-values (0.010 to 0.049) appears in the south-west, along with a scatter of individually significant counties elsewhere in the province. Most of the remaining counties have p-values at or above 0.100, indicating no significant local spatial pattern is detected.
+:::
+
+#### 7.2.3 Mapping both local Moran's I values and p-values
+
+Plotting the local Moran's I values map and its p-values map side by side supports a more direct comparison between the two.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 8
+
+ii.map <- tm_shape(lisa) +
+  tm_polygons(fill = "ii",
+              fill.scale = tm_scale_intervals(
+                style = "pretty",
+                n = 5,
+                values = "brewer.RdBu"),
+              fill.legend = tm_legend(
+                title = "Local Moran's I",
+                position = tm_pos_in(
+                  "left", "bottom"))) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Local Moran's I of GDPPC (Queen's method)")
+
+p_ii.map <- tm_shape(lisa) +
+  tm_polygons(fill = "p_ii", 
+              fill.scale = tm_scale_intervals(
+                breaks = c(-Inf, 0.001, 0.01, 0.05, 0.1, Inf),
+                values = "-brewer.Reds"),
+              fill.legend = tm_legend(
+                title = "p-value",
+      position = tm_pos_in("left", "bottom")
+    )) + 
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("p-values of local Moran's I of GDPPC (Queen's method)")
+
+tmap_arrange(ii.map, p_ii.map, asp=1, ncol=2)
+```
+
+### 7.3 Preparing and Visualising LISA Map
+
+Visualising LISA involves creating maps that highlight significant spatial patterns, such as hot spots (high values clustered together) and cold spots (low values clustered together), as well as spatial outliers. Common methods include choropleth maps of LISA values, Moran scatterplots, which depict local spatial autocorrelation for individual locations, and hot spot analysis maps.
+
+The LISA cluster map shows the significant locations, colour coded by type of spatial autocorrelation. Before it can be generated, the Moran scatterplot is plotted first.
+
+#### 7.3.1 Plotting Moran Scatterplot
+
+A Moran scatterplot visualises the relationship between a variable's values and the average values of its neighbouring locations (its spatial lag) to identify spatial autocorrelation. Standardised values of the variable are plotted on the x-axis, and its spatial lag on the y-axis; the slope of the plot represents Moran's I, revealing High-High or Low-Low value clusters and High-Low or Low-High value outliers.
+
+`st_lag()` of the **sfdep** package is used to calculate the spatial lag of GDPPC, given a neighbour list (`nb`) and a weights list (`wt`).
+
+```{r}
+lisa <- lisa %>%
+  mutate(lag_GDPPC = st_lag(
+    GDPPC, nb, wt),
+    .before = 1) %>%
+  unnest(lag_GDPPC)
+```
+
+The Moran scatterplot of GDPPC against its spatial lag is plotted below.
+
+```{r}
+ggplot(data = lisa, 
+       aes(x = GDPPC, 
+           y = lag_GDPPC)) +
+  geom_point() +
+  geom_smooth(method = "lm", 
+              se = FALSE, 
+              color = "red") +
+  labs(x = "GDPPC",
+       y = "Spatial Lag of GDPPC",
+       title = "Moran Scatterplot") +
+  theme_minimal()
+```
+
+The scatterplot above does not distinguish which quadrant each county falls into. Colour coding the points by their LISA classification makes the four quadrants easier to read.
+
+```{r}
+ggplot(data = lisa, 
+       aes(x = GDPPC, 
+           y = lag_GDPPC, 
+           color = mean)) +
+  geom_point(size = 2) +
+  geom_smooth(method = "lm", 
+              se = FALSE, 
+              color = "black") +
+  geom_hline(yintercept=mean(lisa$lag_GDPPC), lty=2) + 
+    geom_vline(xintercept=mean(lisa$GDPPC), lty=2) +
+  scale_color_manual(
+    values = c("High-High" = "red", 
+               "Low-Low" = "blue",
+               "Low-High" = "lightblue", 
+               "High-Low" = "pink")) +
+  labs(x = "GDPPC",
+       y = "Spatial Lag of GDPPC",
+       title = "Moran Scatterplot with LISA Quadrants") +
+  theme_minimal()
+```
+
+::: callout-note
+**Interpretation:**
+
+The scatterplot is split into four quadrants by the dashed lines, which mark the mean of GDPPC and its spatial lag.
+
+The plot shows a clear separation between two large clusters. High-High counties (red) sit in the upper-right, with GDPPC and spatial lag both well above average, consistent with the hot spot already identified in the north-east. Low-Low counties (blue) form the largest cluster, in the lower-left, where both a county's own GDPPC and its neighbours' average are low. High-Low and Low-High counties (pink and light blue) are comparatively fewer and scattered near the quadrant boundaries rather than forming clusters of their own, consistent with local outliers. The upward slope of the fitted line reflects the positive global spatial autocorrelation in GDPPC found in Hands-on Exercise 5A.
+:::
+
+#### 7.3.2 Plotting Moran Scatterplot with Standardised Variable
+
+`scale()` is used to centre and scale GDPPC and its spatial lag. Centring subtracts the mean (omitting NAs) of the corresponding column, and scaling divides the centred variable by its standard deviation.
+
+```{r}
+lisa <- lisa %>%
+  mutate(z_GDPPC = scale(GDPPC),
+         z_lag_GDPPC = scale(lag_GDPPC),
+         .before = 1)
+```
+
+The Moran scatterplot is then plotted again, using the standardised variables.
+
+```{r}
+ggplot(data = lisa, 
+       aes(x = z_GDPPC, 
+           y = z_lag_GDPPC, 
+           color = mean)) +
+  geom_point(size = 2) +
+  geom_smooth(method = "lm", 
+              se = FALSE, 
+              color = "black") +
+  geom_hline(yintercept=mean(lisa$z_lag_GDPPC), lty=2) + 
+    geom_vline(xintercept=mean(lisa$z_GDPPC), lty=2) +
+  scale_color_manual(
+    values = c("High-High" = "red", 
+               "Low-Low" = "blue",
+               "Low-High" = "lightblue", 
+               "High-Low" = "pink")) +
+  labs(x = "Standardised GDPPC",
+       y = "Standardised Spatial Lag of GDPPC",
+       title = "Standardised Moran Scatterplot with LISA Quadrants") +
+  theme_minimal()
+```
+
+::: callout-note
+**Interpretation:**
+
+Standardising GDPPC and its spatial lag does not change the quadrant pattern, only the scale. The same separation between High-High counties (upper-right) and Low-Low counties (lower-left) is visible. This makes the two axes directly comparable.
+:::
+
+#### 7.3.3 Preparing LISA Map Classes
+
+The spatial lag of GDPPC and its standardised form have already been derived in the previous sections. What remains is to set a significance level for the local Moran's I values, used to separate significant clusters and outliers from the rest.
+
+```{r}
+signif <- 0.05
+```
+
+#### 7.3.4 Plotting and Visualising LISA Map
+
+By default, the LISA classes are stored in the mean, median and pysal fields of the lisa sf data frame. To prepare the LISA map, a new field, `LISA_cluster`, is derived from one of these three fields.
+
+```{r}
+lisa <- lisa %>%
+  mutate(
+    LISA_cluster = ifelse(
+      p_ii < signif,
+      as.character(mean), 
+      "Insignificant"),
+    LISA_cluster = factor(
+      LISA_cluster,
+      levels = c("Insignificant", "Low-Low", "Low-High", "High-Low", "High-High")
+    )
+  )
+```
+
+::: callout-note
+A new class, `Insignificant`, is added for counties with p_ii >= 0.05.
+:::
+
+The LISA map is then plotted using the code chunk below.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6
+
+lisa_map <- tm_shape(lisa) + 
+  tm_polygons(
+    fill = "LISA_cluster",
+    fill.scale = tm_scale_categorical(
+      values = c(
+        "grey80",      # Insignificant
+        "blue",        # Low-Low
+        "lightblue",   # Low-High
+        "pink",        # High-Low
+        "red"          # High-High
+      )
+    ),
+    fill.legend = tm_legend(
+      title = "LISA Cluster",
+      position = tm_pos_in("left", "bottom"))
+  ) +
+  tm_borders() +
+  tm_title("Local Moran's I Clusters (p < 0.05)")
+lisa_map
+```
+
+::: callout-note
+**Interpretation:**
+
+The LISA cluster map shows that the High-High cluster (red) in the north-east matches the hot spot identified in the choropleth, the local Moran's I values, and the p-value map. The Low-Low cluster (blue) in the south-west, which showed low p-values earlier, turns out to be a cold spot rather than a second hot spot. A small Low-High patch (light blue) sits immediately next to the High-High cluster. No High-Low counties are significant at p < 0.05. The rest of the province (in grey) shows no significant local spatial pattern.
+:::
+
+The local Moran's I values map and the LISA cluster map can be plotted side by side, to compare the raw values against the counties confirmed as significant clusters or outliers.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 8
+
+tmap_arrange(ii.map, lisa_map, ncol=2)
+```
