@@ -522,7 +522,7 @@
     "href": "index.html#about-this-site",
     "title": "ISSS626 Geospatial Analytics & Applications",
     "section": "About this site",
-    "text": "About this site\nThis site documents my coursework for ISSS626 Geospatial Analytics and Applications, including hands-on exercises and take-home exercises using R.\nTopics covered in this course:\n\nIntroduction to Geospatial Analytics\nSpatial Point Patterns Analysis (SPPA)\nAdvanced Spatial Point Patterns Analysis\nSpatial Weights and Applications\nGlobal and Local Measures of Spatial Association\nGeographic Segmentation\nGeographically Weighted Explanatory Models\nGeographically Weighted Predictive Models\nModelling Geographic Accessibility\nSpatial Interaction Models"
+    "text": "About this site\nThis site documents my coursework for ISSS626 Geospatial Analytics and Applications, including hands-on exercises, in-class exercises, and take-home exercises using R.\nTopics covered in this course:\n\nIntroduction to Geospatial Analytics\nSpatial Point Patterns Analysis (SPPA)\nAdvanced Spatial Point Patterns Analysis\nSpatial Weights and Applications\nGlobal and Local Measures of Spatial Association\nGeographic Segmentation\nGeographically Weighted Explanatory Models\nGeographically Weighted Predictive Models\nModelling Geographic Accessibility\nSpatial Interaction Models"
   },
   {
     "objectID": "In-class_Ex/In-class_Ex04/In-class_Ex04.html#geographically-weighted-summary-statistics-gwss",
