@@ -21,17 +21,17 @@ This exercise applies spatial and spatio-temporal point pattern analysis to road
 
 ## 2 Analytical Questions
 
-1. How is the intensity of road traffic accidents distributed across space and time within the BMR?
-2. Do accidents exhibit statistically significant spatial and spatio-temporal clustering, beyond what would be expected under complete spatial randomness?
-3. Does accounting for the road network materially change the interpretation of accident concentration, compared to treating accidents as freely distributed in planar space?
-4. What do the resulting patterns imply for public safety planning and resource allocation within the region?
+1.  How is the intensity of road traffic accidents distributed across space and time within the BMR?
+2.  Do accidents exhibit statistically significant spatial and spatio-temporal clustering, beyond what would be expected under complete spatial randomness?
+3.  Does accounting for the road network materially change the interpretation of accident concentration, compared to treating accidents as freely distributed in planar space?
+4.  What do the resulting patterns imply for public safety planning and resource allocation within the region?
 
 ## 3 The Data
 
 Three datasets are used in this exercise:
 
 | Dataset | Description | Format | Source | Date Accessed |
-|---|---|---|---|---|
+|---------------|---------------|---------------|---------------|---------------|
 | Thailand Road Accident (2019 to 2022) | Accident-level records with location, timing, severity, and contributing-factor fields, sourced from the Ministry of Transport's TRAMS dashboard. **Only the 2022 subset is used for this study.** | CSV | [Kaggle](https://www.kaggle.com/datasets/thaweewatboy/thailand-road-accident-2019-2022) | 20 Sep 2026 |
 | Thailand Administrative Boundaries, ADM2 | District-level administrative boundaries for Thailand | GeoJSON | [geoBoundaries](https://www.geoboundaries.org) | 20 Sep 2026 |
 | Thailand Road Network (OpenStreetMap extract) | Line-based road network for Thailand, classified by highway type under the `fclass` field | Shapefile | [Geofabrik](https://download.geofabrik.de/asia/thailand.html) | 20 Sep 2026 |
@@ -41,7 +41,7 @@ Three datasets are used in this exercise:
 The following R packages are used across this exercise:
 
 | Package | Purpose | Use Case in This Exercise |
-|---|---|---|
+|------|------|------|
 | **tidyverse** | Collection of packages for data import, manipulation, and visualisation | Importing, cleaning, and transforming the accident dataset |
 | **sf** | Imports, manages, and processes vector-based geospatial data | Handling the administrative boundary and road network data, and constructing spatial point objects from the accident coordinates |
 | **spatstat** | Toolkit for spatial point pattern analysis | First-order (KDE, quadrat) and second-order (G, F, K, L functions) analysis of accident intensity and clustering |
@@ -49,11 +49,12 @@ The following R packages are used across this exercise:
 | **stpp** | Analysis of second-order properties of spatio-temporal point processes | Testing for space-time interaction beyond what spatial and temporal clustering alone would predict |
 | **spNetwork** | Spatial analysis constrained to a network | Network-constrained kernel density estimation (NKDE) of accidents along the road network |
 | **tmap** | Static and interactive thematic mapping | Choropleth maps, KDE surfaces, and accident point maps throughout the report |
-| **knitr** | Dynamic report generation | Rendering tables and controlling code chunk output in this document |
+| **knitr** | Dynamic report generation | Rendering tables and controlling code chunk output |
+| **plotly** | Creates interactive visualisations | Building interactive charts for Exploratory Data Analysis |
 
 ```{r}
 pacman::p_load(tidyverse, sf, spatstat, sparr, stpp, 
-               spNetwork, tmap, knitr)
+               spNetwork, tmap, knitr, plotly)
 ```
 
 ## 5 Reproducibility
@@ -118,7 +119,7 @@ accidents_bmr <- rdacc %>%
 
 ::: callout-note
 - [crs = 4326](https://epsg.io/4326) labels the coordinates as WGS84 decimal degrees
-- [crs = 32647](crs = 32647) then reprojects them into UTM Zone 47N (metres). EPSG:32647 specifically covers 96°E to 102°E, the zone the BMR provinces fall within; this reprojection is needed for the distance- and area-based methods used later.
+- [crs = 32647](crs%20=%2032647) then reprojects them into UTM Zone 47N (metres). EPSG:32647 specifically covers 96°E to 102°E, the zone the BMR provinces fall within; this reprojection is needed for the distance- and area-based methods used later.
 :::
 
 ### 6.2 Administrative Boundaries: Bangkok Metropolitan Region (BMR)
@@ -262,7 +263,7 @@ Clipping lines against polygons with `st_intersection()` can change geometry typ
 st_geometry_type(roads_bmr) |> unique()
 ```
 
-The result is a mix of `LINESTRING` and `MULTILINESTRING`. 
+The result is a mix of `LINESTRING` and `MULTILINESTRING`.
 
 Since more than one geometry type is present, `roads_bmr` is cast to a single consistent type, `LINESTRING`, which **spNetwork** requires.
 
@@ -346,15 +347,15 @@ glimpse(accidents_bmr)
 
 ## 8 Spatial Point Pattern Analysis (SPPA)
 
-This section applies spatial point pattern analysis (SPPA) using **spatstat** to quantify how road traffic accidents are distributed across the BMR, and to test whether the distribution departs from the Complete Spatial Randomness (CSR) hypothesis, which assumes that accidents occur independently and uniformly across the study area. 
+This section applies spatial point pattern analysis (SPPA) using **spatstat** to quantify how road traffic accidents are distributed across the BMR, and to test whether the distribution departs from the Complete Spatial Randomness (CSR) hypothesis, which assumes that accidents occur independently and uniformly across the study area.
 
 Three methods are applied:
 
-1. **First-order analysis:** Examine how accident intensity varies across the region, using kernel density estimation to identify areas of concentration
+1.  **First-order analysis:** Examine how accident intensity varies across the region, using kernel density estimation to identify areas of concentration
 
-2. **Second-order analysis:** Use Ripley's G, F, K, and L functions to test whether accidents are more clustered, more regular, or consistent with CSR at varying distances
+2.  **Second-order analysis:** Use Ripley's G, F, K, and L functions to test whether accidents are more clustered, more regular, or consistent with CSR at varying distances
 
-3. **Network-constrained analysis:** Account for accidents being restricted to the road network rather than free to occur anywhere in planar space
+3.  **Network-constrained analysis:** Account for accidents being restricted to the road network rather than free to occur anywhere in planar space
 
 ### 8.1 Constructing the Point Pattern Objects
 
@@ -384,7 +385,7 @@ any(duplicated(accidents_ppp))
 Since no duplicated points are found, `rjitter()` will not be needed.
 :::
 
-`accidents_ppp` and `adm2`_owin are rescaled from metres to kilometres as this keeps the intensity and area readable.
+`accidents_ppp` and `adm2`\_owin are rescaled from metres to kilometres as this keeps the intensity and area readable.
 
 ```{r}
 accidents_ppp_km <- rescale(accidents_ppp, 1000, "km")
@@ -398,5 +399,183 @@ The rescaled point pattern is plotted against its window, confirming the points 
 #| fig-height: 8
 plot(unmark(accidents_ppp_km), main = "Road Accidents in the BMR (2022)")
 ```
+
+### 8.2 First Order Spatial Point Pattern Analysis
+
+First-order analysis begins with kernel density estimation (KDE), which estimates how accident intensity, the expected number of accidents per unit area, varies continuously across the BMR. Unlike a count aggregated by district, KDE produces a smooth surface that does not depend on how the study area happens to be divided into administrative units.
+
+#### 8.2.1 Kernel Density Estimation (KDE)
+
+KDE's most consequential parameter is its bandwidth (`sigma` in **spatstat**), which controls how far each point's influence is smoothed. Too small produces a noisy surface; too large oversmooths and hides genuine concentration. Three automatic selectors, each using a different criterion, are computed and compared rather than fixing a value by inspection.
+
+**Diggle's method** minimises the mean-square error of the estimated intensity and tends to select a small bandwidth sensitive to fine-scale clustering:
+
+```{r}
+bw_diggle <- bw.diggle(accidents_ppp_km)
+bw_diggle
+```
+
+**The Cronie-van Lieshout method** is designed to directly minimise estimation error in the intensity function itself:
+
+```{r}
+bw_cvl <- bw.CvL(accidents_ppp_km)
+bw_cvl
+```
+
+**Likelihood cross-validation** tends toward comparatively larger bandwidths that risk oversmoothing local detail:
+
+```{r}
+bw_ppl <- bw.ppl(accidents_ppp_km)
+bw_ppl
+```
+
+The three values are compared directly:
+
+```{r}
+c(diggle = bw_diggle, CvL = bw_cvl, ppl = bw_ppl)
+```
+
+The unusually large CvL value, 28.622km against 0.064km and 0.934km for the other two, is further checked.
+
+```{r}
+plot(bw_cvl)
+```
+
+::: callout-note
+**Analysis:**
+
+The curve is flat between roughly 10 km and 28 km before rising sharply. However, the criterion barely distinguishes between bandwidths across that range. At 28.6 km, roughly a quarter of the BMR's extent (90 to 125 km), the result would also collapse local concentration into a single regional trend. For both reasons, `bw.CvL` is not the most appropriate. 
+:::
+
+Density surfaces are computed using both remaining bandwidths (`bw.diggle` and `bw.ppl`), for visual comparison before either is treated as final.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 8
+
+kde_diggle <- density(accidents_ppp_km, sigma = bw_diggle, edge = TRUE, kernel = "gaussian")
+kde_ppl <- density(accidents_ppp_km, sigma = bw_ppl, edge = TRUE, kernel = "gaussian")
+
+par(mfrow = c(1, 2))
+plot(kde_diggle, main = "Diggle bandwidth")
+plot(kde_ppl, main = "ppl bandwidth")
+```
+
+::: callout-note
+**Analysis:**
+
+Both surfaces trace the same underlying pattern despite using different bandwidths. This agreement is a useful check as it suggests that the pattern reflects real spatial concentration, not an artefact of one bandwidth choice. Diggle's bandwidth shows this pattern at finer resolution and will be used as the primary surface moving forward.
+:::
+
+#### 8.2.2 Quadrat Analysis
+
+Quadrat analysis complements KDE with a simpler, non-kernel method. The study area is divided into a grid of equal-sized cells, and the number of accidents in each cell is compared against what Complete Spatial Randomness would predict.
+
+The grid resolution is chosen so that it matches the shape of the study area, and each cell has enough expected accidents for the chi-square test below to be valid; at least 5 per cell is a common rule of thumb. `adm2_owin`'s enclosing rectangle is approximately 177.5 km by 131.1 km, an aspect ratio of about 1.35, which is close to a 12 by 9 grid's ratio of 1.33.
+
+```{r}
+qcount <- quadratcount(accidents_ppp_km, nx = 12, ny = 9)
+
+plot(unmark(accidents_ppp_km), pch = 20, cex = 0.4, main = "Quadrat Counts of Road Accidents")
+plot(qcount, add = TRUE, col = "red", cex = 0.8)
+```
+
+The variance to mean ratio (VMR) provides a quick diagnostic. A value close to 1 is consistent with CSR, above 1 suggests clustering, and below 1 suggests regularity. 
+
+```{r}
+qcount_df <- as.data.frame(qcount)
+vmr <- var(qcount_df$Freq) / mean(qcount_df$Freq)
+vmr
+```
+
+A chi-square test of CSR is performed, using the same grid:
+
+```{r}
+quadrat.test(accidents_ppp_km, nx = 12, ny = 9)
+```
+
+::: callout-note
+**Analysis:**
+
+VMR and the chi-square test answer different questions: VMR measures how large the departure from CSR is; the chi-square test measures whether that departure could be due to chance. With a sample this large, the chi-square test is almost always significant and the test alone would not show the effect is substantial. VMR fills this gap: at 176.6, where the value is significantly higher than 1 expected under CSR, it shows the clustering is genuinely large. The chi-square test confirms it is not due to chance. This agrees with the KDE surface, both methods point to the same conclusion.
+:::
+
+#### 8.2.3 Temporal First-Order Analysis
+
+KDE and quadrat analysis above addressed how accident intensity varies across space. This section focuses on the temporal portion, examining whether accident intensity varies across the year. The point pattern is split by month, and a separate density surface is computed for each.
+
+```{r}
+accidents_ppp_month <- accidents_ppp_km
+marks(accidents_ppp_month) <- marks(accidents_ppp_km)$month
+
+st_kde <- spattemp.density(accidents_ppp_month)
+summary(st_kde)
+```
+
+Twelve monthly slices are plotted on a shared colour scale for direct comparison across the year:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 10
+
+par(mfrow = c(4, 3), mar = c(2, 2, 2, 2))
+for (i in 1:12) {
+  plot(st_kde, i,
+       override.par = FALSE,
+       fix.range = TRUE,
+       main = paste("Month", i))
+}
+```
+
+::: callout-note
+**Analysis:**
+
+**Month 1** shows a moderately widespread hotspot concentrated in the central BMR, with some diffusion into surrounding areas.
+
+**Months 2 to 7** show generally lower intensity, with hotspots more contained.
+
+**Months 8 to 11** show accident density concentrated around Bangkok increasing in both intensity and spatial extent, with the branching pattern along major roads becoming more pronounced.
+
+**Month 12** shows the highest density of the year, concentrated in central BMR, likely due to increased travel during the year-end and holiday period. This also coincides with the start of Thailand's New Year "Seven Dangerous Days" period, 29 December 2022 to 4 January 2023, of which 29 to 31 December falls within the study period. 317 deaths were recorded nationwide [GT Rider, citing Thailand's Road Safety Centre, 2023](https://www.thegtrider.com/thailand-2022-2023-new-year-road-traffic-report-deaths.htm).
+:::
+
+#### 8.2.4 KDE Comparison By Province
+
+The region-wide KDE surface shows where accidents concentrate across the whole BMR, but not how that pattern differs between provinces. This section computes a separate density surface for each of the six BMR provinces, using each province's own boundary as the window.
+
+```{r}
+kde_by_province <- list()
+
+for (i in seq_along(bmr_provinces)) {
+  province_owin <- adm2_bmr %>%
+    filter(province_name == bmr_provinces_adm1[i]) %>%
+    as.owin() %>%
+    rescale(1000, "km")
+
+  province_ppp <- accidents_ppp_km[province_owin]
+  kde_by_province[[bmr_provinces[i]]] <- density(province_ppp, sigma = bw_diggle, edge = TRUE, kernel = "gaussian")
+}
+```
+
+The six surfaces are plotted on a shared colour scale for direct comparison:
+
+```{r}
+#| fig-width: 12
+#| fig-height: 12
+province_range <- range(sapply(kde_by_province, function(im) range(im$v, na.rm = TRUE)))
+
+par(mfrow = c(3, 2), mar = c(2, 2, 2, 4))
+for (nm in names(kde_by_province)) {
+  plot(kde_by_province[[nm]], main = nm, axes = TRUE, box = TRUE)
+}
+```
+
+::: callout-note
+**Analysis:**
+
+Across all six provinces, accidents cluster tightly along specific road corridors, appearing on each map as thin, bright lines.
+
+**Bangkok** and **Samut Prakan** show the highest peak intensities among the six provinces, with colour scales reaching approximately 170 and 250 respectively. In both cases, this intensity is concentrated along short, specific highway segments rather than distributed across the province. **Nakhon Pathom** shows the lowest peak intensity, with its colour scale reaching only about 10, and its hotspots appear comparatively scattered rather than concentrated on one corridor. **Nonthaburi** and **Pathum Thani** fall in between, with colour scales reaching approximately 44 and 50 respectively. For both provinces, hotspots concentrate toward the southern portion of the province, the area bordering Bangkok.
+:::
 
 ## Reference

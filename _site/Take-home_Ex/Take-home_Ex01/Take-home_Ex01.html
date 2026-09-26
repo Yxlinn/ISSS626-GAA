@@ -234,6 +234,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#spatial-point-pattern-analysis-sppa" id="toc-spatial-point-pattern-analysis-sppa" class="nav-link" data-scroll-target="#spatial-point-pattern-analysis-sppa">8 Spatial Point Pattern Analysis (SPPA)</a>
   <ul>
   <li><a href="#constructing-the-point-pattern-objects" id="toc-constructing-the-point-pattern-objects" class="nav-link" data-scroll-target="#constructing-the-point-pattern-objects">8.1 Constructing the Point Pattern Objects</a></li>
+  <li><a href="#first-order-spatial-point-pattern-analysis" id="toc-first-order-spatial-point-pattern-analysis" class="nav-link" data-scroll-target="#first-order-spatial-point-pattern-analysis">8.2 First Order Spatial Point Pattern Analysis</a>
+  <ul class="collapse">
+  <li><a href="#kernel-density-estimation-kde" id="toc-kernel-density-estimation-kde" class="nav-link" data-scroll-target="#kernel-density-estimation-kde">8.2.1 Kernel Density Estimation (KDE)</a></li>
+  <li><a href="#quadrat-analysis" id="toc-quadrat-analysis" class="nav-link" data-scroll-target="#quadrat-analysis">8.2.2 Quadrat Analysis</a></li>
+  <li><a href="#temporal-first-order-analysis" id="toc-temporal-first-order-analysis" class="nav-link" data-scroll-target="#temporal-first-order-analysis">8.2.3 Temporal First-Order Analysis</a></li>
+  <li><a href="#kde-comparison-by-province" id="toc-kde-comparison-by-province" class="nav-link" data-scroll-target="#kde-comparison-by-province">8.2.4 KDE Comparison By Province</a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">Reference</a></li>
   </ul>
@@ -263,7 +270,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">September 22, 2026</p>
+      <p class="date-modified">September 26, 2026</p>
     </div>
   </div>
     
@@ -381,13 +388,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tr class="even">
 <td><strong>knitr</strong></td>
 <td>Dynamic report generation</td>
-<td>Rendering tables and controlling code chunk output in this document</td>
+<td>Rendering tables and controlling code chunk output</td>
+</tr>
+<tr class="odd">
+<td><strong>plotly</strong></td>
+<td>Creates interactive visualisations</td>
+<td>Building interactive charts for Exploratory Data Analysis</td>
 </tr>
 </tbody>
 </table>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(tidyverse, sf, spatstat, sparr, stpp, </span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>               spNetwork, tmap, knitr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>               spNetwork, tmap, knitr, plotly)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="reproducibility" class="level2">
@@ -989,6 +1001,273 @@ Note
 </div>
 </div>
 </div>
+</section>
+<section id="first-order-spatial-point-pattern-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="first-order-spatial-point-pattern-analysis">8.2 First Order Spatial Point Pattern Analysis</h3>
+<p>First-order analysis begins with kernel density estimation (KDE), which estimates how accident intensity, the expected number of accidents per unit area, varies continuously across the BMR. Unlike a count aggregated by district, KDE produces a smooth surface that does not depend on how the study area happens to be divided into administrative units.</p>
+<section id="kernel-density-estimation-kde" class="level4">
+<h4 class="anchored" data-anchor-id="kernel-density-estimation-kde">8.2.1 Kernel Density Estimation (KDE)</h4>
+<p>KDE’s most consequential parameter is its bandwidth (<code>sigma</code> in <strong>spatstat</strong>), which controls how far each point’s influence is smoothed. Too small produces a noisy surface; too large oversmooths and hides genuine concentration. Three automatic selectors, each using a different criterion, are computed and compared rather than fixing a value by inspection.</p>
+<p><strong>Diggle’s method</strong> minimises the mean-square error of the estimated intensity and tends to select a small bandwidth sensitive to fine-scale clustering:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>bw_diggle <span class="ot">&lt;-</span> <span class="fu">bw.diggle</span>(accidents_ppp_km)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>bw_diggle</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     sigma 
+0.06412305 </code></pre>
+</div>
+</div>
+<p><strong>The Cronie-van Lieshout method</strong> is designed to directly minimise estimation error in the intensity function itself:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>bw_cvl <span class="ot">&lt;-</span> <span class="fu">bw.CvL</span>(accidents_ppp_km)</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>bw_cvl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> sigma 
+28.622 </code></pre>
+</div>
+</div>
+<p><strong>Likelihood cross-validation</strong> tends toward comparatively larger bandwidths that risk oversmoothing local detail:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>bw_ppl <span class="ot">&lt;-</span> <span class="fu">bw.ppl</span>(accidents_ppp_km)</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>bw_ppl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    sigma 
+0.9342669 </code></pre>
+</div>
+</div>
+<p>The three values are compared directly:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">diggle =</span> bw_diggle, <span class="at">CvL =</span> bw_cvl, <span class="at">ppl =</span> bw_ppl)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     diggle         CvL         ppl 
+ 0.06412305 28.62200060  0.93426689 </code></pre>
+</div>
+</div>
+<p>The unusually large CvL value, 28.622km against 0.064km and 0.934km for the other two, is further checked.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bw_cvl)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Analysis:</strong></p>
+<p>The curve is flat between roughly 10 km and 28 km before rising sharply. However, the criterion barely distinguishes between bandwidths across that range. At 28.6 km, roughly a quarter of the BMR’s extent (90 to 125 km), the result would also collapse local concentration into a single regional trend. For both reasons, <code>bw.CvL</code> is not the most appropriate.</p>
+</div>
+</div>
+<p>Density surfaces are computed using both remaining bandwidths (<code>bw.diggle</code> and <code>bw.ppl</code>), for visual comparison before either is treated as final.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>kde_diggle <span class="ot">&lt;-</span> <span class="fu">density</span>(accidents_ppp_km, <span class="at">sigma =</span> bw_diggle, <span class="at">edge =</span> <span class="cn">TRUE</span>, <span class="at">kernel =</span> <span class="st">"gaussian"</span>)</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>kde_ppl <span class="ot">&lt;-</span> <span class="fu">density</span>(accidents_ppp_km, <span class="at">sigma =</span> bw_ppl, <span class="at">edge =</span> <span class="cn">TRUE</span>, <span class="at">kernel =</span> <span class="st">"gaussian"</span>)</span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_diggle, <span class="at">main =</span> <span class="st">"Diggle bandwidth"</span>)</span>
+<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_ppl, <span class="at">main =</span> <span class="st">"ppl bandwidth"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Analysis:</strong></p>
+<p>Both surfaces trace the same underlying pattern despite using different bandwidths. This agreement is a useful check as it suggests that the pattern reflects real spatial concentration, not an artefact of one bandwidth choice. Diggle’s bandwidth shows this pattern at finer resolution and will be used as the primary surface moving forward.</p>
+</div>
+</div>
+</section>
+<section id="quadrat-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="quadrat-analysis">8.2.2 Quadrat Analysis</h4>
+<p>Quadrat analysis complements KDE with a simpler, non-kernel method. The study area is divided into a grid of equal-sized cells, and the number of accidents in each cell is compared against what Complete Spatial Randomness would predict.</p>
+<p>The grid resolution is chosen so that it matches the shape of the study area, and each cell has enough expected accidents for the chi-square test below to be valid; at least 5 per cell is a common rule of thumb. <code>adm2_owin</code>’s enclosing rectangle is approximately 177.5 km by 131.1 km, an aspect ratio of about 1.35, which is close to a 12 by 9 grid’s ratio of 1.33.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>qcount <span class="ot">&lt;-</span> <span class="fu">quadratcount</span>(accidents_ppp_km, <span class="at">nx =</span> <span class="dv">12</span>, <span class="at">ny =</span> <span class="dv">9</span>)</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">unmark</span>(accidents_ppp_km), <span class="at">pch =</span> <span class="dv">20</span>, <span class="at">cex =</span> <span class="fl">0.4</span>, <span class="at">main =</span> <span class="st">"Quadrat Counts of Road Accidents"</span>)</span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qcount, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">cex =</span> <span class="fl">0.8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The variance to mean ratio (VMR) provides a quick diagnostic. A value close to 1 is consistent with CSR, above 1 suggests clustering, and below 1 suggests regularity.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>qcount_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(qcount)</span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>vmr <span class="ot">&lt;-</span> <span class="fu">var</span>(qcount_df<span class="sc">$</span>Freq) <span class="sc">/</span> <span class="fu">mean</span>(qcount_df<span class="sc">$</span>Freq)</span>
+<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>vmr</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 176.6295</code></pre>
+</div>
+</div>
+<p>A chi-square test of CSR is performed, using the same grid:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quadrat.test</span>(accidents_ppp_km, <span class="at">nx =</span> <span class="dv">12</span>, <span class="at">ny =</span> <span class="dv">9</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Chi-squared test of CSR using quadrat counts
+
+data:  accidents_ppp_km
+X2 = 10056, df = 83, p-value &lt; 2.2e-16
+alternative hypothesis: two.sided
+
+Quadrats: 84 tiles (irregular windows)</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Analysis:</strong></p>
+<p>VMR and the chi-square test answer different questions: VMR measures how large the departure from CSR is; the chi-square test measures whether that departure could be due to chance. With a sample this large, the chi-square test is almost always significant and the test alone would not show the effect is substantial. VMR fills this gap: at 176.6, where the value is significantly higher than 1 expected under CSR, it shows the clustering is genuinely large. The chi-square test confirms it is not due to chance. This agrees with the KDE surface, both methods point to the same conclusion.</p>
+</div>
+</div>
+</section>
+<section id="temporal-first-order-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="temporal-first-order-analysis">8.2.3 Temporal First-Order Analysis</h4>
+<p>KDE and quadrat analysis above addressed how accident intensity varies across space. This section focuses on the temporal portion, examining whether accident intensity varies across the year. The point pattern is split by month, and a separate density surface is computed for each.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>accidents_ppp_month <span class="ot">&lt;-</span> accidents_ppp_km</span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a><span class="fu">marks</span>(accidents_ppp_month) <span class="ot">&lt;-</span> <span class="fu">marks</span>(accidents_ppp_km)<span class="sc">$</span>month</span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a>st_kde <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(accidents_ppp_month)</span>
+<span id="cb72-5"><a href="#cb72-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(st_kde)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatiotemporal Kernel Density Estimate
+
+Bandwidths
+  h = 4.8825 (spatial)
+  lambda = 0.0285 (temporal)
+
+No. of observations
+  3593 
+
+Spatial bound
+  Type: polygonal
+  2D enclosure: [565.5458, 743.0603] x [1468.71, 1599.777]
+
+Temporal bound
+  [1, 12]
+
+Evaluation
+  128 x 128 x 12 trivariate lattice
+  Density range: [7.546022e-35, 0.002849939]</code></pre>
+</div>
+</div>
+<p>Twelve monthly slices are plotted on a shared colour scale for direct comparison across the year:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">3</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(st_kde, i,</span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">override.par =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">fix.range =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"Month"</span>, i))</span>
+<span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-45-1.png" class="img-fluid figure-img" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Analysis:</strong></p>
+<p><strong>Month 1</strong> shows a moderately widespread hotspot concentrated in the central BMR, with some diffusion into surrounding areas.</p>
+<p><strong>Months 2 to 7</strong> show generally lower intensity, with hotspots more contained.</p>
+<p><strong>Months 8 to 11</strong> show accident density concentrated around Bangkok increasing in both intensity and spatial extent, with the branching pattern along major roads becoming more pronounced.</p>
+<p><strong>Month 12</strong> shows the highest density of the year, concentrated in central BMR, likely due to increased travel during the year-end and holiday period. This also coincides with the start of Thailand’s New Year “Seven Dangerous Days” period, 29 December 2022 to 4 January 2023, of which 29 to 31 December falls within the study period. 317 deaths were recorded nationwide <a href="https://www.thegtrider.com/thailand-2022-2023-new-year-road-traffic-report-deaths.htm">GT Rider, citing Thailand’s Road Safety Centre, 2023</a>.</p>
+</div>
+</div>
+</section>
+<section id="kde-comparison-by-province" class="level4">
+<h4 class="anchored" data-anchor-id="kde-comparison-by-province">8.2.4 KDE Comparison By Province</h4>
+<p>The region-wide KDE surface shows where accidents concentrate across the whole BMR, but not how that pattern differs between provinces. This section computes a separate density surface for each of the six BMR provinces, using each province’s own boundary as the window.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>kde_by_province <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(bmr_provinces)) {</span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>  province_owin <span class="ot">&lt;-</span> adm2_bmr <span class="sc">%&gt;%</span></span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(province_name <span class="sc">==</span> bmr_provinces_adm1[i]) <span class="sc">%&gt;%</span></span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.owin</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rescale</span>(<span class="dv">1000</span>, <span class="st">"km"</span>)</span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a>  province_ppp <span class="ot">&lt;-</span> accidents_ppp_km[province_owin]</span>
+<span id="cb75-10"><a href="#cb75-10" aria-hidden="true" tabindex="-1"></a>  kde_by_province[[bmr_provinces[i]]] <span class="ot">&lt;-</span> <span class="fu">density</span>(province_ppp, <span class="at">sigma =</span> bw_diggle, <span class="at">edge =</span> <span class="cn">TRUE</span>, <span class="at">kernel =</span> <span class="st">"gaussian"</span>)</span>
+<span id="cb75-11"><a href="#cb75-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The six surfaces are plotted on a shared colour scale for direct comparison:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>province_range <span class="ot">&lt;-</span> <span class="fu">range</span>(<span class="fu">sapply</span>(kde_by_province, <span class="cf">function</span>(im) <span class="fu">range</span>(im<span class="sc">$</span>v, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)))</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">2</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">4</span>))</span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (nm <span class="cf">in</span> <span class="fu">names</span>(kde_by_province)) {</span>
+<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(kde_by_province[[nm]], <span class="at">main =</span> nm, <span class="at">axes =</span> <span class="cn">TRUE</span>, <span class="at">box =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb76-6"><a href="#cb76-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-47-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Analysis:</strong></p>
+<p>Across all six provinces, accidents cluster tightly along specific road corridors, appearing on each map as thin, bright lines.</p>
+<p><strong>Bangkok</strong> and <strong>Samut Prakan</strong> show the highest peak intensities among the six provinces, with colour scales reaching approximately 170 and 250 respectively. In both cases, this intensity is concentrated along short, specific highway segments rather than distributed across the province. <strong>Nakhon Pathom</strong> shows the lowest peak intensity, with its colour scale reaching only about 10, and its hotspots appear comparatively scattered rather than concentrated on one corridor. <strong>Nonthaburi</strong> and <strong>Pathum Thani</strong> fall in between, with colour scales reaching approximately 44 and 50 respectively. For both provinces, hotspots concentrate toward the southern portion of the province, the area bordering Bangkok.</p>
+</div>
+</div>
+</section>
 </section>
 </section>
 <section id="reference" class="level2">
