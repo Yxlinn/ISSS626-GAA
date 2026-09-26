@@ -22,11 +22,13 @@ website:
           - text: "Hands-on Exercise 5A"
             href: "Hands-on_Ex/Hands-on_Ex05A/Hands-on_Ex05A.html"
           - text: "Hands-on Exercise 5B"
-            href: "Hands-on_Ex/Hands-on_Ex05B/Hands-on_Ex05B.html"  
+            href: "Hands-on_Ex/Hands-on_Ex05B/Hands-on_Ex05B.html"
       - text: "In-class Exercises"
         menu:
           - text: "In-class Exercise 4"
             href: "In-class_Ex/In-class_Ex04/In-class_Ex04.html"
+          - text: "In-class Exercise 5"
+            href: "In-class_Ex/In-class_Ex05/In-class_Ex05.html"
       - text: "Take-home Exercises"
         menu:
           - text: "Take-home Exercise 1"

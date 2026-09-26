@@ -1,0 +1,127 @@
+---
+title: "In-class Exercise 5"
+date: "September 26, 2026"
+date-modified: today
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
+---
+
+## 1 Installing and Loading R Packages
+
+Four packages are used in this exercise:
+
+- **sf** imports and handles the geospatial data
+- **sfdep** computes the spatial weights and the local spatial autocorrelation statistics
+- **tmap** produces the choropleth maps
+- **tidyverse** supports attribute data handling
+
+```{r}
+pacman::p_load(sf, sfdep, tmap, tidyverse)
+```
+
+## 2 Reproducibility
+
+```{r}
+set.seed(123)
+```
+
+## 3 Getting the Data into R
+
+### 3.1 Importing the Shapefile
+
+The shapefile is imported with `st_read()` of **sf**, which returns a simple features object.
+
+```{r}
+hunan <- st_read(dsn = "data/geospatial",
+                 layer = "Hunan")
+```
+
+### 3.2 Importing the CSV File
+
+`Hunan_2012.csv` is imported with `read_csv()` of **readr**, which returns a data frame class.
+
+```{r}
+hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv")
+```
+
+### 3.3 Performing relational join
+
+The attribute table of `hunan` is extended with the fields of `hunan2012` using `left_join()` of **dplyr**.
+
+```{r}
+hunan_GDPPC <- left_join(hunan, hunan2012) %>%
+  select(1:4, 7, 15, 16)
+```
+
+## 4 Deriving Queen's Continguity Weights: sfdep methods
+
+The code chunk below is used to compute the Queen's contiguity weights.
+
+```{r}
+wm_q <- hunan_GDPPC %>%
+  mutate(nb = st_contiguity(geometry),
+         wt = st_weights(nb,
+                         style = "W"),
+         .before = 1)
+```
+
+## 5 Computing Global Moran's I
+
+In the code chunk below, `global_moran()` function is used to compute the Moran's I value. Different from spdep package, the output is a tibble data frame.
+
+```{r}
+moranI <- global_moran(wm_q$GDPPC,
+                       wm_q$nb,
+                       wm_q$wt)
+glimpse(moranI)
+```
+
+## 6 Performing Global Moran's I Permutation Test
+
+```{r}
+global_moran_perm(wm_q$GDPPC,
+                  wm_q$nb,
+                  wm_q$wt,
+                  nsim = 99)
+```
+
+::: callout-tip
+## Reminder
+
+- It is always a good practice to use `set.seed()` before performing simulation. This is to ensure that the computation is reproducible.
+- The numbers of simulation is always equal to nsim + 1.
+:::
+
+## 7 Computing local Moran's I
+
+```{r}
+lisa <- wm_q %>%
+  mutate(local_moran = local_moran(
+    GDPPC, nb, wt, nsim = 99), 
+    .before = 1) %>%
+  unnest(local_moran)
+```
+
+## 8 Plotting LISA Map
+
+```{r}
+lisa_sig <- lisa %>%
+  filter(p_ii_sim < 0.05)
+tmap_mode("plot")
+tm_shape(lisa) +
+  tm_polygons() +
+  tm_borders(fill_alpha = 0.5) +
+  tm_shape(lisa_sig) +
+  tm_polygons(fill = "mean",
+              fill.legend = tm_legend(
+                text.size = 1.15,
+                width = 6)) +
+  tm_borders(fill_alpha = 0.4) +
+  tm_layout(legend.title.size = 1.25)
+```
