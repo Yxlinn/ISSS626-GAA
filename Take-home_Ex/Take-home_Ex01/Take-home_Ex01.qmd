@@ -41,7 +41,7 @@ Three datasets are used in this exercise:
 The following R packages are used across this exercise:
 
 | Package | Purpose | Use Case in This Exercise |
-|------|------|------|
+|------------------------|------------------------|------------------------|
 | **tidyverse** | Collection of packages for data import, manipulation, and visualisation | Importing, cleaning, and transforming the accident dataset |
 | **sf** | Imports, manages, and processes vector-based geospatial data | Handling the administrative boundary and road network data, and constructing spatial point objects from the accident coordinates |
 | **spatstat** | Toolkit for spatial point pattern analysis | First-order (KDE, quadrat) and second-order (G, F, K, L functions) analysis of accident intensity and clustering |
@@ -277,7 +277,7 @@ The resulting `roads_bmr` is the road network used for the network-constrained k
 
 `accidents_bmr` currently only has a single timestamp column, `incident_datetime`. This section derives temporal and contextual variables from it, which is needed to examine how accidents vary over time.
 
-**1. Temporal Variables**
+### 7.1 Temporal Variables
 
 Temporal variables are extracted first:
 
@@ -289,7 +289,7 @@ accidents_bmr <- accidents_bmr %>%
          day_of_year = yday(incident_datetime))
 ```
 
-**2. Season**
+### 7.2 Season
 
 Season is derived based on Thailand's official three-season year - hot, rainy, and cool ([Government Public Relations Department](https://thailand.go.th/event-detail/009_142)):
 
@@ -306,7 +306,7 @@ accidents_bmr <- accidents_bmr %>%
   select(-md)
 ```
 
-**3. Peak Period**
+### 7.3 Peak Period
 
 Peak period is derived based on Bangkok's known morning and evening rush hours. The exact cutoffs used here are a reasonable estimate rather than an official rule.
 
@@ -323,7 +323,7 @@ accidents_bmr <- accidents_bmr %>%
   select(-hms)
 ```
 
-**4. Songkran: "Seven Dangerous Days"**
+### 7.4 Songkran: "Seven Dangerous Days"
 
 Songkran's "Seven Dangerous Days" is Thailand's annual road-safety campaign, covering the week surrounding the Songkran New Year holiday, a period nationally recognised for a sharp rise in road accidents. Since this study covers 2022, the relevant campaign dates are 11 to 17 April that year ([The Phuket News](https://www.pressreader.com/thailand/the-phuket-news/20220422/281560884348253)).
 
@@ -345,7 +345,253 @@ accidents_bmr <- accidents_bmr %>%
 glimpse(accidents_bmr)
 ```
 
-## 8 Spatial Point Pattern Analysis (SPPA)
+## 8 Exploratory Data Analysis (EDA)
+
+This section conducts an Exploratory Data Analysis (EDA) to visualise the distribution of road accidents in the BMR in 2022. The findings identified will support the public safety discussion by providing relevant evidence about accident circumstances.
+
+### 8.1 Overview Map
+
+```{r}
+tm_shape(adm2_bmr) +
+  tm_polygons(fill = "province_name", fill.legend = tm_legend(title = "Province", na.show = FALSE)) +
+tm_shape(roads_bmr) +
+  tm_lines(col = "darkgreen", lwd = 1) +
+tm_shape(accidents_bmr) +
+  tm_dots(fill = "red", size = 0.05) +
+tm_layout(main.title = "Road Traffic Accidents in the BMR (2022)", main.title.position = "center")
+```
+
+::: callout-note
+**Analysis:**
+
+- Accident points are concentrated along the road network across the BMR, rather than scattered away from mapped roads.
+- Accident density appears visibly higher in the central portion of the study area, spanning parts of Bangkok, Nonthaburi, and Samut Prakan, compared to the northern part of Pathum Thani and the western part of Nakhon Pathom.
+- The road network itself appears denser in the central and southern portions of the study area, with a comparatively sparser network in the northern part of Pathum Thani.
+:::
+
+### 8.2 Accidents by Month and Season
+
+Accident counts are aggregated by `month_label` and `season`, highlighting how many accidents happen each month.
+
+```{r}
+accidents_by_month <- accidents_bmr %>%
+  st_drop_geometry() %>%
+  count(month_label, season)
+```
+
+The result is plotted as a grouped bar chart using **plotly**.
+
+```{r}
+plot_ly(accidents_by_month, x = ~month_label, y = ~n, color = ~season,
+        colors = c("Cool" = "lightblue", "Hot" = "red3", "Rainy" = "royalblue3"),
+        type = "bar") %>%
+  layout(title = "Accidents by Month, Coloured by Season",
+         xaxis = list(title = "Month"), yaxis = list(title = "Number of Accidents"),
+         barmode = "stack")
+```
+
+::: callout-note
+**Analysis:**
+
+- October, November, and December (Cool season) show the highest total accidents of the year, with October being the highest.
+- April (Hot season) also shows a high total accident count, standing out clearly above the other Hot season months.
+- February show comparatively lower total accidents than most other months.
+- The Rainy season months (June to September) show generally high and relatively consistent total accidents across that stretch, without a sharp peak or dip within the season.
+- The Hot season (mid-February to mid-May) shows more variation in total accidents between its months than the Rainy or Cool seasons, ranging from one of the lowest totals (February) to one of the highest (April).
+:::
+
+#### 8.2.1 Event: Songkran Festival
+
+This subsection examines the impact of the Songkran festival on road accidents in April, a period known for increased travel and correspondingly elevated road risk. `songkran_dangerous_days`, derived in Feature Engineering, flags accidents falling within the 11 to 17 April Seven Dangerous Days window. Since this period covers 7 days against 23 remaining days in April, the average daily accident rate is compared rather than raw totals, to avoid a comparison biased toward whichever side has more days.
+
+```{r}
+songkran_comparison <- accidents_bmr %>%
+  st_drop_geometry() %>%
+  filter(month == 4) %>%
+  count(songkran_dangerous_days) %>%
+  mutate(
+    days_count = if_else(songkran_dangerous_days, 7, 30 - 7),
+    average_daily_accidents = n / days_count,
+    label = if_else(songkran_dangerous_days, "Songkran (11 to 17 Apr)", "Rest of April")
+  )
+
+plot_ly(songkran_comparison, x = ~label, y = ~average_daily_accidents, color = ~label,
+        colors = c("Songkran (11 to 17 Apr)" = "tomato1", "Rest of April" = "royalblue3"),
+        type = "bar") %>%
+  layout(title = "Average Daily Accident Rate: Songkran vs Rest of April",
+         xaxis = list(title = "Period"), yaxis = list(title = "Average Accidents per Day"),
+         showlegend = FALSE)
+```
+
+::: callout-note
+**Analysis:**
+
+- The average daily accident rate during the Songkran Seven Dangerous Days (11 to 17 April) is substantially higher than the average daily rate for the rest of April, more than double.
+- This is consistent with Songkran being a period of nationally elevated road risk, attributed to the surge in travel during the holiday.
+:::
+
+### 8.3 Accidents by Day of Week
+
+Instead of just analysing based on individual day, accidents are split by weekday versus weekend.
+
+```{r}
+accidents_by_day <- accidents_bmr %>%
+  st_drop_geometry() %>%
+  mutate(day_type = if_else(day_of_week %in% c("Sat", "Sun"), "Weekend", "Weekday")) %>%
+  count(day_of_week, day_type)
+
+plot_ly(accidents_by_day, x = ~day_of_week, y = ~n, color = ~day_type,
+        colors = c("Weekday" = "orange", "Weekend" = "seagreen"), type = "bar") %>%
+  layout(title = "Accidents by Day of Week",
+         xaxis = list(title = "Day of Week"), yaxis = list(title = "Number of Accidents"))
+```
+
+::: callout-note
+**Analysis:**
+
+- Weekday totals rise steadily across the week, from the lowest point on Tuesday to the highest point on Friday.
+- Between the two weekend days, Saturday records a noticeably higher total than Sunday.
+- Friday and Saturday together stand out as the two highest days overall, straddling the weekday to weekend transition. This may reflect increased travel for social or leisure purposes as the weekend begins.
+- Sunday's accident drop back toward weekday levels could reflect reduced travel activity as the weekend winds down.
+:::
+
+### 8.4 Accidents by Peak Period
+
+Accidents are examined by peak period: Morning Peak, Evening Peak, and Off-Peak.
+
+```{r}
+accidents_by_peak <- accidents_bmr %>%
+  st_drop_geometry() %>%
+  count(peak_period) %>%
+  mutate(
+    peak_period = factor(peak_period, levels = c("Morning Peak", "Evening Peak", "Off-Peak")),
+    hours_in_period = case_when(
+      peak_period == "Morning Peak" ~ 2,
+      peak_period == "Evening Peak" ~ 3,
+      peak_period == "Off-Peak" ~ 19
+    ),
+    accidents_per_hour = n / hours_in_period
+  )
+
+plot_ly(accidents_by_peak, x = ~peak_period, y = ~accidents_per_hour, type = "bar",
+        marker = list(color = c("Morning Peak" = "orange", "Evening Peak" = "tomato", "Off-Peak" = "lightblue")[as.character(accidents_by_peak$peak_period)])) %>%
+  layout(title = "Average Accidents per Hour by Peak Period",
+         xaxis = list(title = "Peak Period", categoryorder = "array", categoryarray = c("Morning Peak", "Evening Peak", "Off-Peak")),
+         yaxis = list(title = "Accidents per Hour"))
+```
+
+::: callout-important
+Morning Peak, Evening Peak, and Off-Peak are unequal length periods: 2, 3, and 19 hours respectively. A raw count comparison across `peak_period` would favour Off-Peak simply because it covers more clock time, instead of carrying more risk per hour. Counts are therefore converted to an average per hour before comparison, so that the three periods are placed on equal footing.
+:::
+
+::: callout-note
+**Analysis:**
+
+- Morning Peak records the highest average accidents per hour among the three periods, narrowly ahead of Evening Peak.
+- Both Morning and Evening Peak records are well above Off-Peak. Off-Peak records the lowest average accidents per hour.
+:::
+
+### 8.5 Accidents by Presumed Cause
+
+The presumed cause recorded for each accident is counted and ranked.
+
+```{r}
+accidents_bmr %>%
+  st_drop_geometry() %>%
+  count(presumed_cause, sort = TRUE) %>%
+  mutate(presumed_cause = fct_reorder(presumed_cause, n)) %>%
+  ggplot(aes(x = n, y = presumed_cause)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Accidents by Presumed Cause", x = "Number of Accidents", y = NULL)
+```
+
+::: callout-note
+**Analysis:**
+
+- Speeding is the most common presumed cause, well ahead of every other category. It accounts for a substantially larger number of accidents than every other category combined.
+- All other causes account for comparatively few accidents each, with a long tail of rarely recorded categories.
+:::
+
+### 8.6 Accidents by Accident Type
+
+Accidents are broken down by accident type.
+
+```{r}
+accidents_bmr %>%
+  st_drop_geometry() %>%
+  count(accident_type, sort = TRUE) %>%
+  mutate(accident_type = fct_reorder(accident_type, n)) %>%
+  ggplot(aes(x = n, y = accident_type)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Accidents by Accident Type", x = "Number of Accidents", y = NULL)
+```
+
+::: callout-note
+**Analysis:**
+
+- Rear-end collision is the most common accident type, followed by rollover/fallen on straight road.
+- The remaining types account for a comparatively smaller number of accidents.
+:::
+
+### 8.7 Accidents by Vehicle Type
+
+`vehicle_type` contains a long tail of rare categories. Only the ten most frequent are shown.
+
+```{r}
+accidents_bmr %>%
+  st_drop_geometry() %>%
+  count(vehicle_type, sort = TRUE) %>%
+  slice_max(n, n = 10) %>%
+  mutate(vehicle_type = fct_reorder(vehicle_type, n)) %>%
+  ggplot(aes(x = n, y = vehicle_type)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Top 10 Vehicle Types Involved in Accidents", x = "Number of Accidents", y = NULL)
+```
+
+::: callout-note
+**Analysis:**
+
+- Private/passenger car and 4-wheel pickup truck are the two most common vehicle types involved.
+- The remaining vehicle types account for a comparatively small share of the top ten.
+:::
+
+### 8.8 Accidents by Weather Condition
+
+The weather condition recorded at the time of each accident is broken down by category.
+
+```{r}
+accidents_bmr %>%
+  st_drop_geometry() %>%
+  count(weather_condition, sort = TRUE) %>%
+  mutate(weather_condition = fct_reorder(weather_condition, n)) %>%
+  ggplot(aes(x = n, y = weather_condition)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "Accidents by Weather Condition", x = "Number of Accidents", y = NULL)
+```
+
+::: callout-note
+**Analysis:**
+
+- The majority of accidents occurred under clear weather conditions.
+- Rainy conditions account for a much smaller share of accidents.
+:::
+
+### 8.9 Overall Severity
+
+Total accidents, fatalities, injuries, and the count of accidents involving at least one fatality are summarised below.
+
+```{r}
+accidents_bmr %>%
+  st_drop_geometry() %>%
+  summarise(
+    total_accidents = n(),
+    total_fatalities = sum(number_of_fatalities),
+    total_injuries = sum(number_of_injuries),
+    fatal_accidents = sum(number_of_fatalities > 0)
+  )
+```
+
+## 9 Spatial Point Pattern Analysis (SPPA)
 
 This section applies spatial point pattern analysis (SPPA) using **spatstat** to quantify how road traffic accidents are distributed across the BMR, and to test whether the distribution departs from the Complete Spatial Randomness (CSR) hypothesis, which assumes that accidents occur independently and uniformly across the study area.
 
@@ -357,7 +603,7 @@ Three methods are applied:
 
 3.  **Network-constrained analysis:** Account for accidents being restricted to the road network rather than free to occur anywhere in planar space
 
-### 8.1 Constructing the Point Pattern Objects
+### 9.1 Constructing the Point Pattern Objects
 
 Before SPPA can begin, the `sf` objects prepared above are converted into `ppp` (point pattern) and `owin` (observation window) objects, so that they are in the formats **spatstat** works with.
 
@@ -400,11 +646,11 @@ The rescaled point pattern is plotted against its window, confirming the points 
 plot(unmark(accidents_ppp_km), main = "Road Accidents in the BMR (2022)")
 ```
 
-### 8.2 First Order Spatial Point Pattern Analysis
+### 9.2 First Order Spatial Point Pattern Analysis
 
 First-order analysis begins with kernel density estimation (KDE), which estimates how accident intensity, the expected number of accidents per unit area, varies continuously across the BMR. Unlike a count aggregated by district, KDE produces a smooth surface that does not depend on how the study area happens to be divided into administrative units.
 
-#### 8.2.1 Kernel Density Estimation (KDE)
+#### 9.2.1 Kernel Density Estimation (KDE)
 
 KDE's most consequential parameter is its bandwidth (`sigma` in **spatstat**), which controls how far each point's influence is smoothed. Too small produces a noisy surface; too large oversmooths and hides genuine concentration. Three automatic selectors, each using a different criterion, are computed and compared rather than fixing a value by inspection.
 
@@ -444,7 +690,7 @@ plot(bw_cvl)
 ::: callout-note
 **Analysis:**
 
-The curve is flat between roughly 10 km and 28 km before rising sharply. However, the criterion barely distinguishes between bandwidths across that range. At 28.6 km, roughly a quarter of the BMR's extent (90 to 125 km), the result would also collapse local concentration into a single regional trend. For both reasons, `bw.CvL` is not the most appropriate. 
+The curve is flat between roughly 10 km and 28 km before rising sharply. However, the criterion barely distinguishes between bandwidths across that range. At 28.6 km, roughly a quarter of the BMR's extent (90 to 125 km), the result would also collapse local concentration into a single regional trend. For both reasons, `bw.CvL` is not the most appropriate.
 :::
 
 Density surfaces are computed using both remaining bandwidths (`bw.diggle` and `bw.ppl`), for visual comparison before either is treated as final.
@@ -467,7 +713,7 @@ plot(kde_ppl, main = "ppl bandwidth")
 Both surfaces trace the same underlying pattern despite using different bandwidths. This agreement is a useful check as it suggests that the pattern reflects real spatial concentration, not an artefact of one bandwidth choice. Diggle's bandwidth shows this pattern at finer resolution and will be used as the primary surface moving forward.
 :::
 
-#### 8.2.2 Quadrat Analysis
+#### 9.2.2 Quadrat Analysis
 
 Quadrat analysis complements KDE with a simpler, non-kernel method. The study area is divided into a grid of equal-sized cells, and the number of accidents in each cell is compared against what Complete Spatial Randomness would predict.
 
@@ -480,7 +726,7 @@ plot(unmark(accidents_ppp_km), pch = 20, cex = 0.4, main = "Quadrat Counts of Ro
 plot(qcount, add = TRUE, col = "red", cex = 0.8)
 ```
 
-The variance to mean ratio (VMR) provides a quick diagnostic. A value close to 1 is consistent with CSR, above 1 suggests clustering, and below 1 suggests regularity. 
+The variance to mean ratio (VMR) provides a quick diagnostic. A value close to 1 is consistent with CSR, above 1 suggests clustering, and below 1 suggests regularity.
 
 ```{r}
 qcount_df <- as.data.frame(qcount)
@@ -500,46 +746,7 @@ quadrat.test(accidents_ppp_km, nx = 12, ny = 9)
 VMR and the chi-square test answer different questions: VMR measures how large the departure from CSR is; the chi-square test measures whether that departure could be due to chance. With a sample this large, the chi-square test is almost always significant and the test alone would not show the effect is substantial. VMR fills this gap: at 176.6, where the value is significantly higher than 1 expected under CSR, it shows the clustering is genuinely large. The chi-square test confirms it is not due to chance. This agrees with the KDE surface, both methods point to the same conclusion.
 :::
 
-#### 8.2.3 Temporal First-Order Analysis
-
-KDE and quadrat analysis above addressed how accident intensity varies across space. This section focuses on the temporal portion, examining whether accident intensity varies across the year. The point pattern is split by month, and a separate density surface is computed for each.
-
-```{r}
-accidents_ppp_month <- accidents_ppp_km
-marks(accidents_ppp_month) <- marks(accidents_ppp_km)$month
-
-st_kde <- spattemp.density(accidents_ppp_month)
-summary(st_kde)
-```
-
-Twelve monthly slices are plotted on a shared colour scale for direct comparison across the year:
-
-```{r}
-#| fig-width: 10
-#| fig-height: 10
-
-par(mfrow = c(4, 3), mar = c(2, 2, 2, 2))
-for (i in 1:12) {
-  plot(st_kde, i,
-       override.par = FALSE,
-       fix.range = TRUE,
-       main = paste("Month", i))
-}
-```
-
-::: callout-note
-**Analysis:**
-
-**Month 1** shows a moderately widespread hotspot concentrated in the central BMR, with some diffusion into surrounding areas.
-
-**Months 2 to 7** show generally lower intensity, with hotspots more contained.
-
-**Months 8 to 11** show accident density concentrated around Bangkok increasing in both intensity and spatial extent, with the branching pattern along major roads becoming more pronounced.
-
-**Month 12** shows the highest density of the year, concentrated in central BMR, likely due to increased travel during the year-end and holiday period. This also coincides with the start of Thailand's New Year "Seven Dangerous Days" period, 29 December 2022 to 4 January 2023, of which 29 to 31 December falls within the study period. 317 deaths were recorded nationwide [GT Rider, citing Thailand's Road Safety Centre, 2023](https://www.thegtrider.com/thailand-2022-2023-new-year-road-traffic-report-deaths.htm).
-:::
-
-#### 8.2.4 KDE Comparison By Province
+#### 9.2.3 KDE Comparison by Province
 
 The region-wide KDE surface shows where accidents concentrate across the whole BMR, but not how that pattern differs between provinces. This section computes a separate density surface for each of the six BMR provinces, using each province's own boundary as the window.
 
@@ -576,6 +783,177 @@ for (nm in names(kde_by_province)) {
 Across all six provinces, accidents cluster tightly along specific road corridors, appearing on each map as thin, bright lines.
 
 **Bangkok** and **Samut Prakan** show the highest peak intensities among the six provinces, with colour scales reaching approximately 170 and 250 respectively. In both cases, this intensity is concentrated along short, specific highway segments rather than distributed across the province. **Nakhon Pathom** shows the lowest peak intensity, with its colour scale reaching only about 10, and its hotspots appear comparatively scattered rather than concentrated on one corridor. **Nonthaburi** and **Pathum Thani** fall in between, with colour scales reaching approximately 44 and 50 respectively. For both provinces, hotspots concentrate toward the southern portion of the province, the area bordering Bangkok.
+:::
+
+### 9.3 Second-Order Spatial Point Pattern Analysis
+
+Second-order SPPA analysis complements the first-order analysis by examining the arrangement of points relative to one another at varying distances, rather than counts within fixed cells or grid squares.
+
+Four methods are applied in this section: the Clark-Evans test, the G-function, the F-function, and the paired K- and L-functions, each testing the CSR hypothesis through nearest-neighbour or inter-point distances.
+
+#### 9.3.1 Nearest Neighbour Analysis: Clark-Evans Test
+
+The Clark-Evans test compares the observed mean nearest-neighbour distance between accidents against the distance expected under Complete Spatial Randomness (CSR).
+
+- R = 1 is consistent with CSR: accidents are randomly distributed.
+- R < 1 indicates clustering: accidents lie closer together than CSR would predict.
+- R > 1 indicates regularity or dispersion: accidents are more evenly spaced than CSR would predict.
+
+The test hypothesis:
+
+- **Null Hypothesis (H0):** Traffic accidents are randomly distributed across the BMR.
+- **Alternative Hypothesis (H1):** Traffic accidents are not randomly distributed across the BMR.
+
+The hypothesis tests will use a 5% significance level.
+
+```{r}
+clarkevans.test(accidents_ppp_km, 
+                correction = "cdf", 
+                alternative = "clustered", 
+                nsim = 99, 
+                method = "MonteCarlo")
+```
+
+::: callout-tip
+`correction = "cdf"` is used since `adm2_owin_km` is an irregular polygon rather than a rectangle. It handles edge effects without requiring a rectangular window.
+:::
+
+::: callout-note
+**Analysis:**
+
+- R = 0.177, which is significantly below 1, indicates accidents lie much closer to their nearest neighbour than CSR would predict: strong evidence of clustering.
+- p-value = 0.01, reject the null hypothesis since p-value falls below the 0.05 significance level.
+
+Road accidents in the BMR are strongly clustered rather than randomly distributed, agreeing with the KDE surface and the quadrat test's VMR of 176.6.
+:::
+
+#### 9.3.2 G-Function
+
+The G-function estimates G(r), the probability that the distance from a typical accident to its nearest neighbouring accident is at most r. Unlike the Clark-Evans test, which reduces the whole pattern to a single R statistic, G(r) shows how that clustering behaves across a range of distances rather than just at one summary value.
+
+```{r}
+G_accidents <- Gest(accidents_ppp_km, correction = "km")
+plot(G_accidents, legendpos = "right")
+```
+
+A Monte Carlo envelope tests whether the observed G-function departs from CSR.
+
+```{r}
+G_accidents.csr <- envelope(accidents_ppp_km, Gest, 
+                            correction = "km", 
+                            nsim = 99)
+plot(G_accidents.csr, legendpos = "topright", legendargs = list(cex = 0.8))
+```
+
+::: callout-note
+**Analysis:**
+
+- The observed G-function rises sharply within the first 0.1km, reaching approximately 0.70, while the CSR line only reaches around 0.05 at the same distance. By r = 0.5km, the observed curve flattens near 0.90, significantly above CSR. 
+- The Monte Carlo envelope confirms this is not due to chance. The observed line sits entirely above the grey simulation envelope across the full range (0 to 0.5km).
+- This means road accidents in BMR are strongly clustered at short distances.
+:::
+
+#### 9.3.3 F-Function
+
+The F-function estimates F(r), the probability that the distance from a random location (not an accident) to its nearest accident is at most r. F reads in the opposite direction from G: a lower observed F-function indicates clustering, since clustered points leave larger empty gaps between them for F to measure.
+
+```{r}
+F_accidents <- Fest(accidents_ppp_km, correction = "km")
+plot(F_accidents, legendpos = "topleft", legendargs = list(cex = 0.8))
+```
+
+A Monte Carlo envelope tests whether the observed F-function departs from CSR.
+
+```{r}
+F_accidents.csr <- envelope(accidents_ppp_km, Fest, 
+                            correction = "km", 
+                            nsim = 99)
+plot(F_accidents.csr, legendpos = "topleft", legendargs = list(cex = 0.8))
+```
+
+::: callout-note
+**Analysis:**
+
+- The observed F-function sits below the CSR line across the entire distance range. At r = 1km, observed F is only around 0.15 whereas CSR is around 0.60.
+- The Monte Carlo envelope confirms this is not due to chance. The observed line sits entirely below the grey simulation envelope across the whole range. 
+- Since a lower-than-expected F-function indicates clustering, this means a randomly chosen location in the BMR takes much longer to reach its nearest accident than CSR would predict, consistent with accidents leaving large empty gaps between clusters rather than being spread evenly across the region.
+:::
+
+#### 9.3.4 K-Function and L-Function
+
+For K-function, K(r) estimates the expected number of accidents found within distance r of a typical accident, compared to what CSR would predict. A higher-than-CSR K(r) indicates clustering.
+
+::: callout-note
+Instead of spatstat's default, `rmax = 1` limits the K- and L-function estimates to 1km, since the G- and F-function results above already show clustering concentrated within roughly 0.1 to 0.5km.
+:::
+
+```{r}
+K_accidents <- Kest(accidents_ppp_km, correction = "Ripley", rmax = 1)
+plot(K_accidents)
+```
+
+K(r) grows quickly with distance under CSR, producing a steep curve that makes subtle departures difficult to discern visually. The L-function rescales K into a version that grows steadily and predictably under CSR, so any departure from a straight line stands out clearly instead of being hidden inside a curve. 
+
+```{r}
+L_accidents <- Lest(accidents_ppp_km, correction = "Ripley", rmax = 1)
+plot(L_accidents, . - r ~ r, legendpos = "right")
+```
+
+A single Monte Carlo envelope, run on the L-function, tests both K and L-function together, since L is just a clearer view of the same underlying K result. `global = TRUE` is used, testing whether the observed line departs from CSR anywhere across the full distance range instead of one fixed distance.
+
+```{r}
+L_accidents.csr <- envelope(accidents_ppp_km, Lest, correction = "Ripley", rmax = 1, nsim = 99, global = TRUE)
+plot(L_accidents.csr, . - r ~ r, legendpos = "right", legendargs = list(cex = 0.8))
+```
+
+::: callout-note
+**Analysis:**
+
+- The observed K-function lies well above the CSR line across the entire range (0 to 1km). The L-function confirms this after removing the quadratic CSR trend.
+- The Monte Carlo envelope confirms this is statistically significant, as the observed line remains outside the envelope across the entire range. Therefore, the null hypothesis of CSR is rejected.
+
+Overall, the results agree with Clark-Evans, G-function, and F-function.
+:::
+
+## 10 Spatio-Temporal Point Pattern Analysis
+
+### 10.1 Spatio-Temporal KDE by Month
+
+KDE and quadrat analysis above addressed how accident intensity varies across space. This section focuses on the temporal portion, examining whether accident intensity varies across the year. The point pattern is split by month, and a separate density surface is computed for each.
+
+```{r}
+accidents_ppp_month <- accidents_ppp_km
+marks(accidents_ppp_month) <- marks(accidents_ppp_km)$month
+
+st_kde <- spattemp.density(accidents_ppp_month)
+summary(st_kde)
+```
+
+Twelve monthly slices are plotted on a shared colour scale for direct comparison across the year:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 10
+
+par(mfrow = c(4, 3), mar = c(2, 2, 2, 2))
+for (i in 1:12) {
+  plot(st_kde, i,
+       override.par = FALSE,
+       fix.range = TRUE,
+       main = paste("Month", i))
+}
+```
+
+::: callout-note
+**Analysis:**
+
+**Month 1** shows a moderately widespread hotspot concentrated in the central BMR, with some diffusion into surrounding areas.
+
+**Months 2 to 7** show generally lower intensity, with hotspots more contained.
+
+**Months 8 to 11** show accident density concentrated around Bangkok increasing in both intensity and spatial extent, with the branching pattern along major roads becoming more pronounced.
+
+**Month 12** shows the highest density of the year, concentrated in central BMR, likely due to increased travel during the year-end and holiday period. This also coincides with the start of Thailand's New Year "Seven Dangerous Days" period, 29 December 2022 to 4 January 2023, of which 29 to 31 December falls within the study period. 317 deaths were recorded nationwide [GT Rider, citing Thailand's Road Safety Centre, 2023](https://www.thegtrider.com/thailand-2022-2023-new-year-road-traffic-report-deaths.htm).
 :::
 
 ## Reference
