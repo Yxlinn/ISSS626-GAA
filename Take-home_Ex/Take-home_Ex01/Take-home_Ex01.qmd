@@ -19,7 +19,7 @@ Public safety planning increasingly relies on location-based evidence to identif
 
 This exercise applies spatial and spatio-temporal point pattern analysis to road traffic accident data for the [Bangkok Metropolitan Region (BMR)](https://en.wikipedia.org/wiki/Bangkok_Metropolitan_Region), Thailand, covering Bangkok and the five adjacent provinces of Nonthaburi, Nakhon Pathom, Pathum Thani, Samut Prakan, and Samut Sakhon.
 
-## 2 Analytical Questions
+## 2 Research Questions
 
 1.  How is the intensity of road traffic accidents distributed across space and time within the BMR?
 2.  Do accidents exhibit statistically significant spatial and spatio-temporal clustering, beyond what would be expected under complete spatial randomness?
@@ -1104,7 +1104,7 @@ The first and second-order results reinforce one another. The network-constraine
 
 Road accidents in the BMR are not randomly distributed in space or time. Identifying where and when accidents concentrate allows resources such as police patrols, road engineering interventions, and safety campaigns to be targeted at high-risk locations and periods rather than distributed evenly across the region. The spatial point-pattern analysis and spatio-temporal density analysis support several findings relevant to public-safety planning.
 
-Accidents are statistically clustered, not just visually concentrated. Multiple independent methods agree on this: the Clark-Evans test (R = 0.177, p = 0.01) shows accidents lie far closer to their nearest neighbours than CSR would predict; the quadrat analysis produced a variance-to-mean ratio of 176.6, well above the value of 1 expected under CSR; and the G-, F-, and K/L-functions each show significant clustering within short distances. The network-constrained kernel density estimation (NKDE) reinforces this at the road-segment level, showing that accident density is concentrated on a small share of the network, particularly specific highway corridors and intersections in central and central-eastern BMR. As every method converges on the same conclusion, this clustering reflects a genuine spatial pattern. This supports targeting enforcement and road-safety engineering at the specific corridors where accidents concentrate.
+Accidents are statistically clustered, not just visually concentrated. Multiple independent methods agree on this: the Clark-Evans test (R = 0.177, p = 0.01) shows accidents lie far closer to their nearest neighbours than CSR would predict; the quadrat analysis produced a variance-to-mean ratio of 176.6, well above the value of 1 expected under CSR; and the G, F, and K/L-functions each show significant clustering within short distances. The network-constrained kernel density estimation (NKDE) reinforces this at the road-segment level, showing that accident density is concentrated on a small share of the network, particularly specific highway corridors and intersections in central and central-eastern BMR. As every method converges on the same conclusion, this clustering reflects a genuine spatial pattern. This supports targeting enforcement and road-safety engineering at the specific corridors where accidents concentrate.
 
 Accident concentration also varies across time and not just space. The STKDE shows accident intensity per hour is highest during Bangkok's morning and evening peak periods, and rises steadily across the week toward Friday and Saturday. At the annual scale, October to December record the highest number of accident counts. April is also notable due to the Songkran festival, where the average daily accident rate during the Songkran week was more than double the rest of April, and the daily STKDE surfaces show density expanding outward and peaking during that particular week. Hence, instead of maintaining a constant level of resourcing year-round, enforcement and public-safety campaigns can be strengthened around periods of known elevated accident frequency, such as peak hours, weekends, and during festive periods (e.g. Songkran).
 
@@ -1114,7 +1114,7 @@ In summary, road accidents in the BMR are concentrated in specific corridors and
 
 ## 13 Data Limitations
 
-There are some data limitations to be noted:
+In this study, there are some data limitations to be noted:
 
 - The analysis is limited to a single year (2022). As such, it cannot be determined whether the identified hotspots and seasonal patterns, such as those observed during Songkran and the year-end period, persist across multiple years or are specific to 2022 alone.
 - The road network data (Geofabrik OpenStreetMap extract) represents a single snapshot and may not perfectly reflect the road network as it existed in 2022.

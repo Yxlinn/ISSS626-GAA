@@ -51,9 +51,9 @@ This study is guided by four research questions. First, how accident intensity i
 
 ## 3. Study Area & Data
 
-**Study area:** Bangkok Metropolitan Region (BMR) — Bangkok, Nonthaburi, Nakhon Pathom, Pathum Thani, Samut Prakan, Samut Sakhon
+**Study Area:** Bangkok Metropolitan Region (BMR) — Bangkok, Nonthaburi, Nakhon Pathom, Pathum Thani, Samut Prakan, Samut Sakhon
 
-**Study period:** 2022
+**Study Period:** 2022
 
 **Data:**
 
