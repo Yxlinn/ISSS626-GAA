@@ -902,7 +902,12 @@ plot(L_accidents, . - r ~ r, legendpos = "right")
 A single Monte Carlo envelope, run on the L-function, tests both K and L-function together, since L is just a clearer view of the same underlying K result. `global = TRUE` is used, testing whether the observed line departs from CSR anywhere across the full distance range instead of one fixed distance.
 
 ```{r}
+#| results: 'hide'
+
 L_accidents.csr <- envelope(accidents_ppp_km, Lest, correction = "Ripley", rmax = 1, nsim = 99, global = TRUE)
+```
+
+```{r}
 plot(L_accidents.csr, . - r ~ r, legendpos = "right", legendargs = list(cex = 0.8))
 ```
 
@@ -1029,7 +1034,7 @@ for (i in 1:12) {
 
 **Months 8 to 11** show accident density concentrated around Bangkok increasing in both intensity and spatial extent, with the branching pattern along major roads becoming more pronounced.
 
-**Month 12** shows the highest density of the year, concentrated in central BMR, likely due to increased travel during the year-end and holiday period. This also coincides with the start of Thailand's New Year "Seven Dangerous Days" period, 29 December 2022 to 4 January 2023, of which 29 to 31 December falls within the study period. 317 deaths were recorded nationwide [GT Rider, citing Thailand's Road Safety Centre, 2023](https://www.thegtrider.com/thailand-2022-2023-new-year-road-traffic-report-deaths.htm).
+**Month 12** shows the highest density of the year, concentrated in central BMR, likely due to increased travel during the year-end and holiday period. This also coincides with the start of Thailand's New Year "Seven Dangerous Days" period, 29 December 2022 to 4 January 2023, of which 29 to 31 December falls within the study period. 317 deaths were recorded nationwide ([GT Rider, 2023](https://www.thegtrider.com/thailand-2022-2023-new-year-road-traffic-report-deaths.htm)).
 :::
 
 ### 10.2 STKDE During Songkran "Seven Dangerous Days"
@@ -1113,6 +1118,7 @@ There are some data limitations to be noted:
 
 - The analysis is limited to a single year (2022). As such, it cannot be determined whether the identified hotspots and seasonal patterns, such as those observed during Songkran and the year-end period, persist across multiple years or are specific to 2022 alone.
 - The road network data (Geofabrik OpenStreetMap extract) represents a single snapshot and may not perfectly reflect the road network as it existed in 2022.
+- Rows with missing coordinates were concentrated among accidents recorded by the Expressway Authority of Thailand. These rows could not be placed spatially and were dropped from the analysis, which may result in some undercounting of accidents in that area.
 
 ## 14 References
 
