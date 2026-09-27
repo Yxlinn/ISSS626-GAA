@@ -277,7 +277,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#spatial-point-pattern-analysis-sppa" id="toc-spatial-point-pattern-analysis-sppa" class="nav-link" data-scroll-target="#spatial-point-pattern-analysis-sppa">9 Spatial Point Pattern Analysis (SPPA)</a>
   <ul>
   <li><a href="#constructing-the-point-pattern-objects" id="toc-constructing-the-point-pattern-objects" class="nav-link" data-scroll-target="#constructing-the-point-pattern-objects">9.1 Constructing the Point Pattern Objects</a></li>
-  <li><a href="#first-order-spatial-point-pattern-analysis" id="toc-first-order-spatial-point-pattern-analysis" class="nav-link" data-scroll-target="#first-order-spatial-point-pattern-analysis">9.2 First Order Spatial Point Pattern Analysis</a>
+  <li><a href="#first-order-spatial-point-pattern-analysis" id="toc-first-order-spatial-point-pattern-analysis" class="nav-link" data-scroll-target="#first-order-spatial-point-pattern-analysis">9.2 First-Order Spatial Point Pattern Analysis</a>
   <ul class="collapse">
   <li><a href="#kernel-density-estimation-kde" id="toc-kernel-density-estimation-kde" class="nav-link" data-scroll-target="#kernel-density-estimation-kde">9.2.1 Kernel Density Estimation (KDE)</a></li>
   <li><a href="#quadrat-analysis" id="toc-quadrat-analysis" class="nav-link" data-scroll-target="#quadrat-analysis">9.2.2 Quadrat Analysis</a></li>
@@ -290,12 +290,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#f-function" id="toc-f-function" class="nav-link" data-scroll-target="#f-function">9.3.3 F-Function</a></li>
   <li><a href="#k-function-and-l-function" id="toc-k-function-and-l-function" class="nav-link" data-scroll-target="#k-function-and-l-function">9.3.4 K-Function and L-Function</a></li>
   </ul></li>
+  <li><a href="#network-constrained-spatial-point-pattern-analysis" id="toc-network-constrained-spatial-point-pattern-analysis" class="nav-link" data-scroll-target="#network-constrained-spatial-point-pattern-analysis">9.4 Network-Constrained Spatial Point Pattern Analysis</a>
+  <ul class="collapse">
+  <li><a href="#preparing-the-lixels" id="toc-preparing-the-lixels" class="nav-link" data-scroll-target="#preparing-the-lixels">9.4.1 Preparing the Lixels</a></li>
+  <li><a href="#computing-nkde" id="toc-computing-nkde" class="nav-link" data-scroll-target="#computing-nkde">9.4.2 Computing NKDE</a></li>
+  <li><a href="#visualising-nkde" id="toc-visualising-nkde" class="nav-link" data-scroll-target="#visualising-nkde">9.4.3 Visualising NKDE</a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#spatio-temporal-point-pattern-analysis" id="toc-spatio-temporal-point-pattern-analysis" class="nav-link" data-scroll-target="#spatio-temporal-point-pattern-analysis">10 Spatio-Temporal Point Pattern Analysis</a>
   <ul>
-  <li><a href="#spatio-temporal-kde-by-month" id="toc-spatio-temporal-kde-by-month" class="nav-link" data-scroll-target="#spatio-temporal-kde-by-month">10.1 Spatio-Temporal KDE by Month</a></li>
+  <li><a href="#stkde-by-month" id="toc-stkde-by-month" class="nav-link" data-scroll-target="#stkde-by-month">10.1 STKDE by Month</a></li>
+  <li><a href="#stkde-during-songkran-seven-dangerous-days" id="toc-stkde-during-songkran-seven-dangerous-days" class="nav-link" data-scroll-target="#stkde-during-songkran-seven-dangerous-days">10.2 STKDE During Songkran “Seven Dangerous Days”</a></li>
   </ul></li>
-  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">Reference</a></li>
+  <li><a href="#integration-of-spatial-and-spatio-temporal-findings" id="toc-integration-of-spatial-and-spatio-temporal-findings" class="nav-link" data-scroll-target="#integration-of-spatial-and-spatio-temporal-findings">11 Integration of Spatial and Spatio-Temporal Findings</a>
+  <ul>
+  <li><a href="#first-order-sppa-findings" id="toc-first-order-sppa-findings" class="nav-link" data-scroll-target="#first-order-sppa-findings">11.1 First-Order SPPA Findings</a></li>
+  <li><a href="#second-order-sppa-findings" id="toc-second-order-sppa-findings" class="nav-link" data-scroll-target="#second-order-sppa-findings">11.2 Second-Order SPPA Findings</a></li>
+  <li><a href="#linking-first-order-and-second-order-sppa" id="toc-linking-first-order-and-second-order-sppa" class="nav-link" data-scroll-target="#linking-first-order-and-second-order-sppa">11.3 Linking First-Order and Second-Order SPPA</a></li>
+  </ul></li>
+  <li><a href="#public-safety-planning-and-management" id="toc-public-safety-planning-and-management" class="nav-link" data-scroll-target="#public-safety-planning-and-management">12 Public-Safety Planning and Management</a></li>
+  <li><a href="#data-limitations" id="toc-data-limitations" class="nav-link" data-scroll-target="#data-limitations">13 Data Limitations</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">14 References</a></li>
   </ul>
 </nav>
     </div>
@@ -1048,7 +1063,7 @@ Note
 <span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">barmode =</span> <span class="st">"stack"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="plotly html-widget html-fill-item" id="htmlwidget-9eceb20dc2a931752ae4" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-9eceb20dc2a931752ae4">{"x":{"visdat":{"65f03a27105a":["function () ","plotlyVisDat"]},"cur_data":"65f03a27105a","attrs":{"65f03a27105a":{"x":{},"y":{},"color":{},"colors":["lightblue","red3","royalblue3"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Accidents by Month, Coloured by Season","xaxis":{"domain":[0,1],"automargin":true,"title":"Month","type":"category","categoryorder":"array","categoryarray":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"Number of Accidents"},"barmode":"stack","hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["Jan","Feb","Oct","Nov","Dec"],"y":[277,111,214,367,369],"type":"bar","name":"Cool","marker":{"color":"rgba(173,216,230,1)","line":{"color":"rgba(173,216,230,1)"}},"textfont":{"color":"rgba(173,216,230,1)"},"error_y":{"color":"rgba(173,216,230,1)"},"error_x":{"color":"rgba(173,216,230,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Feb","Mar","Apr","May"],"y":[100,244,332,120],"type":"bar","name":"Hot","marker":{"color":"rgba(205,0,0,1)","line":{"color":"rgba(205,0,0,1)"}},"textfont":{"color":"rgba(205,0,0,1)"},"error_y":{"color":"rgba(205,0,0,1)"},"error_x":{"color":"rgba(205,0,0,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["May","Jun","Jul","Aug","Sept","Oct"],"y":[122,241,312,324,280,180],"type":"bar","name":"Rainy","marker":{"color":"rgba(58,95,205,1)","line":{"color":"rgba(58,95,205,1)"}},"textfont":{"color":"rgba(58,95,205,1)"},"error_y":{"color":"rgba(58,95,205,1)"},"error_x":{"color":"rgba(58,95,205,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-9eceb20dc2a931752ae4">{"x":{"visdat":{"42201f631e82":["function () ","plotlyVisDat"]},"cur_data":"42201f631e82","attrs":{"42201f631e82":{"x":{},"y":{},"color":{},"colors":["lightblue","red3","royalblue3"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Accidents by Month, Coloured by Season","xaxis":{"domain":[0,1],"automargin":true,"title":"Month","type":"category","categoryorder":"array","categoryarray":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"Number of Accidents"},"barmode":"stack","hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["Jan","Feb","Oct","Nov","Dec"],"y":[277,111,214,367,369],"type":"bar","name":"Cool","marker":{"color":"rgba(173,216,230,1)","line":{"color":"rgba(173,216,230,1)"}},"textfont":{"color":"rgba(173,216,230,1)"},"error_y":{"color":"rgba(173,216,230,1)"},"error_x":{"color":"rgba(173,216,230,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Feb","Mar","Apr","May"],"y":[100,244,332,120],"type":"bar","name":"Hot","marker":{"color":"rgba(205,0,0,1)","line":{"color":"rgba(205,0,0,1)"}},"textfont":{"color":"rgba(205,0,0,1)"},"error_y":{"color":"rgba(205,0,0,1)"},"error_x":{"color":"rgba(205,0,0,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["May","Jun","Jul","Aug","Sept","Oct"],"y":[122,241,312,324,280,180],"type":"bar","name":"Rainy","marker":{"color":"rgba(58,95,205,1)","line":{"color":"rgba(58,95,205,1)"}},"textfont":{"color":"rgba(58,95,205,1)"},"error_y":{"color":"rgba(58,95,205,1)"},"error_x":{"color":"rgba(58,95,205,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -1093,7 +1108,7 @@ Note
 <span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">showlegend =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="plotly html-widget html-fill-item" id="htmlwidget-f30d7598595affc4f25a" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-f30d7598595affc4f25a">{"x":{"visdat":{"65f05f084f54":["function () ","plotlyVisDat"]},"cur_data":"65f05f084f54","attrs":{"65f05f084f54":{"x":{},"y":{},"color":{},"colors":["tomato1","royalblue3"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Average Daily Accident Rate: Songkran vs Rest of April","xaxis":{"domain":[0,1],"automargin":true,"title":"Period","type":"category","categoryorder":"array","categoryarray":["Rest of April","Songkran (11 to 17 Apr)"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"Average Accidents per Day"},"showlegend":false,"hovermode":"closest"},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["Rest of April"],"y":[8.7826086956521738],"type":"bar","name":"Rest of April","marker":{"color":"rgba(58,95,205,1)","line":{"color":"rgba(58,95,205,1)"}},"textfont":{"color":"rgba(58,95,205,1)"},"error_y":{"color":"rgba(58,95,205,1)"},"error_x":{"color":"rgba(58,95,205,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Songkran (11 to 17 Apr)"],"y":[18.571428571428573],"type":"bar","name":"Songkran (11 to 17 Apr)","marker":{"color":"rgba(255,99,71,1)","line":{"color":"rgba(255,99,71,1)"}},"textfont":{"color":"rgba(255,99,71,1)"},"error_y":{"color":"rgba(255,99,71,1)"},"error_x":{"color":"rgba(255,99,71,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-f30d7598595affc4f25a">{"x":{"visdat":{"42205928247d":["function () ","plotlyVisDat"]},"cur_data":"42205928247d","attrs":{"42205928247d":{"x":{},"y":{},"color":{},"colors":["tomato1","royalblue3"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Average Daily Accident Rate: Songkran vs Rest of April","xaxis":{"domain":[0,1],"automargin":true,"title":"Period","type":"category","categoryorder":"array","categoryarray":["Rest of April","Songkran (11 to 17 Apr)"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"Average Accidents per Day"},"showlegend":false,"hovermode":"closest"},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["Rest of April"],"y":[8.7826086956521738],"type":"bar","name":"Rest of April","marker":{"color":"rgba(58,95,205,1)","line":{"color":"rgba(58,95,205,1)"}},"textfont":{"color":"rgba(58,95,205,1)"},"error_y":{"color":"rgba(58,95,205,1)"},"error_x":{"color":"rgba(58,95,205,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Songkran (11 to 17 Apr)"],"y":[18.571428571428573],"type":"bar","name":"Songkran (11 to 17 Apr)","marker":{"color":"rgba(255,99,71,1)","line":{"color":"rgba(255,99,71,1)"}},"textfont":{"color":"rgba(255,99,71,1)"},"error_y":{"color":"rgba(255,99,71,1)"},"error_x":{"color":"rgba(255,99,71,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -1130,7 +1145,7 @@ Note
 <span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">xaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">"Day of Week"</span>), <span class="at">yaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">"Number of Accidents"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="plotly html-widget html-fill-item" id="htmlwidget-b85bf888dc62471906a9" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-b85bf888dc62471906a9">{"x":{"visdat":{"65f044a13b39":["function () ","plotlyVisDat"]},"cur_data":"65f044a13b39","attrs":{"65f044a13b39":{"x":{},"y":{},"color":{},"colors":["orange","seagreen"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Accidents by Day of Week","xaxis":{"domain":[0,1],"automargin":true,"title":"Day of Week","type":"category","categoryorder":"array","categoryarray":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"Number of Accidents"},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["Mon","Tue","Wed","Thu","Fri"],"y":[500,455,472,529,595],"type":"bar","name":"Weekday","marker":{"color":"rgba(255,165,0,1)","line":{"color":"rgba(255,165,0,1)"}},"textfont":{"color":"rgba(255,165,0,1)"},"error_y":{"color":"rgba(255,165,0,1)"},"error_x":{"color":"rgba(255,165,0,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Sat","Sun"],"y":[572,470],"type":"bar","name":"Weekend","marker":{"color":"rgba(46,139,87,1)","line":{"color":"rgba(46,139,87,1)"}},"textfont":{"color":"rgba(46,139,87,1)"},"error_y":{"color":"rgba(46,139,87,1)"},"error_x":{"color":"rgba(46,139,87,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-b85bf888dc62471906a9">{"x":{"visdat":{"42207e54edf":["function () ","plotlyVisDat"]},"cur_data":"42207e54edf","attrs":{"42207e54edf":{"x":{},"y":{},"color":{},"colors":["orange","seagreen"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Accidents by Day of Week","xaxis":{"domain":[0,1],"automargin":true,"title":"Day of Week","type":"category","categoryorder":"array","categoryarray":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]},"yaxis":{"domain":[0,1],"automargin":true,"title":"Number of Accidents"},"hovermode":"closest","showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["Mon","Tue","Wed","Thu","Fri"],"y":[500,455,472,529,595],"type":"bar","name":"Weekday","marker":{"color":"rgba(255,165,0,1)","line":{"color":"rgba(255,165,0,1)"}},"textfont":{"color":"rgba(255,165,0,1)"},"error_y":{"color":"rgba(255,165,0,1)"},"error_x":{"color":"rgba(255,165,0,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":["Sat","Sun"],"y":[572,470],"type":"bar","name":"Weekend","marker":{"color":"rgba(46,139,87,1)","line":{"color":"rgba(46,139,87,1)"}},"textfont":{"color":"rgba(46,139,87,1)"},"error_y":{"color":"rgba(46,139,87,1)"},"error_x":{"color":"rgba(46,139,87,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -1177,7 +1192,7 @@ Note
 <span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">yaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">"Accidents per Hour"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="plotly html-widget html-fill-item" id="htmlwidget-88fdd2a34d502a66744b" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-88fdd2a34d502a66744b">{"x":{"visdat":{"65f03e0cf78":["function () ","plotlyVisDat"]},"cur_data":"65f03e0cf78","attrs":{"65f03e0cf78":{"x":{},"y":{},"marker":{"color":["tomato","orange","lightblue"]},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Average Accidents per Hour by Peak Period","xaxis":{"domain":[0,1],"automargin":true,"title":"Peak Period","categoryorder":"array","categoryarray":["Morning Peak","Evening Peak","Off-Peak"],"type":"category"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Accidents per Hour"},"hovermode":"closest","showlegend":false},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["Evening Peak","Morning Peak","Off-Peak"],"y":[168.66666666666666,171,144.47368421052633],"marker":{"color":["tomato","orange","lightblue"],"line":{"color":"rgba(31,119,180,1)"}},"type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-88fdd2a34d502a66744b">{"x":{"visdat":{"4220669e4bf9":["function () ","plotlyVisDat"]},"cur_data":"4220669e4bf9","attrs":{"4220669e4bf9":{"x":{},"y":{},"marker":{"color":["tomato","orange","lightblue"]},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"bar"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"title":"Average Accidents per Hour by Peak Period","xaxis":{"domain":[0,1],"automargin":true,"title":"Peak Period","categoryorder":"array","categoryarray":["Morning Peak","Evening Peak","Off-Peak"],"type":"category"},"yaxis":{"domain":[0,1],"automargin":true,"title":"Accidents per Hour"},"hovermode":"closest","showlegend":false},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":["Evening Peak","Morning Peak","Off-Peak"],"y":[168.66666666666666,171,144.47368421052633],"marker":{"color":["tomato","orange","lightblue"],"line":{"color":"rgba(31,119,180,1)"}},"type":"bar","error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div class="callout callout-style-default callout-important callout-titled">
@@ -1455,7 +1470,7 @@ Note
 </div>
 </section>
 <section id="first-order-spatial-point-pattern-analysis" class="level3">
-<h3 class="anchored" data-anchor-id="first-order-spatial-point-pattern-analysis">9.2 First Order Spatial Point Pattern Analysis</h3>
+<h3 class="anchored" data-anchor-id="first-order-spatial-point-pattern-analysis">9.2 First-Order Spatial Point Pattern Analysis</h3>
 <p>First-order analysis begins with kernel density estimation (KDE), which estimates how accident intensity, the expected number of accidents per unit area, varies continuously across the BMR. Unlike a count aggregated by district, KDE produces a smooth surface that does not depend on how the study area happens to be divided into administrative units.</p>
 <section id="kernel-density-estimation-kde" class="level4">
 <h4 class="anchored" data-anchor-id="kernel-density-estimation-kde">9.2.1 Kernel Density Estimation (KDE)</h4>
@@ -1743,11 +1758,39 @@ Note
 <span id="cb89-3"><a href="#cb89-3" aria-hidden="true" tabindex="-1"></a>                            <span class="at">nsim =</span> <span class="dv">99</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 99 simulated realisations of CSR  ...
-1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 
+1, 2,  [3:19 remaining] 3,
+ [3:11 remaining] 4,  [3:03 remaining] 5,  [2:58 remaining] 6,
+ [2:54 remaining] 7,  [2:50 remaining] 8,  [2:47 remaining] 9,
+ [2:45 remaining] 10,  [2:42 remaining] 11,  [2:41 remaining] 12,
+ [2:39 remaining] 13,  [2:38 remaining] 14,  [2:36 remaining] 15,
+ [2:33 remaining] 16,  [2:31 remaining] 17,  [2:29 remaining] 18,
+ [2:27 remaining] 19,  [2:25 remaining] 20,  [2:24 remaining] 21,
+ [2:22 remaining] 22,  [2:20 remaining] 23,  [2:18 remaining] 24,
+ [2:16 remaining] 25,  [2:16 remaining] 26,  [2:15 remaining] 27,
+ [2:14 remaining] 28,  [2:12 remaining] 29,  [2:11 remaining] 30,
+ [2:09 remaining] 31,  [2:07 remaining] 32,  [2:05 remaining] 33,
+ [2:03 remaining] 34,  [2:01 remaining] 35,  [1:59 remaining] 36,
+ [1:57 remaining] 37,  [1:55 remaining] 38,  [1:53 remaining] 39,
+ [1:51 remaining] 40,  [1:49 remaining] 41,  [1:47 remaining] 42,
+ [1:45 remaining] 43,  [1:43 remaining] 44,  [1:42 remaining] 45,
+ [1:40 remaining] 46,  [1:38 remaining] 47,  [1:36 remaining] 48,
+ [1:34 remaining] 49,  [1:32 remaining] 50,  [1:30 remaining] 51,
+ [1:28 remaining] 52,  [1:27 remaining] 53,  [1:25 remaining] 54,
+ [1:23 remaining] 55,  [1:21 remaining] 56,  [1:19 remaining] 57,
+ [1:17 remaining] 58,  [1:15 remaining] 59,  [1:13 remaining] 60,
+ [1:12 remaining] 61,  [1:10 remaining] 62,  [1:08 remaining] 63,
+ [1:06 remaining] 64,  [1:04 remaining] 65,  [1:02 remaining] 66,
+ [1:00 remaining] 67,  [59 sec remaining] 68,  [57 sec remaining] 69,
+ [55 sec remaining] 70,  [54 sec remaining] 71,  [52 sec remaining] 72,
+ [50 sec remaining] 73,  [48 sec remaining] 74,  [46 sec remaining] 75,
+ [44 sec remaining] 76,  [42 sec remaining] 77,  [41 sec remaining] 78,
+ [39 sec remaining] 79,  [37 sec remaining] 80,  [35 sec remaining] 81,
+ [33 sec remaining] 82,  [31 sec remaining] 83,  [30 sec remaining] 84,
+ [28 sec remaining] 85,  [26 sec remaining] 86,  [24 sec remaining] 87,
+ [22 sec remaining] 88,  [20 sec remaining] 89,  [18 sec remaining] 90,
+ [16 sec remaining] 91,  [15 sec remaining] 92,  [13 sec remaining] 93,
+ [11 sec remaining] 94,  [9 sec remaining] 95,  [7 sec remaining] 96,
+ [5 sec remaining] 97,  [4 sec remaining] 98,  [2 sec remaining] 
 99.
 
 Done.</code></pre>
@@ -1868,7 +1911,7 @@ Note
 <p>K(r) grows quickly with distance under CSR, producing a steep curve that makes subtle departures difficult to discern visually. The L-function rescales K into a version that grows steadily and predictably under CSR, so any departure from a straight line stands out clearly instead of being hidden inside a curve.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>L_accidents <span class="ot">&lt;-</span> <span class="fu">Lest</span>(accidents_ppp_km, <span class="at">correction =</span> <span class="st">"Ripley"</span>, <span class="at">rmax =</span> <span class="dv">1</span>)</span>
-<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(L_accidents, . <span class="sc">-</span> r <span class="sc">~</span> r, <span class="at">legendpos =</span> <span class="st">"bottomright"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(L_accidents, . <span class="sc">-</span> r <span class="sc">~</span> r, <span class="at">legendpos =</span> <span class="st">"right"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1882,11 +1925,39 @@ Note
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>L_accidents.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(accidents_ppp_km, Lest, <span class="at">correction =</span> <span class="st">"Ripley"</span>, <span class="at">rmax =</span> <span class="dv">1</span>, <span class="at">nsim =</span> <span class="dv">99</span>, <span class="at">global =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 99 simulated realisations of CSR  ...
-1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 
+1, 2,  [5:08 remaining] 3,
+ [5:02 remaining] 4,  [5:01 remaining] 5,  [5:02 remaining] 6,
+ [5:20 remaining] 7,  [5:53 remaining] 8,  [6:17 remaining] 9,
+ [6:34 remaining] 10,  [6:39 remaining] 11,  [6:45 remaining] 12,
+ [6:48 remaining] 13,  [6:48 remaining] 14,  [6:48 remaining] 15,
+ [6:47 remaining] 16,  [6:45 remaining] 17,  [6:44 remaining] 18,
+ [6:43 remaining] 19,  [6:40 remaining] 20,  [6:38 remaining] 21,
+ [6:35 remaining] 22,  [6:32 remaining] 23,  [6:29 remaining] 24,
+ [6:26 remaining] 25,  [6:24 remaining] 26,  [6:19 remaining] 27,
+ [6:16 remaining] 28,  [6:13 remaining] 29,  [6:09 remaining] 30,
+ [6:04 remaining] 31,  [5:58 remaining] 32,  [5:54 remaining] 33,
+ [5:51 remaining] 34,  [5:45 remaining] 35,  [5:40 remaining] 36,
+ [5:34 remaining] 37,  [5:30 remaining] 38,  [5:25 remaining] 39,
+ [5:20 remaining] 40,  [5:15 remaining] 41,  [5:10 remaining] 42,
+ [5:05 remaining] 43,  [5:00 remaining] 44,  [4:55 remaining] 45,
+ [4:50 remaining] 46,  [4:45 remaining] 47,  [4:40 remaining] 48,
+ [4:34 remaining] 49,  [4:29 remaining] 50,  [4:23 remaining] 51,
+ [4:18 remaining] 52,  [4:12 remaining] 53,  [4:07 remaining] 54,
+ [4:02 remaining] 55,  [3:57 remaining] 56,  [3:52 remaining] 57,
+ [3:47 remaining] 58,  [3:42 remaining] 59,  [3:36 remaining] 60,
+ [3:31 remaining] 61,  [3:26 remaining] 62,  [3:20 remaining] 63,
+ [3:15 remaining] 64,  [3:10 remaining] 65,  [3:04 remaining] 66,
+ [2:59 remaining] 67,  [2:53 remaining] 68,  [2:48 remaining] 69,
+ [2:43 remaining] 70,  [2:37 remaining] 71,  [2:32 remaining] 72,
+ [2:27 remaining] 73,  [2:21 remaining] 74,  [2:16 remaining] 75,
+ [2:10 remaining] 76,  [2:05 remaining] 77,  [1:59 remaining] 78,
+ [1:54 remaining] 79,  [1:48 remaining] 80,  [1:43 remaining] 81,
+ [1:38 remaining] 82,  [1:32 remaining] 83,  [1:27 remaining] 84,
+ [1:22 remaining] 85,  [1:16 remaining] 86,  [1:11 remaining] 87,
+ [1:05 remaining] 88,  [1:00 remaining] 89,  [55 sec remaining] 90,
+ [49 sec remaining] 91,  [44 sec remaining] 92,  [38 sec remaining] 93,
+ [33 sec remaining] 94,  [27 sec remaining] 95,  [22 sec remaining] 96,
+ [16 sec remaining] 97,  [11 sec remaining] 98,  [5 sec remaining] 
 99.
 
 Done.</code></pre>
@@ -1920,18 +1991,109 @@ Note
 </div>
 </section>
 </section>
+<section id="network-constrained-spatial-point-pattern-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="network-constrained-spatial-point-pattern-analysis">9.4 Network-Constrained Spatial Point Pattern Analysis</h3>
+<p>Each method in Section 9.3 assumed that accidents could occur anywhere within <code>adm2_owin_km</code>. However, in reality, road accidents can only occur on the road network itself (not buildings, fields, etc.). Treating accidents as freely distributed across the whole planar area can distort how clustered accidents really are like.</p>
+<p>Network-constrained analysis addresses this by restricting the density estimate to the road network itself. This section computes the Network-Constrained Kernel Density Estimation (NKDE) using <a href="https://jeremygelb.github.io/spNetwork/"><strong>spNetwork</strong></a>, which estimates accident density along <code>road_bmr</code>, expressed as accidents per unit length of road.</p>
+<section id="preparing-the-lixels" class="level4">
+<h4 class="anchored" data-anchor-id="preparing-the-lixels">9.4.1 Preparing the Lixels</h4>
+<p>The road network first needs to be split into lixels to estimate density. This uses <code>lixelize_lines()</code> of <strong>spNetwork</strong>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb101"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a>lixels <span class="ot">&lt;-</span> <span class="fu">lixelize_lines</span>(roads_bmr, <span class="at">lx_length =</span> <span class="dv">5000</span>, <span class="at">mindist =</span> <span class="dv">2500</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Smaller lixel lengths were tested first (e.g.&nbsp;<code>lx_length = 200</code>), each producing a nearly flat density surface with no visible hotspots, likely due to the network being too finely segmented relative to the incident count. After a few rounds of testing, <code>lx_length = 5000</code> was found to reflect better identification of accident patterns.</p>
+</div>
+</div>
+<p>NKDE evaluates density at a sample point along each lixel. These sample points are generated separately using <code>lines_center()</code> of <strong>spNetwork</strong>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a>samples <span class="ot">&lt;-</span> <span class="fu">lines_center</span>(lixels)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="computing-nkde" class="level4">
+<h4 class="anchored" data-anchor-id="computing-nkde">9.4.2 Computing NKDE</h4>
+<p>With the network split into lixels and their sample points prepared, NKDE estimates accident density along <code>roads_bmr</code> using <code>nkde()</code> of <strong>spNetwork</strong>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a>accidents_nkde <span class="ot">&lt;-</span> <span class="fu">nkde</span>(</span>
+<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">lines =</span> roads_bmr,</span>
+<span id="cb103-3"><a href="#cb103-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">events =</span> accidents_bmr,</span>
+<span id="cb103-4"><a href="#cb103-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">w =</span> <span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">nrow</span>(accidents_bmr)),</span>
+<span id="cb103-5"><a href="#cb103-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">samples =</span> samples,</span>
+<span id="cb103-6"><a href="#cb103-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">kernel_name =</span> <span class="st">"quartic"</span>,</span>
+<span id="cb103-7"><a href="#cb103-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">bw =</span> <span class="dv">300</span>,</span>
+<span id="cb103-8"><a href="#cb103-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"simple"</span></span>
+<span id="cb103-9"><a href="#cb103-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="visualising-nkde" class="level4">
+<h4 class="anchored" data-anchor-id="visualising-nkde">9.4.3 Visualising NKDE</h4>
+<p>The computed density values are attached back to <code>lixels_200</code> and <code>samples_200</code> before visualization, and rescaled by 1000 for a more readable display range.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb104"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a>lixels<span class="sc">$</span>density <span class="ot">&lt;-</span> accidents_nkde <span class="sc">*</span> <span class="dv">1000</span></span>
+<span id="cb104-2"><a href="#cb104-2" aria-hidden="true" tabindex="-1"></a>samples<span class="sc">$</span>density <span class="ot">&lt;-</span> accidents_nkde <span class="sc">*</span> <span class="dv">1000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The result is plotted with <strong>tmap</strong>, coloring each lixel by its density value along the network:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(adm2_bmr) <span class="sc">+</span></span>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">col =</span> <span class="st">"white"</span>, <span class="at">border.col =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb105-3"><a href="#cb105-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(lixels) <span class="sc">+</span></span>
+<span id="cb105-4"><a href="#cb105-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_lines</span>(<span class="at">col =</span> <span class="st">"density"</span>, <span class="at">palette =</span> <span class="st">"YlOrRd"</span>, <span class="at">style =</span> <span class="st">"jenks"</span>, <span class="at">n =</span> <span class="dv">6</span>, <span class="at">lwd =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb105-5"><a href="#cb105-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(</span>
+<span id="cb105-6"><a href="#cb105-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">main.title =</span> <span class="st">"Network Kernel Density of Road Accidents in BMR"</span>,</span>
+<span id="cb105-7"><a href="#cb105-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">main.title.size =</span> <span class="fl">1.2</span>,</span>
+<span id="cb105-8"><a href="#cb105-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">frame =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb105-9"><a href="#cb105-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.outside =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb105-10"><a href="#cb105-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.outside.position =</span> <span class="st">"right"</span></span>
+<span id="cb105-11"><a href="#cb105-11" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-69-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Analysis:</strong></p>
+<ul>
+<li>Density is heavily concentrated on a small share of the road network. Most road segments see very few accidents relative to the network as a whole, while a small number of segments account for a disproportionate share of accident density.</li>
+<li>The concentrated density follows specific highways and intersections rather than broad areas, with the highest concentration in the central and central-eastern parts of the BMR. This is consistent with the location KDE, Clark-Evans test, G/F/K/L-functions identified earlier as high-risk.</li>
+</ul>
+</div>
+</div>
+</section>
+</section>
 </section>
 <section id="spatio-temporal-point-pattern-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="spatio-temporal-point-pattern-analysis">10 Spatio-Temporal Point Pattern Analysis</h2>
-<section id="spatio-temporal-kde-by-month" class="level3">
-<h3 class="anchored" data-anchor-id="spatio-temporal-kde-by-month">10.1 Spatio-Temporal KDE by Month</h3>
-<p>KDE and quadrat analysis above addressed how accident intensity varies across space. This section focuses on the temporal portion, examining whether accident intensity varies across the year. The point pattern is split by month, and a separate density surface is computed for each.</p>
+<p>KDE and quadrat analysis above addressed how accident intensity varies across space. This section focuses on the temporal portion, examining whether accident intensity varies across the year. Spatio-Temporal Kernel Density Estimation (STKDE) extends KDE into the time dimension, producing a separate density surface for each month.</p>
+<section id="stkde-by-month" class="level3">
+<h3 class="anchored" data-anchor-id="stkde-by-month">10.1 STKDE by Month</h3>
+<p><code>spattemp.density()</code> of <strong>sparr</strong> computes STKDE, building a separate density surface for each value of a time variable. Since it requires a ppp object with just one numeric mark representing time, <code>accidents_ppp_km</code>’s marks are replaced with the month column before running it.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb101"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a>accidents_ppp_month <span class="ot">&lt;-</span> accidents_ppp_km</span>
-<span id="cb101-2"><a href="#cb101-2" aria-hidden="true" tabindex="-1"></a><span class="fu">marks</span>(accidents_ppp_month) <span class="ot">&lt;-</span> <span class="fu">marks</span>(accidents_ppp_km)<span class="sc">$</span>month</span>
-<span id="cb101-3"><a href="#cb101-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb101-4"><a href="#cb101-4" aria-hidden="true" tabindex="-1"></a>st_kde <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(accidents_ppp_month)</span>
-<span id="cb101-5"><a href="#cb101-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(st_kde)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb106"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a>accidents_ppp_month <span class="ot">&lt;-</span> accidents_ppp_km</span>
+<span id="cb106-2"><a href="#cb106-2" aria-hidden="true" tabindex="-1"></a><span class="fu">marks</span>(accidents_ppp_month) <span class="ot">&lt;-</span> <span class="fu">marks</span>(accidents_ppp_km)<span class="sc">$</span>month</span>
+<span id="cb106-3"><a href="#cb106-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb106-4"><a href="#cb106-4" aria-hidden="true" tabindex="-1"></a>st_kde <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(accidents_ppp_month)</span>
+<span id="cb106-5"><a href="#cb106-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(st_kde)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Spatiotemporal Kernel Density Estimate
 
@@ -1954,19 +2116,19 @@ Evaluation
   Density range: [7.546022e-35, 0.002849939]</code></pre>
 </div>
 </div>
-<p>Twelve monthly slices are plotted on a shared colour scale for direct comparison across the year:</p>
+<p>Every month is plotted on a shared colour scale for direct comparison across the year.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">3</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>))</span>
-<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
-<span id="cb103-3"><a href="#cb103-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(st_kde, i,</span>
-<span id="cb103-4"><a href="#cb103-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">override.par =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb103-5"><a href="#cb103-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">fix.range =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb103-6"><a href="#cb103-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"Month"</span>, i))</span>
-<span id="cb103-7"><a href="#cb103-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb108"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">3</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb108-2"><a href="#cb108-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>) {</span>
+<span id="cb108-3"><a href="#cb108-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(st_kde, i,</span>
+<span id="cb108-4"><a href="#cb108-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">override.par =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb108-5"><a href="#cb108-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">fix.range =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb108-6"><a href="#cb108-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"Month"</span>, i))</span>
+<span id="cb108-7"><a href="#cb108-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-66-1.png" class="img-fluid figure-img" width="960"></p>
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-71-1.png" class="img-fluid figure-img" width="960"></p>
 </figure>
 </div>
 </div>
@@ -1989,9 +2151,125 @@ Note
 </div>
 </div>
 </section>
+<section id="stkde-during-songkran-seven-dangerous-days" class="level3">
+<h3 class="anchored" data-anchor-id="stkde-during-songkran-seven-dangerous-days">10.2 STKDE During Songkran “Seven Dangerous Days”</h3>
+<p>Songkran, Thailand’s New Year festival, falls within the “Seven Dangerous Days” road safety campaign period (11 to 17 April), a week of higher travel activity nationwide. This section takes a different angle from the daily accident rate comparison in the exploratory analysis, specifically looking at whether accident concentration during the Songkran week looks different from the pattern shown in April’s whole-month panel.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb109"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a>accidents_ppp_april <span class="ot">&lt;-</span> accidents_ppp_km[<span class="fu">marks</span>(accidents_ppp_km)<span class="sc">$</span>month <span class="sc">==</span> <span class="dv">4</span>]</span>
+<span id="cb109-2"><a href="#cb109-2" aria-hidden="true" tabindex="-1"></a><span class="fu">marks</span>(accidents_ppp_april) <span class="ot">&lt;-</span> <span class="fu">day</span>(<span class="fu">marks</span>(accidents_ppp_april)<span class="sc">$</span>incident_datetime)</span>
+<span id="cb109-3"><a href="#cb109-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb109-4"><a href="#cb109-4" aria-hidden="true" tabindex="-1"></a>st_kde_april <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(accidents_ppp_april)</span>
+<span id="cb109-5"><a href="#cb109-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(st_kde_april)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Spatiotemporal Kernel Density Estimate
+
+Bandwidths
+  h = 7.7579 (spatial)
+  lambda = 1.5026 (temporal)
+
+No. of observations
+  332 
+
+Spatial bound
+  Type: polygonal
+  2D enclosure: [565.5458, 743.0603] x [1468.71, 1599.777]
+
+Temporal bound
+  [1, 30]
+
+Evaluation
+  128 x 128 x 30 trivariate lattice
+  Density range: [1.144436e-20, 3.099254e-05]</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb111"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">6</span>, <span class="dv">5</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb111-2"><a href="#cb111-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>) {</span>
+<span id="cb111-3"><a href="#cb111-3" aria-hidden="true" tabindex="-1"></a>  is_songkran <span class="ot">&lt;-</span> i <span class="sc">&gt;=</span> <span class="dv">11</span> <span class="sc">&amp;</span> i <span class="sc">&lt;=</span> <span class="dv">17</span></span>
+<span id="cb111-4"><a href="#cb111-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(st_kde_april, i,</span>
+<span id="cb111-5"><a href="#cb111-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">override.par =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb111-6"><a href="#cb111-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">fix.range =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb111-7"><a href="#cb111-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">main =</span> <span class="fu">paste</span>(<span class="st">"Day"</span>, i),</span>
+<span id="cb111-8"><a href="#cb111-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">col.main =</span> <span class="cf">if</span> (is_songkran) <span class="st">"red"</span> <span class="cf">else</span> <span class="st">"black"</span>)</span>
+<span id="cb111-9"><a href="#cb111-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-73-1.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Analysis:</strong></p>
+<p><strong>1st to 10th April:</strong></p>
+<ul>
+<li>Density of accidents remains concentrated in a single, compact area in the central BMR, with the shape and location day-to-day.</li>
+<li>For Days 9 and 10, a gradual widening in density is seen, ahead of the Songkran festival period.</li>
+</ul>
+<p><strong>11th to 17th April (Songkran Festival)</strong></p>
+<ul>
+<li><strong>11th to 14th:</strong> Density of accidents rises sharply and spreads outward from the earlier compact area, peaking in both intensity and spatial extent.</li>
+<li><strong>15th to 17th:</strong> Density begins to recede, and the single broad area of concentration starts splitting into two separate zones.</li>
+<li>The Songkran period marks the sharpest and most widespread density seen in the month of April.</li>
+</ul>
+<p><strong>18th to 30th April:</strong></p>
+<ul>
+<li>Density remains split into two smaller areas (Days 18 to 20), before gradually merging back into one.</li>
+<li>By the end of the month, density has reconsolidated into a single central area, similar to the pattern seen before Songkran.</li>
+</ul>
+<p>Overall, there is a clear rise in accident density in the central BMR during Songkran Festival period. This reveals a specific spatial pattern to the festival period beyond what the accident rate comparison in the exploratory analysis alone could show.</p>
+</div>
+</div>
 </section>
-<section id="reference" class="level2">
-<h2 class="anchored" data-anchor-id="reference">Reference</h2>
+</section>
+<section id="integration-of-spatial-and-spatio-temporal-findings" class="level2">
+<h2 class="anchored" data-anchor-id="integration-of-spatial-and-spatio-temporal-findings">11 Integration of Spatial and Spatio-Temporal Findings</h2>
+<section id="first-order-sppa-findings" class="level3">
+<h3 class="anchored" data-anchor-id="first-order-sppa-findings">11.1 First-Order SPPA Findings</h3>
+<p>First-order analysis (Section 9.2) confirms that accident intensity is highly uneven across the BMR, concentrated in the central and central-eastern portions of the region, with high densities in Bangkok and Samut Prakan. This is consistent across both the KDE surfaces. In short, first-order analysis identifies where accident intensity is elevated, but does not reveal how individual accidents are spatially related to one another.</p>
+</section>
+<section id="second-order-sppa-findings" class="level3">
+<h3 class="anchored" data-anchor-id="second-order-sppa-findings">11.2 Second-Order SPPA Findings</h3>
+<p>Second-order analysis (Section 9.3) examines whether the accidents that occurred are positioned closer together than chance would predict. Every method applied agrees that accidents exhibit strong small-scale clustering, beyond what CSR would predict. This is a separate finding from first-order analysis as it shows accidents do not just occur more often in busier areas, they also tend to occur in tight groups within those areas.</p>
+</section>
+<section id="linking-first-order-and-second-order-sppa" class="level3">
+<h3 class="anchored" data-anchor-id="linking-first-order-and-second-order-sppa">11.3 Linking First-Order and Second-Order SPPA</h3>
+<p>The first and second-order results reinforce one another. The network-constrained KDE (Section 9.4) links the first- and second-order findings directly. It shows the region-wide intensity pattern is concentrated on a small share of the road network, confirming that the second-order clustering is a real feature of accident locations, not just a side effect of roads being unevenly spread across the region. Together, it shows that accidents are unevenly distributed at the regional scale (first-order) and further cluster into localised hotspots within those high-intensity areas (second-order), a pattern that either analysis alone would miss.</p>
+</section>
+</section>
+<section id="public-safety-planning-and-management" class="level2">
+<h2 class="anchored" data-anchor-id="public-safety-planning-and-management">12 Public-Safety Planning and Management</h2>
+<p>Road accidents in the BMR are not randomly distributed in space or time. Identifying where and when accidents concentrate allows resources such as police patrols, road engineering interventions, and safety campaigns to be targeted at high-risk locations and periods rather than distributed evenly across the region. The spatial point-pattern analysis and spatio-temporal density analysis support several findings relevant to public-safety planning.</p>
+<p>Accidents are statistically clustered, not just visually concentrated. Multiple independent methods agree on this: the Clark-Evans test (R = 0.177, p = 0.01) shows accidents lie far closer to their nearest neighbours than CSR would predict; the quadrat analysis produced a variance-to-mean ratio of 176.6, well above the value of 1 expected under CSR; and the G-, F-, and K/L-functions each show significant clustering within short distances. The network-constrained kernel density estimation (NKDE) reinforces this at the road-segment level, showing that accident density is concentrated on a small share of the network, particularly specific highway corridors and intersections in central and central-eastern BMR. As every method converges on the same conclusion, this clustering reflects a genuine spatial pattern. This supports targeting enforcement and road-safety engineering at the specific corridors where accidents concentrate.</p>
+<p>Accident concentration also varies across time and not just space. The STKDE shows accident intensity per hour is highest during Bangkok’s morning and evening peak periods, and rises steadily across the week toward Friday and Saturday. At the annual scale, October to December record the highest number of accident counts. April is also notable due to the Songkran festival, where the average daily accident rate during the Songkran week was more than double the rest of April, and the daily STKDE surfaces show density expanding outward and peaking during that particular week. Hence, instead of maintaining a constant level of resourcing year-round, enforcement and public-safety campaigns can be strengthened around periods of known elevated accident frequency, such as peak hours, weekends, and during festive periods (e.g.&nbsp;Songkran).</p>
+<p>The type of accident also hints at what kind of interventions might help. Speeding was the most commonly recorded cause, and rear-end collisions were the most common type of accident. This suggests that speed enforcement measures (e.g.&nbsp;speed cameras, better signage, or traffic-calming) and improvements at intersections in the identified hotspot areas may be more relevant interventions than weather-related measures, given that most accidents occurred under clear conditions.</p>
+<p>In summary, road accidents in the BMR are concentrated in specific corridors and time periods rather than occurring randomly. This provides a good starting point for targeting public-safety resources where and when they are most needed. Pairing these findings with traffic-volume data would further strengthen public safety planning, offering a fuller picture of accident risk beyond just concentration alone.</p>
+</section>
+<section id="data-limitations" class="level2">
+<h2 class="anchored" data-anchor-id="data-limitations">13 Data Limitations</h2>
+<p>There are some data limitations to be noted:</p>
+<ul>
+<li>The analysis is limited to a single year (2022). As such, it cannot be determined whether the identified hotspots and seasonal patterns, such as those observed during Songkran and the year-end period, persist across multiple years or are specific to 2022 alone.</li>
+<li>The road network data (Geofabrik OpenStreetMap extract) represents a single snapshot and may not perfectly reflect the road network as it existed in 2022.</li>
+</ul>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">14 References</h2>
+<p><em>Bangkok Metropolitan Region</em>. (n.d.). In Wikipedia. Retrieved September 27, 2026, from https://en.wikipedia.org/wiki/Bangkok_Metropolitan_Region</p>
+<p>David. (2023). <em>Thailand 2022–2023 New Year road traffic report &amp; deaths</em>. GT Rider. https://www.thegtrider.com/thailand-2022-2023-new-year-road-traffic-report-deaths.htm</p>
+<p>Government Public Relations Department. (n.d.). <em>Seasons in Thailand</em>. Thailand.go.th. Retrieved September 27, 2026, from https://thailand.go.th/event-detail/009_142</p>
+<p>The Phuket News. (2022, April 22). <em>Four dead, 28 injured in Seven Days</em>. https://www.pressreader.com/thailand/the-phuket-news/20220422/281560884348253</p>
+<p><em>Thailand/Conventions</em>. (n.d.). In OpenStreetMap Wiki. Retrieved September 27, 2026, from https://wiki.openstreetmap.org/wiki/Thailand/Conventions</p>
 
 
 </section>

@@ -646,7 +646,7 @@ The rescaled point pattern is plotted against its window, confirming the points 
 plot(unmark(accidents_ppp_km), main = "Road Accidents in the BMR (2022)")
 ```
 
-### 9.2 First Order Spatial Point Pattern Analysis
+### 9.2 First-Order Spatial Point Pattern Analysis
 
 First-order analysis begins with kernel density estimation (KDE), which estimates how accident intensity, the expected number of accidents per unit area, varies continuously across the BMR. Unlike a count aggregated by district, KDE produces a smooth surface that does not depend on how the study area happens to be divided into administrative units.
 
@@ -915,11 +915,87 @@ plot(L_accidents.csr, . - r ~ r, legendpos = "right", legendargs = list(cex = 0.
 Overall, the results agree with Clark-Evans, G-function, and F-function.
 :::
 
+### 9.4 Network-Constrained Spatial Point Pattern Analysis
+
+Each method in Section 9.3 assumed that accidents could occur anywhere within `adm2_owin_km`. However, in reality, road accidents can only occur on the road network itself (not buildings, fields, etc.). Treating accidents as freely distributed across the whole planar area can distort how clustered accidents really are like.
+
+Network-constrained analysis addresses this by restricting the density estimate to the road network itself. This section computes the Network-Constrained Kernel Density Estimation (NKDE) using [**spNetwork**](https://jeremygelb.github.io/spNetwork/), which estimates accident density along `road_bmr`, expressed as accidents per unit length of road.
+
+#### 9.4.1 Preparing the Lixels
+
+The road network first needs to be split into lixels to estimate density. This uses `lixelize_lines()` of **spNetwork**.
+
+```{r}
+lixels <- lixelize_lines(roads_bmr, lx_length = 5000, mindist = 2500)
+```
+
+::: callout-note
+Smaller lixel lengths were tested first (e.g. `lx_length = 200`), each producing a nearly flat density surface with no visible hotspots, likely due to the network being too finely segmented relative to the incident count. After a few rounds of testing, `lx_length = 5000` was found to reflect better identification of accident patterns.
+:::
+
+NKDE evaluates density at a sample point along each lixel. These sample points are generated separately using `lines_center()` of **spNetwork**.
+
+```{r}
+samples <- lines_center(lixels)
+```
+
+#### 9.4.2 Computing NKDE
+
+With the network split into lixels and their sample points prepared, NKDE estimates accident density along `roads_bmr` using `nkde()` of **spNetwork**.
+
+```{r}
+#| results: 'hide'
+
+accidents_nkde <- nkde(
+  lines = roads_bmr,
+  events = accidents_bmr,
+  w = rep(1, nrow(accidents_bmr)),
+  samples = samples,
+  kernel_name = "quartic",
+  bw = 300,
+  method = "simple"
+)
+```
+
+#### 9.4.3 Visualising NKDE
+
+The computed density values are attached back to `lixels_200` and `samples_200` before visualization, and rescaled by 1000 for a more readable display range.
+
+```{r}
+lixels$density <- accidents_nkde * 1000
+samples$density <- accidents_nkde * 1000
+```
+
+The result is plotted with **tmap**, coloring each lixel by its density value along the network:
+
+```{r}
+tm_shape(adm2_bmr) +
+  tm_polygons(col = "white", border.col = "black") +
+  tm_shape(lixels) +
+  tm_lines(col = "density", palette = "YlOrRd", style = "jenks", n = 6, lwd = 2) +
+  tm_layout(
+    main.title = "Network Kernel Density of Road Accidents in BMR",
+    main.title.size = 1.2,
+    frame = FALSE,
+    legend.outside = TRUE,
+    legend.outside.position = "right"
+  )
+```
+
+::: callout-note
+**Analysis:**
+
+- Density is heavily concentrated on a small share of the road network. Most road segments see very few accidents relative to the network as a whole, while a small number of segments account for a disproportionate share of accident density.
+- The concentrated density follows specific highways and intersections rather than broad areas, with the highest concentration in the central and central-eastern parts of the BMR. This is consistent with the location KDE, Clark-Evans test, G/F/K/L-functions identified earlier as high-risk.
+:::
+
 ## 10 Spatio-Temporal Point Pattern Analysis
 
-### 10.1 Spatio-Temporal KDE by Month
+KDE and quadrat analysis above addressed how accident intensity varies across space. This section focuses on the temporal portion, examining whether accident intensity varies across the year. Spatio-Temporal Kernel Density Estimation (STKDE) extends KDE into the time dimension, producing a separate density surface for each month. 
 
-KDE and quadrat analysis above addressed how accident intensity varies across space. This section focuses on the temporal portion, examining whether accident intensity varies across the year. The point pattern is split by month, and a separate density surface is computed for each.
+### 10.1 STKDE by Month
+
+`spattemp.density()` of **sparr** computes STKDE, building a separate density surface for each value of a time variable. Since it requires a ppp object with just one numeric mark representing time, `accidents_ppp_km`'s marks are replaced with the month column before running it.
 
 ```{r}
 accidents_ppp_month <- accidents_ppp_km
@@ -929,7 +1005,7 @@ st_kde <- spattemp.density(accidents_ppp_month)
 summary(st_kde)
 ```
 
-Twelve monthly slices are plotted on a shared colour scale for direct comparison across the year:
+Every month is plotted on a shared colour scale for direct comparison across the year.
 
 ```{r}
 #| fig-width: 10
@@ -956,4 +1032,96 @@ for (i in 1:12) {
 **Month 12** shows the highest density of the year, concentrated in central BMR, likely due to increased travel during the year-end and holiday period. This also coincides with the start of Thailand's New Year "Seven Dangerous Days" period, 29 December 2022 to 4 January 2023, of which 29 to 31 December falls within the study period. 317 deaths were recorded nationwide [GT Rider, citing Thailand's Road Safety Centre, 2023](https://www.thegtrider.com/thailand-2022-2023-new-year-road-traffic-report-deaths.htm).
 :::
 
-## Reference
+### 10.2 STKDE During Songkran "Seven Dangerous Days"
+
+Songkran, Thailand's New Year festival, falls within the "Seven Dangerous Days" road safety campaign period (11 to 17 April), a week of higher travel activity nationwide. This section takes a different angle from the daily accident rate comparison in the exploratory analysis, specifically looking at whether accident concentration during the Songkran week looks different from the pattern shown in April's whole-month panel.
+
+```{r}
+accidents_ppp_april <- accidents_ppp_km[marks(accidents_ppp_km)$month == 4]
+marks(accidents_ppp_april) <- day(marks(accidents_ppp_april)$incident_datetime)
+
+st_kde_april <- spattemp.density(accidents_ppp_april)
+summary(st_kde_april)
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 15
+
+par(mfrow = c(6, 5), mar = c(2, 2, 2, 2))
+for (i in 1:30) {
+  is_songkran <- i >= 11 & i <= 17
+  plot(st_kde_april, i,
+       override.par = FALSE,
+       fix.range = TRUE,
+       main = paste("Day", i),
+       col.main = if (is_songkran) "red" else "black")
+}
+```
+
+::: callout-note
+**Analysis:**
+
+**1st to 10th April:** 
+
+- Density of accidents remains concentrated in a single, compact area in the central BMR, with the shape and location day-to-day.
+- For Days 9 and 10, a gradual widening in density is seen, ahead of the Songkran festival period.
+
+**11th to 17th April (Songkran Festival)** 
+
+- **11th to 14th:** Density of accidents rises sharply and spreads outward from the earlier compact area, peaking in both intensity and spatial extent. 
+- **15th to 17th:** Density begins to recede, and the single broad area of concentration starts splitting into two separate zones. 
+- The Songkran period marks the sharpest and most widespread density seen in the month of April.
+
+**18th to 30th April:**
+
+- Density remains split into two smaller areas (Days 18 to 20), before gradually merging back into one.
+- By the end of the month, density has reconsolidated into a single central area, similar to the pattern seen before Songkran. 
+
+Overall, there is a clear rise in accident density in the central BMR during Songkran Festival period. This reveals a specific spatial pattern to the festival period beyond what the accident rate comparison in the exploratory analysis alone could show. 
+:::
+
+## 11 Integration of Spatial and Spatio-Temporal Findings
+
+### 11.1 First-Order SPPA Findings
+
+First-order analysis (Section 9.2) confirms that accident intensity is highly uneven across the BMR, concentrated in the central and central-eastern portions of the region, with high densities in Bangkok and Samut Prakan. This is consistent across both the KDE surfaces. In short, first-order analysis identifies where accident intensity is elevated, but does not reveal how individual accidents are spatially related to one another.
+
+### 11.2 Second-Order SPPA Findings
+
+Second-order analysis (Section 9.3) examines whether the accidents that occurred are positioned closer together than chance would predict. Every method applied agrees that accidents exhibit strong small-scale clustering, beyond what CSR would predict. This is a separate finding from first-order analysis as it shows accidents do not just occur more often in busier areas, they also tend to occur in tight groups within those areas. 
+
+### 11.3 Linking First-Order and Second-Order SPPA
+
+The first and second-order results reinforce one another. The network-constrained KDE (Section 9.4) links the first- and second-order findings directly. It shows the region-wide intensity pattern is concentrated on a small share of the road network, confirming that the second-order clustering is a real feature of accident locations, not just a side effect of roads being unevenly spread across the region. Together, it shows that accidents are unevenly distributed at the regional scale (first-order) and further cluster into localised hotspots within those high-intensity areas (second-order), a pattern that either analysis alone would miss.
+
+## 12 Public-Safety Planning and Management
+
+Road accidents in the BMR are not randomly distributed in space or time. Identifying where and when accidents concentrate allows resources such as police patrols, road engineering interventions, and safety campaigns to be targeted at high-risk locations and periods rather than distributed evenly across the region. The spatial point-pattern analysis and spatio-temporal density analysis support several findings relevant to public-safety planning.
+
+Accidents are statistically clustered, not just visually concentrated. Multiple independent methods agree on this: the Clark-Evans test (R = 0.177, p = 0.01) shows accidents lie far closer to their nearest neighbours than CSR would predict; the quadrat analysis produced a variance-to-mean ratio of 176.6, well above the value of 1 expected under CSR; and the G-, F-, and K/L-functions each show significant clustering within short distances. The network-constrained kernel density estimation (NKDE) reinforces this at the road-segment level, showing that accident density is concentrated on a small share of the network, particularly specific highway corridors and intersections in central and central-eastern BMR. As every method converges on the same conclusion, this clustering reflects a genuine spatial pattern. This supports targeting enforcement and road-safety engineering at the specific corridors where accidents concentrate.
+
+Accident concentration also varies across time and not just space. The STKDE shows accident intensity per hour is highest during Bangkok's morning and evening peak periods, and rises steadily across the week toward Friday and Saturday. At the annual scale, October to December record the highest number of accident counts. April is also notable due to the Songkran festival, where the average daily accident rate during the Songkran week was more than double the rest of April, and the daily STKDE surfaces show density expanding outward and peaking during that particular week. Hence, instead of maintaining a constant level of resourcing year-round, enforcement and public-safety campaigns can be strengthened around periods of known elevated accident frequency, such as peak hours, weekends, and during festive periods (e.g. Songkran).
+
+The type of accident also hints at what kind of interventions might help. Speeding was the most commonly recorded cause, and rear-end collisions were the most common type of accident. This suggests that speed enforcement measures (e.g. speed cameras, better signage, or traffic-calming) and improvements at intersections in the identified hotspot areas may be more relevant interventions than weather-related measures, given that most accidents occurred under clear conditions.
+
+In summary, road accidents in the BMR are concentrated in specific corridors and time periods rather than occurring randomly. This provides a good starting point for targeting public-safety resources where and when they are most needed. Pairing these findings with traffic-volume data would further strengthen public safety planning, offering a fuller picture of accident risk beyond just concentration alone.
+
+## 13 Data Limitations
+
+There are some data limitations to be noted:
+
+- The analysis is limited to a single year (2022). As such, it cannot be determined whether the identified hotspots and seasonal patterns, such as those observed during Songkran and the year-end period, persist across multiple years or are specific to 2022 alone.
+- The road network data (Geofabrik OpenStreetMap extract) represents a single snapshot and may not perfectly reflect the road network as it existed in 2022.
+
+## 14 References
+
+*Bangkok Metropolitan Region*. (n.d.). In Wikipedia. Retrieved September 27, 2026, from https://en.wikipedia.org/wiki/Bangkok_Metropolitan_Region
+
+David. (2023). *Thailand 2022–2023 New Year road traffic report & deaths*. GT Rider. https://www.thegtrider.com/thailand-2022-2023-new-year-road-traffic-report-deaths.htm
+
+Government Public Relations Department. (n.d.). *Seasons in Thailand*. Thailand.go.th. Retrieved September 27, 2026, from https://thailand.go.th/event-detail/009_142
+
+The Phuket News. (2022, April 22). *Four dead, 28 injured in Seven Days*. https://www.pressreader.com/thailand/the-phuket-news/20220422/281560884348253
+
+*Thailand/Conventions*. (n.d.). In OpenStreetMap Wiki. Retrieved September 27, 2026, from https://wiki.openstreetmap.org/wiki/Thailand/Conventions
