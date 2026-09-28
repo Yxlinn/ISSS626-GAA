@@ -1,0 +1,32 @@
+---
+title: "Hands-on Exercise 6: Geographical Segmentation with Spatially Constrained Clustering Techniques"
+date: "September 28, 2026"
+date-modified: "last-modified"
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
+---
+
+## 1 Overview
+
+In this hands-on exercise, the focus will be on how to delineate homogeneous region by using geographically referenced multivariate data. There are two major analysis, namely:
+
+- hierarchical cluster analysis; and
+- spatially constrained cluster analysis.
+
+### 1.1 Learning outcome
+
+By the end of this exercise, the following are covered:
+
+- converting GIS polygon data into an **sf** simple feature data frame;
+- converting the simple feature data frame into a SpatialPolygonsDataFrame object by using `as_Spatial()` of the **sf** package;
+- performing cluster analysis by using `hclust()` of base R;
+- performing spatially constrained cluster analysis by using `skater()` of **spdep**; and
+- visualising the analysis output by using the **ggplot2** and **tmap** packages.
+
+

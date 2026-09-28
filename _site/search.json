@@ -950,5 +950,19 @@
     "title": "Take-home Exercise 1: Geospatial Analytics for Public Safety",
     "section": "2 Research Questions",
     "text": "2 Research Questions\n\nHow is the intensity of road traffic accidents distributed across space and time within the BMR?\nDo accidents exhibit statistically significant spatial and spatio-temporal clustering, beyond what would be expected under complete spatial randomness?\nDoes accounting for the road network materially change the interpretation of accident concentration, compared to treating accidents as freely distributed in planar space?\nWhat do the resulting patterns imply for public safety planning and resource allocation within the region?"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex06/Hands-on_Ex06.html",
+    "href": "Hands-on_Ex/Hands-on_Ex06/Hands-on_Ex06.html",
+    "title": "Hands-on Exercise 6: Geographical Segmentation with Spatially Constrained Clustering Techniques",
+    "section": "",
+    "text": "In this hands-on exercise, the focus will be on how to delineate homogeneous region by using geographically referenced multivariate data. There are two major analysis, namely:\n\nhierarchical cluster analysis; and\nspatially constrained cluster analysis.\n\n\n\nBy the end of this exercise, the following are covered:\n\nconverting GIS polygon data into an sf simple feature data frame;\nconverting the simple feature data frame into a SpatialPolygonsDataFrame object by using as_Spatial() of the sf package;\nperforming cluster analysis by using hclust() of base R;\nperforming spatially constrained cluster analysis by using skater() of spdep; and\nvisualising the analysis output by using the ggplot2 and tmap packages."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex06/Hands-on_Ex06.html#overview",
+    "href": "Hands-on_Ex/Hands-on_Ex06/Hands-on_Ex06.html#overview",
+    "title": "Hands-on Exercise 6: Geographical Segmentation with Spatially Constrained Clustering Techniques",
+    "section": "",
+    "text": "In this hands-on exercise, the focus will be on how to delineate homogeneous region by using geographically referenced multivariate data. There are two major analysis, namely:\n\nhierarchical cluster analysis; and\nspatially constrained cluster analysis.\n\n\n\nBy the end of this exercise, the following are covered:\n\nconverting GIS polygon data into an sf simple feature data frame;\nconverting the simple feature data frame into a SpatialPolygonsDataFrame object by using as_Spatial() of the sf package;\nperforming cluster analysis by using hclust() of base R;\nperforming spatially constrained cluster analysis by using skater() of spdep; and\nvisualising the analysis output by using the ggplot2 and tmap packages."
   }
 ]
