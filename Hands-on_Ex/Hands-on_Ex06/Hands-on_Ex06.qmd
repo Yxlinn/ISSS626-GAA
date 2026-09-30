@@ -29,4 +29,315 @@ By the end of this exercise, the following are covered:
 - performing spatially constrained cluster analysis by using `skater()` of **spdep**; and
 - visualising the analysis output by using the **ggplot2** and **tmap** packages.
 
+## 2 Analytical Question
+
+In geobusiness and spatial policy, it is common practice to delineate a market or planning area into homogeneous regions by using multivariate data. In this exercise, the focus is to delineate [Shan State, Myanmar](https://en.wikipedia.org/wiki/Shan_State) into homogeneous regions by using six Information and Communication Technology (ICT) measures: radio, television, land line phone, mobile phone, computer and internet at home.
+
+## 3 The Data
+
+Two data sets are used in this study:
+
+| Data set | Format | Description |
+|------|------|------|
+| myanmar_township_boundaries | ESRI shapefile | Myanmar township boundary information |
+| Shan-ICT.csv | CSV | Extract of the [2014 Population and Housing Census of Myanmar](https://myanmar.unfpa.org/en/publications/2014-population-and-housing-census-myanmar-data-sheet) at the township level |
+
+Both data sets were downloaded from [Myanmar Information Management Unit (MIMU)](https://themimu.info/).
+
+## 4 Installing and Loading R packages
+
+The R packages needed for this exercise are:
+
+- Spatial data handling: **sf** and **spdep**;
+- Attribute data handling: **tidyverse**, especially **readr**, **ggplot2** and **dplyr**;
+- Choropleth mapping: **tmap**;
+- Multivariate data visualisation and analysis: **corrplot**, **psych**, **ggpubr**, **heatmaply** and **GGally**; and
+- Cluster analysis: **cluster**, **factoextra**, **NbClust** and **ClustGeo**.
+
+```{r}
+pacman::p_load(sf, spdep, tidyverse, tmap,
+               corrplot, psych, ggpubr, heatmaply, GGally,
+               cluster, factoextra, NbClust, ClustGeo)
+```
+
+## 5 Data Import and Preparation
+
+### 5.1 Importing geospatial data
+
+The Myanmar township boundary data is in ESRI shapefile format and is imported with `st_read()` of **sf**.
+
+```{r}
+myanmar_sf <- st_read(dsn = "data/geospatial",
+                      layer = "myanmar_township_boundaries")
+```
+
+Shan State is split into three labels in the `ST` field.
+
+```{r}
+myanmar_sf %>%
+  st_drop_geometry() %>%
+  count(ST, sort = TRUE)
+```
+
+The three Shan labels are: Shan (North), Shan (South) and Shan (East).
+
+```{r}
+shan_sf <- myanmar_sf %>%
+  filter(ST %in% c("Shan (North)", "Shan (South)", "Shan (East)")) %>%
+  select(c(2:7))
+```
+
+The imported township boundary object is called `shan_sf` and is saved in simple feature data frame format.
+
+```{r}
+shan_sf
+```
+
+Since `shan_sf` conforms to the tidy framework, `glimpse()` can also be used to reveal the data type of each field:
+
+```{r}
+glimpse(shan_sf)
+```
+
+### 5.2 Importing aspatial data
+
+The CSV file is imported with `read_csv()` of **readr**:
+
+```{r}
+ict <- read_csv("data/aspatial/Shan-ICT.csv")
+```
+
+The imported ICT variables are extracted from the 2014 Population and Housing Census of Myanmar. It is saved in R’s tibble data.frame format.
+
+The summary statistics are revealed with the code chunk below:
+
+```{r}
+summary(ict)
+```
+
+There are 11 fields and 55 observations in the tibble, with no missing values.
+
+### 5.3 Deriving new variables using **dplyr** package
+
+The unit of measurement of the ICT fields is the number of households. Using these values directly would be biased by the total number of households. In general, townships with more households will also have more households owning a radio, a television and so on.
+
+To overcome this, the penetration rate of each ICT variable is derived as households per 1,000 households, using the code chunk below:
+
+```{r}
+ict_derived <- ict %>%
+  rename(DT_PCODE = `District Pcode`, DT = `District Name`,
+         TS_PCODE = `Township Pcode`, TS = `Township Name`,
+         TT_HOUSEHOLDS = `Total households`,
+         RADIO = Radio, TV = Television,
+         LLPHONE = `Land line phone`, MPHONE = `Mobile phone`,
+         COMPUTER = Computer, INTERNET = `Internet at home`) %>%
+  mutate(RADIO_PR = RADIO / TT_HOUSEHOLDS * 1000,
+         TV_PR = TV / TT_HOUSEHOLDS * 1000,
+         LLPHONE_PR = LLPHONE / TT_HOUSEHOLDS * 1000,
+         MPHONE_PR = MPHONE / TT_HOUSEHOLDS * 1000,
+         COMPUTER_PR = COMPUTER / TT_HOUSEHOLDS * 1000,
+         INTERNET_PR = INTERNET / TT_HOUSEHOLDS * 1000)
+```
+
+The summary statistics of the newly derived penetration rates:
+
+```{r}
+summary(ict_derived)
+```
+
+::: callout-note
+Six new fields have been added to the data frame: RADIO_PR, TV_PR, LLPHONE_PR, MPHONE_PR, COMPUTER_PR, and INTERNET_PR.
+:::
+
+## 6 Exploratory Data Analysis (EDA)
+
+### 6.1 EDA using statistical graphics
+
+The distribution of the variables (e.g. the number of households with radio) can be plotted with standard EDA graphics.
+
+A histogram is useful to identify the overall distribution of the data values (e.g. left skew, right skew or normal distribution):
+
+```{r}
+ggplot(data = ict_derived,
+       aes(x = `RADIO`)) +
+  geom_histogram(bins = 20,
+                 color = "black",
+                 fill = "light blue")
+```
+
+::: callout-note
+**Analysis:**
+
+The distribution is heavily right-skewed. Most townships own approximately 1,000 to 5,000 radios, but there is a small handful that owns more than 10,000 radios. 
+:::
+
+Boxplot is useful to detect outliers.
+
+```{r}
+ggplot(data = ict_derived,
+       aes(x = `RADIO`)) +
+  geom_boxplot(color = "black",
+               fill = "light blue")
+```
+
+::: callout-note
+**Analysis:**
+
+The boxplot shows there are three outliers. These three townships can also be seen from the histogram, where two are clustered around 14,000 to 17,000, and one isolated near 30,000.
+:::
+
+Next, the distribution of the newly derived variables (i.e. radio penetration rate) is plotted:
+
+```{r}
+ggplot(data = ict_derived,
+       aes(x = `RADIO_PR`)) +
+  geom_histogram(bins = 20,
+                 color = "black",
+                 fill = "light blue")
+```
+
+```{r}
+ggplot(data = ict_derived,
+       aes(x = `RADIO_PR`)) +
+  geom_boxplot(color = "black",
+               fill = "light blue")
+```
+
+::: callout-note
+**Analysis:**
+
+Compared to the raw `RADIO` count, the distribution of `RADIO_PR` looks much closer to a normal distribution, with most townships sitting between 100 and 300 radios per 1,000 households, and a peak around 225 to 250. There is still a slight right skew, but not as extreme as before.
+
+The boxplot further supports the findings. It is roughly centred, with the median line close to the middle rather than pulled to one edge. Only one outlier remains compared to three before.
+
+This confirms what we expected. Most of the skew and outliers in the raw `RADIO` count were driven by township size instead of actual differences in radio ownership, and standardising to a rate removes most of that effect.
+:::
+
+Next, multiple histograms are plotted together to compare the distributions of all six penetration rates in the `ict_derived` data frame.
+
+```{r}
+radio <- ggplot(data = ict_derived,
+             aes(x = `RADIO_PR`)) +
+  geom_histogram(bins = 20,
+                 color = "black",
+                 fill = "light blue")
+
+tv <- ggplot(data = ict_derived,
+             aes(x = `TV_PR`)) +
+  geom_histogram(bins = 20,
+                 color = "black",
+                 fill = "light blue")
+
+llphone <- ggplot(data = ict_derived,
+             aes(x = `LLPHONE_PR`)) +
+  geom_histogram(bins = 20,
+                 color = "black",
+                 fill = "light blue")
+
+mphone <- ggplot(data = ict_derived,
+             aes(x = `MPHONE_PR`)) +
+  geom_histogram(bins = 20,
+                 color = "black",
+                 fill = "light blue")
+
+computer <- ggplot(data = ict_derived,
+             aes(x = `COMPUTER_PR`)) +
+  geom_histogram(bins = 20,
+                 color = "black",
+                 fill = "light blue")
+
+internet <- ggplot(data = ict_derived,
+             aes(x = `INTERNET_PR`)) +
+  geom_histogram(bins = 20,
+                 color = "black",
+                 fill = "light blue")
+```
+
+`ggarrange()` of **ggpubr** groups the six histograms into one figure:
+
+```{r}
+ggarrange(radio, tv, llphone, mphone, computer, internet,
+          ncol = 3,
+          nrow = 2)
+```
+
+::: callout-note
+**Analysis:**
+
+`RADIO_PR` and `TV_PR` are close to normal, with a central peak and roughly even spread on both sides. On the other hand, the other four (`LLPHONE_PR`, `MPHONE_PR`, `COMPUTER_PR`, and `INTERNET_PR`) are right-skewed. Most townships cluster at the low end, with a long tail of higher values.
+
+This tracks with adoption levels. Radio and TV are widespread enough that most townships land in a similar range. Mobile phone, land-line, computer and internet are rarer and concentrated in fewer townships, hence the skew.
+:::
+
+### 6.2 EDA using choropleth map
+
+#### 6.2.1 Joining geospatial data with aspatial data
+
+Before a choropleth map can be prepared, the geospatial object (`shan_sf`) and the aspatial data frame (`ict_derived`) need to be combined into one. This is done with `left_join()` of **dplyr**, with `shan_sf` as the base object and `ict_derived` as the join table. The unique identifier used to join both objects is `TS_PCODE`.
+
+```{r}
+shan_sf <- left_join(shan_sf,
+                      ict_derived, by = c("TS_PCODE" = "TS_PCODE"))
+
+write_rds(shan_sf, "data/rds/shan_sf.rds")
+```
+
+No new output object is created by the join. Instead, the data fields from `ict_derived` are added onto the existing `shan_sf` data frame.
+
+```{r}
+shan_sf <- read_rds("data/rds/shan_sf.rds")
+```
+
+#### 6.2.2 Preparing a choropleth map
+
+To have a quick look at the distribution of the Radio penetration rate across Shan State at the township level, a choropleth map is prepared using `qtm()` of **tmap**.
+
+```{r}
+qtm(shan_sf, "RADIO_PR")
+```
+
+To check whether the distribution shown above is biased by the underlying number of households per township, two choropleth maps are prepared side by side: one for the total number of households (`TT_HOUSEHOLDS`) and one for the total number of households with radio (`RADIO`).
+
+```{r}
+#| fig-width: 8
+#| fig-height: 4
+
+TT_HOUSEHOLDS.map <- tm_shape(shan_sf) +
+  tm_fill(col = "TT_HOUSEHOLDS",
+          n = 5,
+          style = "jenks",
+          title = "Total households") +
+  tm_borders(alpha = 0.5)
+
+RADIO.map <- tm_shape(shan_sf) +
+  tm_fill(col = "RADIO",
+          n = 5,
+          style = "jenks",
+          title = "Number Radio") +
+  tm_borders(alpha = 0.5)
+
+tmap_arrange(TT_HOUSEHOLDS.map, RADIO.map,
+             asp = NA, ncol = 2)
+```
+
+::: callout-note
+Notice that townships with relatively more households also show relatively higher radio ownership, which is exactly the bias the penetration rate is meant to remove.
+:::
+
+The total households and radio penetration rate are now plotted side by side instead.
+
+```{r}
+tm_shape(shan_sf) +
+    tm_polygons(c("TT_HOUSEHOLDS", "RADIO_PR"),
+                style = "jenks") +
+    tm_facets(sync = TRUE, ncol = 2) +
+  tm_legend(legend.position = c("right", "bottom")) +
+  tm_layout(outer.margins = 0, asp = 0)
+```
+
+::: callout-note
+**Analysis:**
+
+Once the household-count bias is removed, the two maps no longer agree. Several townships with a moderate number of households show among the highest radio penetration rates, while some of the larger townships by household count show relatively low penetration rates.
+:::
 
