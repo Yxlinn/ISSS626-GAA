@@ -1,0 +1,239 @@
+---
+title: "In-class Exercise 6"
+date: "October 03, 2026"
+date-modified: today
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
+---
+
+## 1 Installing and Loading the R Packages
+
+Six R packages are required for this in-class exercise:
+
+```{r}
+pacman::p_load(sf, sfdep, tmap, 
+               plotly, tidyverse, 
+               Kendall)
+```
+
+## 2 The Data
+
+For the purpose of this exercise, the Hunan data sets will be used. There are two data sets
+
+- Hunan, a geospatial data set in ESRI shapefile format, and
+- Hunan_GDPPC, an attribute data set in csv format.
+
+### 2.1 Importing geospatial data
+
+In the code chunk below, `st_read()` of **sf** package is used to import Hunan shapefile into R.
+
+```{r}
+hunan <- st_read(
+  dsn = "data/geospatial", 
+  layer = "Hunan") %>% 
+  st_transform(crs = 32650)
+```
+
+### 2.2 Importing attribute table
+
+In the code chunk below, 'read_csv()' of readr is used to import `Hunan_GDPPC.csv` into R.
+
+```{r}
+GDPPC <- read_csv("data/aspatial/Hunan_GDPPC.csv")
+```
+
+## 3 Creating a Time Series Cube
+
+In the code chunk below, `spacetime()` of **sfdep** is used to create an spatio-temporal cube.
+
+```{r}
+GDPPC_st <- spacetime(GDPPC, hunan,
+                      .loc_col = "County",
+                      .time_col = "Year")
+```
+
+Next, `is_spacetime_cube()` of **sfdep** package will be used to verify if `GDPPC_st` is a space-time cube object.
+
+```{r}
+is_spacetime_cube(GDPPC_st)
+```
+
+The **TRUE** return confirms that `GDPPC_st` object is a time-space cube.
+
+## 4 Computing Gi* (Part 1)
+
+### 4.1 Deriving the spatial weights
+
+The code chunk below will be used to identify neighbors and to derive an inverse distance weights.
+
+```{r}
+GDPPC_nb <- GDPPC_st %>%
+  activate("geometry") %>%
+  mutate(nb = include_self(
+    st_contiguity(geometry)),
+    wt = st_inverse_distance(nb, 
+                             geometry, 
+                             scale = 1,
+                             alpha = 1),
+    .before = 1) %>%
+  set_nbs("nb") %>%
+  set_wts("wt")
+```
+
+## 5 Computing Gi* (Part 2)
+
+### 5.1 Deriving the spatial weights
+
+We can use the new columns to manually calculate the local Gi* for each location. This can be performed by grouping by `Year` and using `local_gstar_perm()` of **sfdep** package. After which, we use `unnest()` to unnest gi_star column of the newly created `gi_starts` data.frame.
+
+```{r}
+gi_stars <- GDPPC_nb %>% 
+  group_by(Year) %>% 
+  mutate(gi_star = local_gstar_perm(
+    GDPPC, nb, wt)) %>% 
+  tidyr::unnest(gi_star)
+```
+
+## 6 Mann-Kendall Test
+
+A monotonic series or function is one that only increases (or decreases) and never changes direction. So long as the function either stays flat or continues to increase, it is monotonic.
+
+Null Hypothesis (H0): No monotonic trend
+
+Alternative Hypothesis (H1): Monotonic trend is present
+
+**Interpretation:**
+
+- Reject the null-hypothesis null if the p-value is smaller than the alpha value (i.e. 1-confident level)
+- Tau ranges between -1 and 1 where:
+  - -1 is a perfectly decreasing series, and
+  - 1 is a perfectly increasing series.
+
+### 6.1 Mann-Kendall Test on Gi
+
+With these Gi* measures we can evaluate each location for a trend using the Mann-Kendall test. 
+
+The code chunk below uses Changsha county.
+
+```{r}
+cbg <- gi_stars %>% 
+  ungroup() %>% 
+  filter(County == "Changsha") |> 
+  select(County, Year, gi_star)
+```
+
+Next, the result can be plotted using **ggplot2** functions.
+
+```{r}
+ggplot(data = cbg, 
+       aes(x = Year, 
+           y = gi_star)) +
+  geom_line() +
+  theme_light()
+```
+
+### 6.2 Interactive Mann-Kendall Plot
+
+We can also create an interactive plot by using `ggplotly()` of plotly package.
+
+```{r}
+p <- ggplot(data = cbg, 
+       aes(x = Year, 
+           y = gi_star)) +
+  geom_line() +
+  theme_light()
+
+ggplotly(p)
+```
+
+### 6.3 Printing Mann-Kendall test report
+
+```{r}
+cbg %>%
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>% 
+  tidyr::unnest_wider(mk)
+```
+
+`sl` is the p-value. With reference to the results, since p-value is lower than 0.05, we will reject the null hypothesis and infer that a slight upward trend.
+
+### 6.4 Mann-Kendall test data.frame
+
+We can replicate this for each location by using `group_by()` of **dplyr** package.
+
+```{r}
+ehsa <- gi_stars %>%
+  group_by(County) %>%
+  summarise(mk = list(
+    unclass(
+      Kendall::MannKendall(gi_star)))) %>%
+  tidyr::unnest_wider(mk)
+head(ehsa)
+```
+
+We can also sort to show significant emerging hot/cold spots:
+
+```{r}
+emerging <- ehsa %>% 
+  arrange(sl, abs(tau)) %>% 
+  slice(1:10)
+head(emerging)
+```
+
+## 7 Performing Emerging Hotspot Analysis
+
+Lastly, we will perform EHSA analysis by using `emerging_hotspot_analysis()` of **sfdep** package. It takes a spacetime object x (i.e. GDPPC_st), and the quoted name of the variable of interest (i.e. GDPPC) for .var argument. The k argument is used to specify the number of time lags which is set to 1 by default. nsim map numbers of simulation to be performed.
+
+```{r}
+ehsa <- emerging_hotspot_analysis(
+  x = GDPPC_st, 
+  .var = "GDPPC", 
+  k = 1, 
+  nsim = 99
+)
+```
+
+### 7.1 Visualising the distribution of EHSA classes
+
+ggplot2 functions is used to reveal the distribution of EHSA classes as a bar chart.
+
+```{r}
+ggplot(data = ehsa,
+       aes(x = classification)) +
+  geom_bar()
+```
+
+The figure above shows that sporadic cold spots class has the high numbers of county.
+
+### 7.2 Visualising EHSA
+
+In this section, we will visualise the geographic distribution EHSA classes. However, before that, we will need to join both `hunan` and `ehsa` together.
+
+```{r}
+hunan_ehsa <- hunan %>%
+  left_join(ehsa,
+            by = join_by(County == location))
+```
+
+Next, tmap functions will be used to plot a categorical choropleth map by using the code chunk below.
+
+```{r}
+ehsa_sig <- hunan_ehsa  %>%
+  filter(p_value < 0.05)
+tmap_mode("plot")
+tm_shape(hunan_ehsa) +
+  tm_polygons() +
+  tm_borders(fill_alpha = 0.5) +
+tm_shape(ehsa_sig) +
+  tm_fill("classification") + 
+  tm_borders(fill_alpha = 0.4)
+```
+
+
