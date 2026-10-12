@@ -56,9 +56,9 @@ Spatial autocorrelation is the degree to which values at nearby locations resemb
 
 Measures of spatial autocorrelation describe only a single snapshot in time. Emerging Hot Spot Analysis (EHSA) adds time by combining Gi* with a trend test (Esri, n.d.). Events are first aggregated into a space-time cube of townships by time bins. Gi* is then computed for each time bin, and the Mann-Kendall test (Kendall, 1975; Mann, 1945) checks whether each township's series of Gi* values is rising or falling. By evaluating a township's hot or cold spot history alongside this trend, the analysis categorises it into a specific temporal pattern, such as new, consecutive, persistent, intensifying, diminishing, sporadic or oscillating.
 
-## 3 The Data
+## 3 Data and Study Design
 
-### 3.1 Datasets
+### 3.1 The Data
 
 | Dataset | Description | Format | Source |
 |---|---|---|---|
@@ -69,7 +69,7 @@ Measures of spatial autocorrelation describe only a single snapshot in time. Eme
 
 The study area is **Myanmar**, and the unit of analysis is the township. The study period runs from **1 January 2021 to 30 September 2025**.
 
-## 4 The Setup
+## 4 Setup
 
 ### 4.1 Installing and Loading the R Packages
 
@@ -94,3 +94,7 @@ A fixed seed value of 123 is set for reproducibility of any simulation-based pro
 ```{r}
 set.seed(123)
 ```
+
+## 5 Data Preparation and Quality Assessment
+
+

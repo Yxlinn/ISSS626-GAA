@@ -1083,5 +1083,26 @@
     "title": "Geospatial Analytics for Public Safety",
     "section": "10. Public-Safety Implications",
     "text": "10. Public-Safety Implications\n\nSpatial: target enforcement and engineering at the specific corridors where accidents concentrate\nTemporal: strengthen campaigns around known high-frequency periods, e.g. peak hours, weekends, and festive periods such as Songkran\nAccident type: prioritise speed enforcement and intersection improvements, given speeding and rear-end collisions dominate\nPair these findings with traffic-volume data for a fuller picture of risk beyond concentration alone\n\n\nRoad accidents in the BMR are not randomly distributed in space or time. Identifying where and when accidents concentrate allows resources such as police patrols, road engineering, and safety campaigns to be targeted at high-risk locations and periods, rather than distributed evenly across the region.\nAccidents are statistically clustered, not just visually concentrated, as shown by the Clark-Evans test, the quadrat analysis, the G, F, K and L-functions, and the network-constrained kernel density estimation. As every method converges on the same conclusion, this supports targeting enforcement and road-safety engineering at the specific corridors where accidents concentrate.\nAccident concentration also varies across time, not just space. Intensity is highest during peak hours and rises toward the weekend, with October to December recording the highest accident counts, and the Songkran festival period showing a sharp rise in both accident rate and spatial spread. Hence, instead of maintaining a constant level of resourcing year-round, enforcement and public-safety campaigns can be strengthened around these known periods of elevated accident frequency.\nThe type of accident also hints at what kind of interventions might help. Since speeding was the most commonly recorded cause, and rear-end collisions the most common accident type, speed enforcement measures and improvements at intersections in the identified hotspot areas may be more relevant than weather-related measures.\nIn summary, road accidents in the BMR are concentrated in specific corridors and time periods rather than occurring randomly. This provides a good starting point for targeting public-safety resources where and when they are most needed. Pairing these findings with traffic-volume data would further strengthen public-safety planning, offering a fuller picture of accident risk beyond concentration alone."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html#data-and-study-design",
+    "href": "Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html#data-and-study-design",
+    "title": "Take-home Exercise 2: Geospatial Analytics for Peace",
+    "section": "3 Data and Study Design",
+    "text": "3 Data and Study Design\n\n3.1 The Data\n\n\n\nDataset\nDescription\nFormat\nSource\n\n\n\n\nACLED Myanmar Event Data (January 2021 to September 2025)\nEvent-level records of political violence, protests and strategic developments, with date, location, event classification and fatality fields.\nCSV\nACLED\n\n\nMyanmar Township Boundaries (MIMU v9.4)\nTownship-level administrative boundaries for Myanmar, with state, district and township names and codes.\nShapefile\nMIMU\n\n\n\n\n\n3.2 Study Area and Period\nThe study area is Myanmar, and the unit of analysis is the township. The study period runs from 1 January 2021 to 30 September 2025."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html#data-preparation-and-quality-assessment",
+    "href": "Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html#data-preparation-and-quality-assessment",
+    "title": "Take-home Exercise 2: Geospatial Analytics for Peace",
+    "section": "5 Data Preparation and Quality Assessment",
+    "text": "5 Data Preparation and Quality Assessment"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html#setup",
+    "href": "Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html#setup",
+    "title": "Take-home Exercise 2: Geospatial Analytics for Peace",
+    "section": "4 Setup",
+    "text": "4 Setup\n\n4.1 Installing and Loading the R Packages\nThe following R packages are used:\n\n\n\n\n\n\n\n\nPackage\nPurpose\nUse Case in this Exercise\n\n\n\n\ntidyverse\nCollection of packages for data import, manipulation and visualisation\nImporting the ACLED data, wrangling and aggregating events, and producing the exploratory charts\n\n\nsf\nImports, manages and processes vector-based geospatial data\nImporting the township boundaries, converting event coordinates to spatial points, and joining events to townships\n\n\nsfdep\nSpatial dependence analysis within a tidy workflow\nBuilding the spatial weights and the space-time cube, computing Local Moran’s I and Gi*, and running Emerging Hot Spot Analysis\n\n\nspdep\nSpatial weights and statistics for spatial dependence\nGlobal Moran’s I tests and the spatial correlogram\n\n\ntmap\nThematic map creation using a layered grammar of graphics\nMapping event patterns, clusters and EHSA classes\n\n\n\n\npacman::p_load(tidyverse, sf, sfdep, spdep, tmap)\n\n\n\n4.2 Reproducibility\nA fixed seed value of 123 is set for reproducibility of any simulation-based procedure used later in this exercise.\n\nset.seed(123)"
   }
 ]

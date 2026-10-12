@@ -250,16 +250,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#spatial-autocorrelation" id="toc-spatial-autocorrelation" class="nav-link" data-scroll-target="#spatial-autocorrelation">2.1 Spatial Autocorrelation</a></li>
   <li><a href="#emerging-hot-spot-analysis" id="toc-emerging-hot-spot-analysis" class="nav-link" data-scroll-target="#emerging-hot-spot-analysis">2.2 Emerging Hot Spot Analysis</a></li>
   </ul></li>
-  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">3 The Data</a>
+  <li><a href="#data-and-study-design" id="toc-data-and-study-design" class="nav-link" data-scroll-target="#data-and-study-design">3 Data and Study Design</a>
   <ul>
-  <li><a href="#datasets" id="toc-datasets" class="nav-link" data-scroll-target="#datasets">3.1 Datasets</a></li>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">3.1 The Data</a></li>
   <li><a href="#study-area-and-period" id="toc-study-area-and-period" class="nav-link" data-scroll-target="#study-area-and-period">3.2 Study Area and Period</a></li>
   </ul></li>
-  <li><a href="#the-setup" id="toc-the-setup" class="nav-link" data-scroll-target="#the-setup">4 The Setup</a>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">4 Setup</a>
   <ul>
   <li><a href="#installing-and-loading-the-r-packages" id="toc-installing-and-loading-the-r-packages" class="nav-link" data-scroll-target="#installing-and-loading-the-r-packages">4.1 Installing and Loading the R Packages</a></li>
   <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">4.2 Reproducibility</a></li>
   </ul></li>
+  <li><a href="#data-preparation-and-quality-assessment" id="toc-data-preparation-and-quality-assessment" class="nav-link" data-scroll-target="#data-preparation-and-quality-assessment">5 Data Preparation and Quality Assessment</a></li>
   </ul>
 </nav>
     </div>
@@ -342,10 +343,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Measures of spatial autocorrelation describe only a single snapshot in time. Emerging Hot Spot Analysis (EHSA) adds time by combining Gi* with a trend test (Esri, n.d.). Events are first aggregated into a space-time cube of townships by time bins. Gi* is then computed for each time bin, and the Mann-Kendall test (Kendall, 1975; Mann, 1945) checks whether each township’s series of Gi* values is rising or falling. By evaluating a township’s hot or cold spot history alongside this trend, the analysis categorises it into a specific temporal pattern, such as new, consecutive, persistent, intensifying, diminishing, sporadic or oscillating.</p>
 </section>
 </section>
-<section id="the-data" class="level2">
-<h2 class="anchored" data-anchor-id="the-data">3 The Data</h2>
-<section id="datasets" class="level3">
-<h3 class="anchored" data-anchor-id="datasets">3.1 Datasets</h3>
+<section id="data-and-study-design" class="level2">
+<h2 class="anchored" data-anchor-id="data-and-study-design">3 Data and Study Design</h2>
+<section id="the-data" class="level3">
+<h3 class="anchored" data-anchor-id="the-data">3.1 The Data</h3>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -376,8 +377,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The study area is <strong>Myanmar</strong>, and the unit of analysis is the township. The study period runs from <strong>1 January 2021 to 30 September 2025</strong>.</p>
 </section>
 </section>
-<section id="the-setup" class="level2">
-<h2 class="anchored" data-anchor-id="the-setup">4 The Setup</h2>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">4 Setup</h2>
 <section id="installing-and-loading-the-r-packages" class="level3">
 <h3 class="anchored" data-anchor-id="installing-and-loading-the-r-packages">4.1 Installing and Loading the R Packages</h3>
 <p>The following R packages are used:</p>
@@ -432,9 +433,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-
-
 </section>
+</section>
+<section id="data-preparation-and-quality-assessment" class="level2">
+<h2 class="anchored" data-anchor-id="data-preparation-and-quality-assessment">5 Data Preparation and Quality Assessment</h2>
+
+
 </section>
 
 </main> <!-- /main -->
