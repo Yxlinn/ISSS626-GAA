@@ -1,0 +1,96 @@
+---
+title: "Take-home Exercise 2: Geospatial Analytics for Peace"
+subtitle: "Local Measures of Spatial Association and Emerging Hot Spot Analysis of Armed Conflict in Myanmar"
+date: "October 07, 2026"
+date-modified: "last-modified"
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
+---
+
+## 1 Introduction
+
+### 1.1 Study Context
+
+Armed conflict in Myanmar dates back to independence in 1948. It has largely been fought between ethnic armed organisations and the national armed forces, the Tatmadaw, over self-determination and the federalisation of the country. Ceasefires and the self-administered zones created in 2008 did not end these demands, and the conflict is often described as the longest ongoing civil war in the world.
+
+In February 2021, the military seized power from the government elected in 2020, which was led by the National League for Democracy. Repression of protests, marked by arbitrary arrests and indiscriminate violence, intensified the conflict rather than ending it. Many civilians fled to forests and mountainous areas, others joined armed resistance, and large areas slipped almost entirely out of the junta's control. Violence since 2021 has therefore been uneven across the country, which makes the question of where it concentrates, and how that is changing, a spatial one.
+
+### 1.2 Purpose and Objectives
+
+This exercise analyses armed conflict in Myanmar at the township level from 1 January 2021 to 30 September 2025. The data is drawn from two sources: event data from the Armed Conflict Location & Event Data Project (ACLED) and township boundaries from the Myanmar Information Management Unit (MIMU). 
+
+To do this, the analysis applies two spatial methods:
+
+- **Local Measures of Spatial Association (LMSA)**, which identify townships where violence is unusually high or low compared with neighbouring townships.
+- **Emerging Hot Spot Analysis (EHSA)**, which tracks how hot spots and cold spots form, persist or fade over time.
+
+The objectives are:
+
+1. To pinpoint exact geographic hot spots, cold spots and spatial outliers where violence clusters or behaves unusually compared with surrounding townships.
+2. To reveal where, how fast and in what pattern political violence is evolving over space and time.
+
+### 1.3 Research Questions
+
+1. Is political violence spatially clustered across Myanmar's townships, or is it distributed randomly?
+2. Which townships are statistically significant hot spots, cold spots or spatial outliers?
+3. Where is political violence intensifying, persisting or fading, how fast it is happening, and in what pattern?
+4. What do these patterns imply for peace-building and conflict prevention?
+
+## 2 Overview of Analytical Methods
+
+### 2.1 Spatial Autocorrelation
+
+Spatial autocorrelation is the degree to which values at nearby locations resemble one another. It follows from Tobler's (1970) first law of geography, which states that near things are more related than distant things. Similar values close together give positive spatial autocorrelation, while contrasting values close together give negative spatial autocorrelation. Measures of spatial autocorrelation are grouped by the scale at which they operate.
+
+**Global indicators** summarise the whole study area in a single value. Moran's I (Moran, 1950) tests whether the pattern of values across townships differs from a random arrangement. It shows whether spatial dependence exists, but not where it is concentrated, so it is used first as a check on whether a local analysis is justified.
+
+**Local indicators** give one result for each location. Local Moran's I, a local indicator of spatial association (LISA), compares each township with its neighbours and labels it as part of a high-high or low-low cluster, or as a spatial outlier (Anselin, 1995). The Getis-Ord Gi* statistic (Getis & Ord, 1992; Ord & Getis, 1995) measures how strongly high or low values are concentrated in a township together with its neighbours, which identifies hot spots and cold spots. Both measures depend on how neighbours are defined through spatial weights, and significance is assessed by permutation.
+
+### 2.2 Emerging Hot Spot Analysis
+
+Measures of spatial autocorrelation describe only a single snapshot in time. Emerging Hot Spot Analysis (EHSA) adds time by combining Gi* with a trend test (Esri, n.d.). Events are first aggregated into a space-time cube of townships by time bins. Gi* is then computed for each time bin, and the Mann-Kendall test (Kendall, 1975; Mann, 1945) checks whether each township's series of Gi* values is rising or falling. By evaluating a township's hot or cold spot history alongside this trend, the analysis categorises it into a specific temporal pattern, such as new, consecutive, persistent, intensifying, diminishing, sporadic or oscillating.
+
+## 3 The Data
+
+### 3.1 Datasets
+
+| Dataset | Description | Format | Source |
+|---|---|---|---|
+| **ACLED Myanmar Event Data** (January 2021 to September 2025) | Event-level records of political violence, protests and strategic developments, with date, location, event classification and fatality fields. | CSV | [ACLED](https://acleddata.com/) |
+| **Myanmar Township Boundaries** (MIMU v9.4) | Township-level administrative boundaries for Myanmar, with state, district and township names and codes. | Shapefile | [MIMU](https://geonode.themimu.info/) |
+
+### 3.2 Study Area and Period
+
+The study area is **Myanmar**, and the unit of analysis is the township. The study period runs from **1 January 2021 to 30 September 2025**.
+
+## 4 The Setup
+
+### 4.1 Installing and Loading the R Packages
+
+The following R packages are used:
+
+| Package | Purpose | Use Case in this Exercise |
+|---|---|---|
+| **tidyverse** | Collection of packages for data import, manipulation and visualisation | Importing the ACLED data, wrangling and aggregating events, and producing the exploratory charts |
+| **sf** | Imports, manages and processes vector-based geospatial data | Importing the township boundaries, converting event coordinates to spatial points, and joining events to townships |
+| **sfdep** | Spatial dependence analysis within a tidy workflow | Building the spatial weights and the space-time cube, computing Local Moran's I and Gi*, and running Emerging Hot Spot Analysis |
+| **spdep** | Spatial weights and statistics for spatial dependence | Global Moran's I tests and the spatial correlogram |
+| **tmap** | Thematic map creation using a layered grammar of graphics | Mapping event patterns, clusters and EHSA classes |
+
+```{r}
+pacman::p_load(tidyverse, sf, sfdep, spdep, tmap)
+```
+
+### 4.2 Reproducibility
+
+A fixed seed value of 123 is set for reproducibility of any simulation-based procedure used later in this exercise.
+
+```{r}
+set.seed(123)
+```
