@@ -23,7 +23,7 @@ In February 2021, the military seized power from the government elected in 2020,
 
 ### 1.2 Purpose and Objectives
 
-This exercise analyses armed conflict in Myanmar at the township level from 1 January 2021 to 30 September 2025. The data is drawn from two sources: event data from the Armed Conflict Location & Event Data Project (ACLED) and township boundaries from the Myanmar Information Management Unit (MIMU). 
+This exercise analyses armed conflict in Myanmar at the township level from 1 January 2021 to 30 September 2025. The data is drawn from two sources: event data from the Armed Conflict Location & Event Data Project (ACLED) and township boundaries from the Myanmar Information Management Unit (MIMU).
 
 To do this, the analysis applies two spatial methods:
 
@@ -32,15 +32,15 @@ To do this, the analysis applies two spatial methods:
 
 The objectives are:
 
-1. To pinpoint exact geographic hot spots, cold spots and spatial outliers where violence clusters or behaves unusually compared with surrounding townships.
-2. To reveal where, how fast and in what pattern political violence is evolving over space and time.
+1.  To pinpoint exact geographic hot spots, cold spots and spatial outliers where violence clusters or behaves unusually compared with surrounding townships.
+2.  To reveal where, how fast and in what pattern political violence is evolving over space and time.
 
 ### 1.3 Research Questions
 
-1. Is political violence spatially clustered across Myanmar's townships, or is it distributed randomly?
-2. Which townships are statistically significant hot spots, cold spots or spatial outliers?
-3. Where is political violence intensifying, persisting or fading, how fast it is happening, and in what pattern?
-4. What do these patterns imply for peace-building and conflict prevention?
+1.  Is political violence spatially clustered across Myanmar's townships, or is it distributed randomly?
+2.  Which townships are statistically significant hot spots, cold spots or spatial outliers?
+3.  Where is political violence intensifying, persisting or fading, how fast it is happening, and in what pattern?
+4.  What do these patterns imply for peace-building and conflict prevention?
 
 ## 2 Overview of Analytical Methods
 
@@ -50,18 +50,18 @@ Spatial autocorrelation is the degree to which values at nearby locations resemb
 
 **Global indicators** summarise the whole study area in a single value. Moran's I (Moran, 1950) tests whether the pattern of values across townships differs from a random arrangement. It shows whether spatial dependence exists, but not where it is concentrated, so it is used first as a check on whether a local analysis is justified.
 
-**Local indicators** give one result for each location. Local Moran's I, a local indicator of spatial association (LISA), compares each township with its neighbours and labels it as part of a high-high or low-low cluster, or as a spatial outlier (Anselin, 1995). The Getis-Ord Gi* statistic (Getis & Ord, 1992; Ord & Getis, 1995) measures how strongly high or low values are concentrated in a township together with its neighbours, which identifies hot spots and cold spots. Both measures depend on how neighbours are defined through spatial weights, and significance is assessed by permutation.
+**Local indicators** give one result for each location. Local Moran's I, a local indicator of spatial association (LISA), compares each township with its neighbours and labels it as part of a high-high or low-low cluster, or as a spatial outlier (Anselin, 1995). The Getis-Ord Gi\* statistic (Getis & Ord, 1992; Ord & Getis, 1995) measures how strongly high or low values are concentrated in a township together with its neighbours, which identifies hot spots and cold spots. Both measures depend on how neighbours are defined through spatial weights, and significance is assessed by permutation.
 
 ### 2.2 Emerging Hot Spot Analysis
 
-Measures of spatial autocorrelation describe only a single snapshot in time. Emerging Hot Spot Analysis (EHSA) adds time by combining Gi* with a trend test (Esri, n.d.). Events are first aggregated into a space-time cube of townships by time bins. Gi* is then computed for each time bin, and the Mann-Kendall test (Kendall, 1975; Mann, 1945) checks whether each township's series of Gi* values is rising or falling. By evaluating a township's hot or cold spot history alongside this trend, the analysis categorises it into a specific temporal pattern, such as new, consecutive, persistent, intensifying, diminishing, sporadic or oscillating.
+Measures of spatial autocorrelation describe only a single snapshot in time. Emerging Hot Spot Analysis (EHSA) adds time by combining Gi\* with a trend test (Esri, n.d.). Events are first aggregated into a space-time cube of townships by time bins. Gi\* is then computed for each time bin, and the Mann-Kendall test (Kendall, 1975; Mann, 1945) checks whether each township's series of Gi\* values is rising or falling. By evaluating a township's hot or cold spot history alongside this trend, the analysis categorises it into a specific temporal pattern, such as new, consecutive, persistent, intensifying, diminishing, sporadic or oscillating.
 
 ## 3 Data and Study Design
 
 ### 3.1 The Data
 
 | Dataset | Description | Format | Source |
-|---|---|---|---|
+|------------------|------------------|------------------|------------------|
 | **ACLED Myanmar Event Data** (January 2021 to September 2025) | Event-level records of political violence, protests and strategic developments, with date, location, event classification and fatality fields. | CSV | [ACLED](https://acleddata.com/) |
 | **Myanmar Township Boundaries** (MIMU v9.4) | Township-level administrative boundaries for Myanmar, with state, district and township names and codes. | Shapefile | [MIMU](https://geonode.themimu.info/) |
 
@@ -76,10 +76,10 @@ The study area is **Myanmar**, and the unit of analysis is the township. The stu
 The following R packages are used:
 
 | Package | Purpose | Use Case in this Exercise |
-|---|---|---|
+|------------------------|------------------------|------------------------|
 | **tidyverse** | Collection of packages for data import, manipulation and visualisation | Importing the ACLED data, wrangling and aggregating events, and producing the exploratory charts |
 | **sf** | Imports, manages and processes vector-based geospatial data | Importing the township boundaries, converting event coordinates to spatial points, and joining events to townships |
-| **sfdep** | Spatial dependence analysis within a tidy workflow | Building the spatial weights and the space-time cube, computing Local Moran's I and Gi*, and running Emerging Hot Spot Analysis |
+| **sfdep** | Spatial dependence analysis within a tidy workflow | Building the spatial weights and the space-time cube, computing Local Moran's I and Gi\*, and running Emerging Hot Spot Analysis |
 | **spdep** | Spatial weights and statistics for spatial dependence | Global Moran's I tests and the spatial correlogram |
 | **tmap** | Thematic map creation using a layered grammar of graphics | Mapping event patterns, clusters and EHSA classes |
 
@@ -96,5 +96,79 @@ set.seed(123)
 ```
 
 ## 5 Data Preparation and Quality Assessment
+
+### 5.1 Importing the Data
+
+#### 5.1.1 Myanmar Township Boundaries
+
+The township boundary shapefile is imported with `st_read() `of **sf**:
+
+```{r}
+mmr <- st_read(dsn = "data/geospatial",
+               layer = "mmr_polbnda_adm3_250k_mimu_1")
+
+glimpse(mmr)
+```
+
+The following code chunk checks whether the township code is a unique key and whether all geometries are valid.
+
+```{r}
+mmr %>%
+  st_drop_geometry() %>%
+  summarise(townships = n(),
+            unique_codes = n_distinct(TS_PCODE),
+            unique_names = n_distinct(TS))
+
+sum(!st_is_valid(mmr))
+```
+
+::: {.callout-note title="Analysis"}
+All 330 township codes are unique, but only 328 township names are. In addition, all geometries were checked and found to be valid.
+:::
+
+The shared names are listed below:
+
+```{r}
+mmr %>%
+  st_drop_geometry() %>%
+  group_by(TS) %>%
+  filter(n() > 1) %>%
+  ungroup() %>%
+  select(TS, TS_PCODE, DT, ST) %>%
+  arrange(TS)
+```
+
+::: {.callout-note title="Analysis"}
+The names Htantabin and Minhla each refer to two different townships located in separate districts and states. 
+
+Hence, `TS_PCODE` is used as the unique join key throughout, with township names reserved only for labels. 
+:::
+
+#### 5.1.2 ACLED Event Data
+
+The event file is imported with `read_csv()` of **readr**:
+
+```{r}
+acled <- read_csv("data/aspatial/ACLED_Data_Myanmar_Jan2021-Sep2025.csv")
+```
+
+The following code chunk summarises the basic dimensions and data integrity checks for the imported ACLED dataset.
+
+```{r}
+tibble(
+  check = c("Events", "Variables", "First event date", 
+            "Last event date", "Duplicated event IDs", 
+            "Missing coordinates"),
+  result = c(nrow(acled), ncol(acled),
+             as.character(min(acled$event_date)),
+             as.character(max(acled$event_date)),
+             sum(duplicated(acled$event_id_cnty)),
+             sum(is.na(acled$latitude) | is.na(acled$longitude)))
+)
+```
+
+::: {.callout-note title="Analysis"}
+The file contains 87,109 events and 31 variables. The first and last event dates (1 January 2021 and 30 September 2025) match the study period, and there are no duplicated event identifiers or missing coordinates.
+:::
 
 

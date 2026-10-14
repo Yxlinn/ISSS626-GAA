@@ -172,6 +172,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex06/Hands-on_Ex06.html">
  <span class="dropdown-text">Hands-on Exercise 6</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex07/Hands-on_Ex07.html">
+ <span class="dropdown-text">Hands-on Exercise 7</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -260,7 +264,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#installing-and-loading-the-r-packages" id="toc-installing-and-loading-the-r-packages" class="nav-link" data-scroll-target="#installing-and-loading-the-r-packages">4.1 Installing and Loading the R Packages</a></li>
   <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">4.2 Reproducibility</a></li>
   </ul></li>
-  <li><a href="#data-preparation-and-quality-assessment" id="toc-data-preparation-and-quality-assessment" class="nav-link" data-scroll-target="#data-preparation-and-quality-assessment">5 Data Preparation and Quality Assessment</a></li>
+  <li><a href="#data-preparation-and-quality-assessment" id="toc-data-preparation-and-quality-assessment" class="nav-link" data-scroll-target="#data-preparation-and-quality-assessment">5 Data Preparation and Quality Assessment</a>
+  <ul>
+  <li><a href="#importing-the-data" id="toc-importing-the-data" class="nav-link" data-scroll-target="#importing-the-data">5.1 Importing the Data</a>
+  <ul class="collapse">
+  <li><a href="#myanmar-township-boundaries" id="toc-myanmar-township-boundaries" class="nav-link" data-scroll-target="#myanmar-township-boundaries">5.1.1 Myanmar Township Boundaries</a></li>
+  <li><a href="#acled-event-data" id="toc-acled-event-data" class="nav-link" data-scroll-target="#acled-event-data">5.1.2 ACLED Event Data</a></li>
+  </ul></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -288,7 +299,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">October 12, 2026</p>
+      <p class="date-modified">October 13, 2026</p>
     </div>
   </div>
     
@@ -437,8 +448,149 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="data-preparation-and-quality-assessment" class="level2">
 <h2 class="anchored" data-anchor-id="data-preparation-and-quality-assessment">5 Data Preparation and Quality Assessment</h2>
+<section id="importing-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="importing-the-data">5.1 Importing the Data</h3>
+<section id="myanmar-township-boundaries" class="level4">
+<h4 class="anchored" data-anchor-id="myanmar-township-boundaries">5.1.1 Myanmar Township Boundaries</h4>
+<p>The township boundary shapefile is imported with <code>st_read()</code>of <strong>sf</strong>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mmr <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial"</span>,</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">layer =</span> <span class="st">"mmr_polbnda_adm3_250k_mimu_1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `mmr_polbnda_adm3_250k_mimu_1' from data source 
+  `C:\yxlinn\ISSS626-GAA\Take-home_Ex\Take-home_Ex02\data\geospatial' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 330 features and 8 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 92.1721 ymin: 9.605884 xmax: 101.17 ymax: 28.54554
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(mmr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 330
+Columns: 9
+$ ST       &lt;chr&gt; "Ayeyarwady", "Ayeyarwady", "Ayeyarwady", "Ayeyarwady", "Ayey…
+$ ST_PCODE &lt;chr&gt; "MMR017", "MMR017", "MMR017", "MMR017", "MMR017", "MMR017", "…
+$ DT       &lt;chr&gt; "Hinthada", "Hinthada", "Hinthada", "Hinthada", "Hinthada", "…
+$ DT_PCODE &lt;chr&gt; "MMR017D002", "MMR017D002", "MMR017D002", "MMR017D002", "MMR0…
+$ TS       &lt;chr&gt; "Hinthada", "Ingapu", "Kyangin", "Lemyethna", "Myanaung", "Za…
+$ TS_PCODE &lt;chr&gt; "MMR017008", "MMR017013", "MMR017012", "MMR017010", "MMR01701…
+$ TS_MMR   &lt;chr&gt; "ဟင်္သာတ", "အင်္ဂပူ", "ကြံခင်း", "လေးမျက်နှာ", "မြန်အောင်", "ဇလွန်", "လပွတ္တာ", "…
+$ PCode_V  &lt;dbl&gt; 9.4, 9.4, 9.4, 9.4, 9.4, 9.4, 9.4, 9.4, 9.4, 9.4, 9.4, 9.4, 9…
+$ geometry &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((95.21313 17..., MULTIPOLYGON (((…</code></pre>
+</div>
+</div>
+<p>The following code chunk checks whether the township code is a unique key and whether all geometries are valid.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mmr <span class="sc">%&gt;%</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">townships =</span> <span class="fu">n</span>(),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">unique_codes =</span> <span class="fu">n_distinct</span>(TS_PCODE),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">unique_names =</span> <span class="fu">n_distinct</span>(TS))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  townships unique_codes unique_names
+1       330          330          328</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="sc">!</span><span class="fu">st_is_valid</span>(mmr))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>All 330 township codes are unique, but only 328 township names are. In addition, all geometries were checked and found to be valid.</p>
+</div>
+</div>
+<p>The shared names are listed below:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>mmr <span class="sc">%&gt;%</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(TS) <span class="sc">%&gt;%</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(TS, TS_PCODE, DT, ST) <span class="sc">%&gt;%</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(TS)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 4
+  TS        TS_PCODE  DT             ST         
+  &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt;          &lt;chr&gt;      
+1 Htantabin MMR007014 Taungoo        Bago (East)
+2 Htantabin MMR013006 Yangon (North) Yangon     
+3 Minhla    MMR008009 Thayarwady     Bago (West)
+4 Minhla    MMR009013 Thayet         Magway     </code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The names Htantabin and Minhla each refer to two different townships located in separate districts and states.</p>
+<p>Hence, <code>TS_PCODE</code> is used as the unique join key throughout, with township names reserved only for labels.</p>
+</div>
+</div>
+</section>
+<section id="acled-event-data" class="level4">
+<h4 class="anchored" data-anchor-id="acled-event-data">5.1.2 ACLED Event Data</h4>
+<p>The event file is imported with <code>read_csv()</code> of <strong>readr</strong>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>acled <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/ACLED_Data_Myanmar_Jan2021-Sep2025.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The following code chunk summarises the basic dimensions and data integrity checks for the imported ACLED dataset.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">check =</span> <span class="fu">c</span>(<span class="st">"Events"</span>, <span class="st">"Variables"</span>, <span class="st">"First event date"</span>, </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Last event date"</span>, <span class="st">"Duplicated event IDs"</span>, </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"Missing coordinates"</span>),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">result =</span> <span class="fu">c</span>(<span class="fu">nrow</span>(acled), <span class="fu">ncol</span>(acled),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>             <span class="fu">as.character</span>(<span class="fu">min</span>(acled<span class="sc">$</span>event_date)),</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>             <span class="fu">as.character</span>(<span class="fu">max</span>(acled<span class="sc">$</span>event_date)),</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>             <span class="fu">sum</span>(<span class="fu">duplicated</span>(acled<span class="sc">$</span>event_id_cnty)),</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>             <span class="fu">sum</span>(<span class="fu">is.na</span>(acled<span class="sc">$</span>latitude) <span class="sc">|</span> <span class="fu">is.na</span>(acled<span class="sc">$</span>longitude)))</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  check                result    
+  &lt;chr&gt;                &lt;chr&gt;     
+1 Events               87109     
+2 Variables            31        
+3 First event date     2021-01-01
+4 Last event date      2025-09-30
+5 Duplicated event IDs 0         
+6 Missing coordinates  0         </code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The file contains 87,109 events and 31 variables. The first and last event dates (1 January 2021 and 30 September 2025) match the study period, and there are no duplicated event identifiers or missing coordinates.</p>
+</div>
+</div>
 
 
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
