@@ -23,12 +23,14 @@ In February 2021, the military seized power from the government elected in 2020,
 
 ### 1.2 Purpose and Objectives
 
-This exercise analyses armed conflict in Myanmar at the township level from 1 January 2021 to 30 September 2025. The data is drawn from two sources: event data from the Armed Conflict Location & Event Data Project (ACLED) and township boundaries from the Myanmar Information Management Unit (MIMU).
+This exercise analyses armed conflict in Myanmar, measured through political violence, at the township level from 1 January 2021 to 30 September 2025. The data is drawn from two sources: event data from the Armed Conflict Location & Event Data Project (ACLED) and township boundaries from the Myanmar Information Management Unit (MIMU).
 
-To do this, the analysis applies two spatial methods:
+The analysis applies two spatial methods:
 
 - **Local Measures of Spatial Association (LMSA)**, which identify townships where violence is unusually high or low compared with neighbouring townships.
 - **Emerging Hot Spot Analysis (EHSA)**, which tracks how hot spots and cold spots form, persist or fade over time.
+
+In this study, political violence is defined following ACLED as "the use of force by a group with a political purpose or motivation, or with distinct political effects" (ACLED, n.d.). The exact scope of included events is set out in the Data and Study Design section.
 
 The objectives are:
 
@@ -101,7 +103,7 @@ set.seed(123)
 
 #### 5.1.1 Myanmar Township Boundaries
 
-The township boundary shapefile is imported with `st_read() `of **sf**:
+The township boundary shapefile is imported with `st_read()`of **sf**:
 
 ```{r}
 mmr <- st_read(dsn = "data/geospatial",
@@ -139,9 +141,9 @@ mmr %>%
 ```
 
 ::: {.callout-note title="Analysis"}
-The names Htantabin and Minhla each refer to two different townships located in separate districts and states. 
+The names Htantabin and Minhla each refer to two different townships located in separate districts and states.
 
-Hence, `TS_PCODE` is used as the unique join key throughout, with township names reserved only for labels. 
+Hence, `TS_PCODE` is used as the unique join key throughout, with township names reserved only for labels.
 :::
 
 #### 5.1.2 ACLED Event Data
@@ -170,5 +172,125 @@ tibble(
 ::: {.callout-note title="Analysis"}
 The file contains 87,109 events and 31 variables. The first and last event dates (1 January 2021 and 30 September 2025) match the study period, and there are no duplicated event identifiers or missing coordinates.
 :::
+
+### 5.2 Spatial Join of Events to Townships
+
+Events are assigned to townships by their coordinates. The event table is first converted to point features with `st_as_sf()`. Then, each point is matched to the township polygon that contains it with `st_join()`, using `st_within` as the join predicate. Only the township code is retained.
+
+```{r}
+acled_sf <- acled %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326, remove = FALSE)
+
+acled_join <- st_join(acled_sf, mmr["TS_PCODE"], join = st_within)
+```
+
+The row counts before and after the join are compared to ensure that no events were lost or duplicated.
+
+```{r}
+c(before_join = nrow(acled_sf),
+  after_join = nrow(acled_join),
+  duplicated_ids = sum(duplicated(acled_join$event_id_cnty,)),
+  unmatched = sum(is.na(acled_join$TS_PCODE)))
+```
+
+All 87,109 events are retained and none is duplicated. However, 15 events fall in no township polygon. The distance from each of them to the nearest township is measured:
+
+```{r}
+unmatched <- which(is.na(acled_join$TS_PCODE))
+nearest <- st_nearest_feature(acled_join[unmatched, ], mmr)
+dist_km <- as.numeric(st_distance(acled_join[unmatched, ],
+                                  mmr[nearest, ],
+                                  by_element = TRUE)) / 1000
+
+acled_join[unmatched, ] %>%
+  st_drop_geometry() %>%
+  mutate(distance_km = dist_km,
+         admin3_agrees = admin3 == mmr$TS[nearest]) %>%
+  group_by(country) %>%
+  summarise(events = n(),
+            admin3_agrees = sum(admin3_agrees, na.rm = TRUE),
+            max_km = round(max(distance_km), 2))
+```
+
+::: {.callout-note title=Analysis}
+The 15 unmatched events fall into two groups. Nine are coded to Myanmar and lie within 0.64 km of a township boundary, so they are most likely points that sit near to a township edge. The township named in `admin3` (ACLED's third administrative level) matches the nearest township in all nine cases. These events are therefore assigned to their nearest township.
+
+The remaining six events are coded to the Indian Ocean and lie approximately 642 km from the nearest township. None of these records have a matching `admin3`, providing no basis for placing them in a township. These events are therefore excluded.
+:::
+
+The adjustments to the 15 unmatched events are applied below:
+
+```{r}
+snap <- acled_join$country[unmatched] == "Myanmar"
+acled_join$TS_PCODE[unmatched[snap]] <- mmr$TS_PCODE[nearest[snap]]
+
+acled_join <- acled_join %>%
+  filter(!is.na(TS_PCODE))
+
+nrow(acled_join)
+```
+
+After the adjustments, **87,103 events** remain, each linked to exactly one township.
+
+### 5.3 Data Quality Assessment 
+
+The township-linked events are assessed for locational reliability and coverage before the space-time cube is built.
+
+#### 5.3.1 Cross-Validation of Township Assignments
+
+ACLED records the township name of each event in `admin3`. This name is compared with the MIMU township that each event falls in.
+
+```{r}
+acled_join %>%
+  st_drop_geometry() %>%
+  left_join(mmr %>% st_drop_geometry() %>% select(TS_PCODE, TS),
+            by = "TS_PCODE") %>%
+  summarise(blank_admin3 = sum(is.na(admin3) | admin3 == ""),
+            compared = sum(!is.na(admin3) & admin3 != ""),
+            agreement_pct = round(mean(admin3 == TS, na.rm = TRUE) * 100, 1))
+```
+
+::: {.callout-note title=Analysis}
+`admin3` is blank for 1,112 events, which are excluded from the comparison. Among the remaining 85,991 events, the recorded township matches the MIMU township for 98.9%. The high agreement rate validates the approach of assigning events to townships based on their coordinates.
+:::
+
+#### 5.3.2 Geographic Precision
+
+ACLED's `geo_precision` records how exactly an event is located:
+
+```{r}
+acled_join %>%
+  st_drop_geometry() %>%
+  left_join(mmr %>% st_drop_geometry() %>% select(TS_PCODE, TS),
+            by = "TS_PCODE") %>%
+  group_by(geo_precision) %>%
+  summarise(n = n(),
+            pct = round(n / nrow(acled_join) * 100, 1),
+            compared = sum(!is.na(admin3) & admin3 != ""),
+            agreement_pct = round(mean(admin3 == TS, na.rm = TRUE) * 100, 1))
+```
+
+::: {.callout-note title=Analysis}
+Based on the output, approximately 56.6% of events are located at an exact site (level 1), 43.0% at a nearby location (level 2), and 0.4% within a broader area (level 3). The recorded township name agrees with the assigned township for at least 98% of compared events at every level, indicating that lower precision does not weaken the township assignment. Therefore, events of all precision levels are retained.
+:::
+
+#### 5.3.3 Political Violence Coverage
+
+Political violence is the conflict variable analysed, and its coverage across townships is checked.
+
+```{r}
+pv <- acled_join %>%
+  st_drop_geometry() %>%
+  filter(grepl("Political violence", disorder_type))
+
+nrow(pv)
+
+mmr %>%
+  st_drop_geometry() %>%
+  left_join(count(pv, TS_PCODE, name = "events"), by = "TS_PCODE") %>%
+  summarise(townships = n(),
+            with_events = sum(!is.na(events)),
+            without_events = sum(is.na(events)))
+```
 
 

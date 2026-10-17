@@ -271,6 +271,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#myanmar-township-boundaries" id="toc-myanmar-township-boundaries" class="nav-link" data-scroll-target="#myanmar-township-boundaries">5.1.1 Myanmar Township Boundaries</a></li>
   <li><a href="#acled-event-data" id="toc-acled-event-data" class="nav-link" data-scroll-target="#acled-event-data">5.1.2 ACLED Event Data</a></li>
   </ul></li>
+  <li><a href="#spatial-join-of-events-to-townships" id="toc-spatial-join-of-events-to-townships" class="nav-link" data-scroll-target="#spatial-join-of-events-to-townships">5.2 Spatial Join of Events to Townships</a></li>
+  <li><a href="#data-quality-assessment" id="toc-data-quality-assessment" class="nav-link" data-scroll-target="#data-quality-assessment">5.3 Data Quality Assessment</a>
+  <ul class="collapse">
+  <li><a href="#cross-validation-of-township-assignments" id="toc-cross-validation-of-township-assignments" class="nav-link" data-scroll-target="#cross-validation-of-township-assignments">5.3.1 Cross-Validation of Township Assignments</a></li>
+  <li><a href="#geographic-precision" id="toc-geographic-precision" class="nav-link" data-scroll-target="#geographic-precision">5.3.2 Geographic Precision</a></li>
+  <li><a href="#political-violence-coverage" id="toc-political-violence-coverage" class="nav-link" data-scroll-target="#political-violence-coverage">5.3.3 Political Violence Coverage</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -299,7 +306,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">October 13, 2026</p>
+      <p class="date-modified">October 17, 2026</p>
     </div>
   </div>
     
@@ -319,12 +326,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="purpose-and-objectives" class="level3">
 <h3 class="anchored" data-anchor-id="purpose-and-objectives">1.2 Purpose and Objectives</h3>
-<p>This exercise analyses armed conflict in Myanmar at the township level from 1 January 2021 to 30 September 2025. The data is drawn from two sources: event data from the Armed Conflict Location &amp; Event Data Project (ACLED) and township boundaries from the Myanmar Information Management Unit (MIMU).</p>
-<p>To do this, the analysis applies two spatial methods:</p>
+<p>This exercise analyses armed conflict in Myanmar, measured through political violence, at the township level from 1 January 2021 to 30 September 2025. The data is drawn from two sources: event data from the Armed Conflict Location &amp; Event Data Project (ACLED) and township boundaries from the Myanmar Information Management Unit (MIMU).</p>
+<p>The analysis applies two spatial methods:</p>
 <ul>
 <li><strong>Local Measures of Spatial Association (LMSA)</strong>, which identify townships where violence is unusually high or low compared with neighbouring townships.</li>
 <li><strong>Emerging Hot Spot Analysis (EHSA)</strong>, which tracks how hot spots and cold spots form, persist or fade over time.</li>
 </ul>
+<p>In this study, political violence is defined following ACLED as “the use of force by a group with a political purpose or motivation, or with distinct political effects” (ACLED, n.d.). The exact scope of included events is set out in the Data and Study Design section.</p>
 <p>The objectives are:</p>
 <ol type="1">
 <li>To pinpoint exact geographic hot spots, cold spots and spatial outliers where violence clusters or behaves unusually compared with surrounding townships.</li>
@@ -585,6 +593,175 @@ $ geometry &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((95.21313 17..., MULTIPOLYGO
 </div>
 <div class="callout-body-container callout-body">
 <p>The file contains 87,109 events and 31 variables. The first and last event dates (1 January 2021 and 30 September 2025) match the study period, and there are no duplicated event identifiers or missing coordinates.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="spatial-join-of-events-to-townships" class="level3">
+<h3 class="anchored" data-anchor-id="spatial-join-of-events-to-townships">5.2 Spatial Join of Events to Townships</h3>
+<p>Events are assigned to townships by their coordinates. The event table is first converted to point features with <code>st_as_sf()</code>. Then, each point is matched to the township polygon that contains it with <code>st_join()</code>, using <code>st_within</code> as the join predicate. Only the township code is retained.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>acled_sf <span class="ot">&lt;-</span> acled <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"longitude"</span>, <span class="st">"latitude"</span>), <span class="at">crs =</span> <span class="dv">4326</span>, <span class="at">remove =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>acled_join <span class="ot">&lt;-</span> <span class="fu">st_join</span>(acled_sf, mmr[<span class="st">"TS_PCODE"</span>], <span class="at">join =</span> st_within)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The row counts before and after the join are compared to ensure that no events were lost or duplicated.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">before_join =</span> <span class="fu">nrow</span>(acled_sf),</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">after_join =</span> <span class="fu">nrow</span>(acled_join),</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">duplicated_ids =</span> <span class="fu">sum</span>(<span class="fu">duplicated</span>(acled_join<span class="sc">$</span>event_id_cnty,)),</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">unmatched =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(acled_join<span class="sc">$</span>TS_PCODE)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   before_join     after_join duplicated_ids      unmatched 
+         87109          87109              0             15 </code></pre>
+</div>
+</div>
+<p>All 87,109 events are retained and none is duplicated. However, 15 events fall in no township polygon. The distance from each of them to the nearest township is measured:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>unmatched <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">is.na</span>(acled_join<span class="sc">$</span>TS_PCODE))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>nearest <span class="ot">&lt;-</span> <span class="fu">st_nearest_feature</span>(acled_join[unmatched, ], mmr)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>dist_km <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">st_distance</span>(acled_join[unmatched, ],</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                                  mmr[nearest, ],</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">by_element =</span> <span class="cn">TRUE</span>)) <span class="sc">/</span> <span class="dv">1000</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>acled_join[unmatched, ] <span class="sc">%&gt;%</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">distance_km =</span> dist_km,</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">admin3_agrees =</span> admin3 <span class="sc">==</span> mmr<span class="sc">$</span>TS[nearest]) <span class="sc">%&gt;%</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(country) <span class="sc">%&gt;%</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">events =</span> <span class="fu">n</span>(),</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">admin3_agrees =</span> <span class="fu">sum</span>(admin3_agrees, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">max_km =</span> <span class="fu">round</span>(<span class="fu">max</span>(distance_km), <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 4
+  country      events admin3_agrees max_km
+  &lt;chr&gt;         &lt;int&gt;         &lt;int&gt;  &lt;dbl&gt;
+1 Indian Ocean      6             0 642.  
+2 Myanmar           9             9   0.64</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The 15 unmatched events fall into two groups. Nine are coded to Myanmar and lie within 0.64 km of a township boundary, so they are most likely points that sit near to a township edge. The township named in <code>admin3</code> (ACLED’s third administrative level) matches the nearest township in all nine cases. These events are therefore assigned to their nearest township.</p>
+<p>The remaining six events are coded to the Indian Ocean and lie approximately 642 km from the nearest township. None of these records have a matching <code>admin3</code>, providing no basis for placing them in a township. These events are therefore excluded.</p>
+</div>
+</div>
+<p>The adjustments to the 15 unmatched events are applied below:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>snap <span class="ot">&lt;-</span> acled_join<span class="sc">$</span>country[unmatched] <span class="sc">==</span> <span class="st">"Myanmar"</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>acled_join<span class="sc">$</span>TS_PCODE[unmatched[snap]] <span class="ot">&lt;-</span> mmr<span class="sc">$</span>TS_PCODE[nearest[snap]]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>acled_join <span class="ot">&lt;-</span> acled_join <span class="sc">%&gt;%</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(TS_PCODE))</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(acled_join)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 87103</code></pre>
+</div>
+</div>
+<p>After the adjustments, <strong>87,103 events</strong> remain, each linked to exactly one township.</p>
+</section>
+<section id="data-quality-assessment" class="level3">
+<h3 class="anchored" data-anchor-id="data-quality-assessment">5.3 Data Quality Assessment</h3>
+<p>The township-linked events are assessed for locational reliability and coverage before the space-time cube is built.</p>
+<section id="cross-validation-of-township-assignments" class="level4">
+<h4 class="anchored" data-anchor-id="cross-validation-of-township-assignments">5.3.1 Cross-Validation of Township Assignments</h4>
+<p>ACLED records the township name of each event in <code>admin3</code>. This name is compared with the MIMU township that each event falls in.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>acled_join <span class="sc">%&gt;%</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(mmr <span class="sc">%&gt;%</span> <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span> <span class="fu">select</span>(TS_PCODE, TS),</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="st">"TS_PCODE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">blank_admin3 =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(admin3) <span class="sc">|</span> admin3 <span class="sc">==</span> <span class="st">""</span>),</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">compared =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(admin3) <span class="sc">&amp;</span> admin3 <span class="sc">!=</span> <span class="st">""</span>),</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">agreement_pct =</span> <span class="fu">round</span>(<span class="fu">mean</span>(admin3 <span class="sc">==</span> TS, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  blank_admin3 compared agreement_pct
+         &lt;int&gt;    &lt;int&gt;         &lt;dbl&gt;
+1         1112    85991          98.9</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>admin3</code> is blank for 1,112 events, which are excluded from the comparison. Among the remaining 85,991 events, the recorded township matches the MIMU township for 98.9%. The high agreement rate validates the approach of assigning events to townships based on their coordinates.</p>
+</div>
+</div>
+</section>
+<section id="geographic-precision" class="level4">
+<h4 class="anchored" data-anchor-id="geographic-precision">5.3.2 Geographic Precision</h4>
+<p>ACLED’s <code>geo_precision</code> records how exactly an event is located:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>acled_join <span class="sc">%&gt;%</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(mmr <span class="sc">%&gt;%</span> <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span> <span class="fu">select</span>(TS_PCODE, TS),</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="st">"TS_PCODE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(geo_precision) <span class="sc">%&gt;%</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">pct =</span> <span class="fu">round</span>(n <span class="sc">/</span> <span class="fu">nrow</span>(acled_join) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>),</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">compared =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(admin3) <span class="sc">&amp;</span> admin3 <span class="sc">!=</span> <span class="st">""</span>),</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">agreement_pct =</span> <span class="fu">round</span>(<span class="fu">mean</span>(admin3 <span class="sc">==</span> TS, <span class="at">na.rm =</span> <span class="cn">TRUE</span>) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 5
+  geo_precision     n   pct compared agreement_pct
+          &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt;    &lt;int&gt;         &lt;dbl&gt;
+1             1 49261  56.6    48411          98.1
+2             2 37460  43      37342         100  
+3             3   382   0.4      238          99.2</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Based on the output, approximately 56.6% of events are located at an exact site (level 1), 43.0% at a nearby location (level 2), and 0.4% within a broader area (level 3). The recorded township name agrees with the assigned township for at least 98% of compared events at every level, indicating that lower precision does not weaken the township assignment. Therefore, events of all precision levels are retained.</p>
+</div>
+</div>
+</section>
+<section id="political-violence-coverage" class="level4">
+<h4 class="anchored" data-anchor-id="political-violence-coverage">5.3.3 Political Violence Coverage</h4>
+<p>Political violence is the conflict variable analysed, and its coverage across townships is checked.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>pv <span class="ot">&lt;-</span> acled_join <span class="sc">%&gt;%</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"Political violence"</span>, disorder_type))</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(pv)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 54284</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>mmr <span class="sc">%&gt;%</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="fu">count</span>(pv, TS_PCODE, <span class="at">name =</span> <span class="st">"events"</span>), <span class="at">by =</span> <span class="st">"TS_PCODE"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">townships =</span> <span class="fu">n</span>(),</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">with_events =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(events)),</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">without_events =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(events)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  townships with_events without_events
+1       330         322              8</code></pre>
 </div>
 </div>
 
