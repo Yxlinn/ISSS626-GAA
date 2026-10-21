@@ -1,0 +1,16 @@
+---
+title: "Hands-on Exercise 8: Market Area Analysis for Retail and Service Locations using Huff Model"
+date: "October 21, 2026"
+date-modified: "last-modified"
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
+---
+
+## 1 Overview
+
