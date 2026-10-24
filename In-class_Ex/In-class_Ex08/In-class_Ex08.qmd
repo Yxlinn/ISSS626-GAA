@@ -1,0 +1,459 @@
+---
+title: "In-class Exercise 8"
+date: "October 24, 2026"
+date-modified: today
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
+---
+
+## 1 Overview
+
+Market Area Analysis (also known as Trade Area Analysis) is the process of defining and studying the geographical area from which a business draws its customers. It involves analysing data on consumer demographics, spending habits and competitors to understand market viability, identify opportunities, and inform decisions about location, marketing, and expansion. It often combines empirical observation, like customer spotting, with mathematical models to identify market segments and understand customer behavior.
+
+The Huff model is a geospatial method used in market area analysis to predict the probability that a consumer from a specific area will patronize a particular store, based on the store’s attractiveness and distance relative to competitors. It calculates a store’s market share by considering factors such as size or sales for attractiveness and distance or travel time. The probability falls as the distance or the level of competition increases. This tool helps businesses assess potential revenue, define trade areas, and make informed decisions about site selection.
+
+### 1.1 Learning Outcome
+
+This exercise covers market area analysis using the Huff model of the **MCI** package. By the end, the following are achieved:
+
+- importing geospatial data into R as simple feature data frames with **sf**
+- importing aspatial data into R with **readr**
+- cleaning and tidying the datasets for analysis
+- computing a distance matrix between origins (i.e. villages) and destinations (i.e. stores)
+- computing interaction probabilities with the Huff model
+- visualising market areas with **tmap** and **ggplot2** packages
+
+### 1.2 Setting the Scene
+
+A franchise is a business model in which a franchisee acquires the right to operate a restaurant under the established brand of a franchisor. This arrangement typically involves franchise fees and adherence to standardised operational procedures. Key considerations prior to investment include the scale of initial capital outlay, the strength of the brand, and the strategic importance of the store location. Capital investment requirements vary significantly, ranging from approximately \$200,000 to more than \$2 million. Major global fast-food franchise brands include McDonald’s, Burger King, Pizza Hut, KFC, and Taco Bell.
+
+In this exercise, the role is that of a data analyst in the business development team of a fast-food franchise. The objective is to delineate the trade areas of the existing stores in Taichung City, Taiwan, and to produce maps that support market analysis and strategic decisions.
+
+## 2 The Data
+
+The following datasets are used:
+
+| Data | Type | Format | Description |
+|------------------|------------------|------------------|------------------|
+| `STORES_TC` | Geospatial | ESRI shapefile (point) | Store location data |
+| `VILLAGE_TC` | Geospatial | ESRI shapefile (polygon) | Village boundary data |
+| `TOWN_TC` | Geospatial | ESRI shapefile (polygon) | Town boundary data |
+| `pop2019.csv` | Aspatial | CSV | 2019 population data of Taichung City by village. `H_CNT`, `P_CNT`, `M_CNT` and `F_CNT` provide the number of households, total population, male population and female population |
+| `Store_sales_data.csv` | Aspatial | CSV | Store sales data |
+
+## 3 Installing and Loading the R Packages
+
+The following packages are used:
+
+| Package | Description |
+|------------------------------------|------------------------------------|
+| **sf** | Handling geospatial data and geoprocessing, such as computing distance matrices |
+| **MCI** | Performing Huff and MCI modelling |
+| **tidyverse** | Performing data science tasks, including data wrangling and visualisation |
+| **ggstatsplot** | Extends **ggplot2** by combining data visualisation with statistical analysis |
+| **tmap** | Plotting cartographic-quality thematic maps |
+
+```{r}
+pacman::p_load(sf, tidyverse, MCI, tmap, ggstatsplot)
+```
+
+## 4 Importing the Data
+
+### 4.1 Importing geospatial data
+
+The three geospatial data sets are imported with `st_read()` of **sf**.
+
+The store locations:
+
+```{r}
+stores <- st_read(dsn = "data/geospatial",
+                  layer = "STORES_TC")
+```
+
+The town boundaries:
+
+```{r}
+town <- st_read(dsn = "data/geospatial",
+                layer = "TOWN_TC")
+```
+
+The village boundaries:
+
+```{r}
+village <- st_read(dsn = "data/geospatial",
+                   layer = "VILLAGE_TC")
+```
+
+Based on the above outputs, all three layers use the projected CRS TWD97 / TM2 zone 121 (EPSG:3826).
+
+::: callout-important
+For any geospatial analysis, it is important to check and confirm that all the geospatial data are in similar projected coodinates system.
+:::
+
+The data sets are plotted together to check how they overlay:
+
+```{r}
+tmap_mode("view")
+tm_shape(town) +
+  tm_polygons() +
+  tm_shape(village) +
+  tm_polygons() +
+  tm_shape(stores) +
+  tm_dots()
+```
+
+```{r}
+tmap_mode("plot")
+```
+
+### 4.2 Importing aspatial data
+
+The two aspatial files are imported with `read_csv()` of **readr**:
+
+```{r}
+pop2019 <- read_csv("data/aspatial/pop2019.csv")
+store_sales <- read_csv("data/aspatial/Store_sales_data.csv")
+```
+
+```{r}
+summary(store_sales)
+```
+
+## 5 Data Preparation
+
+### 5.1 Aggregating store sales
+
+`store_sales` holds one record per store code and POD code. The records are aggregated by `Store Code` to give the total number of bills and the total sales amount of each store.
+
+```{r}
+store_sales_aggre <- store_sales %>%
+  group_by(`Store Code`) %>%
+  summarise(
+    "Total_Bill" = sum(Bills, na.rm = TRUE),
+    "Total_Sales" = sum(Amount, na.rm = TRUE))
+```
+
+### 5.2 Relational join
+
+The aggregated sales are joined to `stores` using `left_join()` from **dplyr**. A new field, `Store_size`, is also created with a default value of 1 for every store.
+
+```{r}
+stores <- stores %>%
+  left_join(store_sales_aggre,
+            by = join_by(Store_CD == `Store Code`)) %>%
+  mutate(Store_size = 1)
+```
+
+A `left_join()` keeps all 28 stores and drops the store codes in `store_sales_aggre` that are not in `stores`. The result is checked for missing values:
+
+```{r}
+summary(stores)
+```
+
+### 5.3 Tidying the pop2019 data frame
+
+Before `pop2019` can be joined to `village`, the join fields are inspected.
+
+```{r}
+glimpse(pop2019)
+```
+
+```{r}
+glimpse(village)
+```
+
+`pop2019` has 625 records and `village` has 622. The village identifier is `V_ID` in `pop2019` and `VILLCODE` in `village`. However, their identifier fields are formatted differently. Both are character variables, but `V_ID` in `pop2019` contains a hyphen (e.g. "66000110-002") while `VILLCODE` in `village` does not.
+
+The code chunk below removes the hyphens ("-") from `V_ID`:
+
+```{r}
+pop2019 <- pop2019 %>%
+  mutate(V_ID = str_remove_all(V_ID, "-"))
+```
+
+`pop2019` is then joined to `village` using `left_join()` from **dplyr**.
+
+```{r}
+village <- village %>%
+  left_join(pop2019,
+            by = join_by(VILLCODE == V_ID))
+```
+
+### 5.4 Checking for missing or zero values
+
+The joined data frame is checked for missing values:
+
+```{r}
+summary(village)
+```
+
+The output above reveals five missing values across `H_CNT`, `P_CNT`, `M_CNT` and `F_CNT` fields.
+
+The code chunk below removes the five incomplete records from the `village` sf data frame:
+
+```{r}
+village <- village %>%
+  filter(!is.na(P_CNT))
+```
+
+```{r}
+any(is.na(village$H_CNT))
+any(is.na(village$P_CNT))
+any(is.na(village$M_CNT))
+any(is.na(village$F_CNT))
+```
+
+All four checks return `FALSE`, confirming that no missing values remain in the population fields.
+
+## 6 Computing Distance Matrix
+
+The Huff model requires the distance between every origin (village) and every destination (store). A village is a polygon, so each village is first represented by one point that lies inside its boundary. The straight-line distance from this point to each store is then computed.
+
+`st_point_on_surface()` of **sf** returns the point for each village, and `st_distance()` computes the distance from each point to each store.
+
+```{r}
+village_center <- st_point_on_surface(village)
+distmat <- st_distance(village_center, stores)
+```
+
+Next, the distance matrix is converted into a long data frame, with one row for each village and store pair.
+
+```{r}
+rownames(distmat) <- village$`VILLCODE`
+colnames(distmat) <- stores$`Store_CD`
+
+distmat_long <- distmat %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "VILLCODE") %>%
+  pivot_longer(
+    cols = -VILLCODE,
+    names_to = "Store_CD",
+    values_to = "distance") %>%
+  mutate(distance = as.numeric(distance))
+```
+
+::: {.callout-note title="Code Explanation"}
+**Assign row and column names**:
+
+- `rownames()` assigns the village codes (`VILLCODE`) to the rows.
+- `colnames()` assigns the store codes (`Store_CD`) to the columns.
+
+**Reshape to long format**:
+
+- `as.data.frame()` and `rownames_to_column()` convert the matrix into a data frame and turn the row names into an explicit `VILLCODE` column.
+- `pivot_longer()` reshapes the wide matrix into long format, where each row represents a unique village-to-store pair with its corresponding `distance`.
+- `as.numeric()` removes the metre units attached by `st_distance()`, ensuring `distance` is stored as a standard numeric field for calculations.
+:::
+
+## 7 Preparing Interaction Matrix
+
+The Huff model in the **MCI** package takes an interaction matrix as input. This is a data frame with one row for every origin and destination pair, holding the origin, the destination, the attractiveness of the destination and the distance between the two. The interaction matrix is built by joining the store attractiveness (`Store_size`) from `stores` onto `distmat_long`:
+
+```{r}
+stores_tidied <- stores %>%
+  st_drop_geometry()
+
+interaction_matrix <- distmat_long %>%
+  left_join(
+    stores_tidied %>%
+      select(Store_CD, Store_size, Total_Sales),
+    by = "Store_CD") %>%
+  relocate(distance, .after = last_col())
+```
+
+The code chunk below is used to tidy the village sf data frame.
+
+```{r}
+village_tidied <- village %>%
+  select(VILLCODE, H_CNT, P_CNT) %>%
+  mutate(HH_SIZE = P_CNT/H_CNT) %>%
+  st_drop_geometry()
+```
+
+```{r}
+summary(village_tidied)
+```
+
+## 8 Computing the Huff Model
+
+The `huff.shares()` function from the **MCI** package computes the probability that consumers from each village will patronize a given store.
+
+```{r}
+huff_share <- huff.shares(
+  interaction_matrix,
+  "VILLCODE",
+  "Store_CD",
+  "Store_size",
+  "distance")
+```
+
+### 8.1 Trade Area Analysis for a Single Store
+
+#### 8.1.1 Selecting the store
+
+The market share of a single store is extracted by filtering `huff_share` on `Store_CD` field.
+
+```{r}
+market_share <- huff_share %>%
+  filter(Store_CD == "BT")
+```
+
+#### 8.1.2 Deriving the trade area
+
+The probabilities are joined to the `village` polygons using `VILLCODE`.
+
+```{r}
+Trade_area <- village %>%
+  left_join(market_share, by = "VILLCODE")
+```
+
+The location of the selected store is extracted from `stores`:
+
+```{r}
+selected_store <- stores %>%
+  filter(Store_CD == "BT")
+```
+
+#### 8.1.3 Mapping the trade area
+
+The trade area is plotted as a choropleth map of patronage probability, with the selected store marked in red.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6
+
+tm_shape(Trade_area) +
+  tm_polygons(
+    fill = "p_ij",
+    fill.scale = tm_scale_intervals(
+      style = "quantile",
+      n = 10,
+      values = "brewer.blues"),
+    fill.legend = tm_legend(
+      title = "Patronage Probability"),
+    col_alpha = 0.5) +
+  tm_shape(selected_store) +
+  tm_dots(size = 0.3,
+          fill = "red",
+          col = "black") +
+  tm_title("Distribution of Patronage Probability of Store BT by Village") +
+  tm_layout(frame = TRUE) +
+  tm_compass(type = "8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(alpha = 0.2)
+```
+
+::: {.callout-note title="Analysis"}
+The map shows the patronage probability of store BT in each village. The red dot marks the store, and the villages immediately around it have the highest probability (darkest blue shade, 0.068 to 0.944). The probability declines quickly with distance.
+
+The lighter shades are scattered across different regions of the city. The earlier map of store locations shows many stores clustered in the centre of Taichung City, so villages near the centre are likely to have other stores closer than BT, which leaves BT with only a small share of their consumers.
+
+The villages in the east and southeast are shaded mid to dark blue, even though they are far from the store. This could be because there are few stores in this part of the city, so the probability is shared more evenly among the stores.
+:::
+
+### 8.2 Store Sales Analysis
+
+The Huff model can also be used to estimate the number of customers each store draws, which can then be compared with the actual store sales.
+
+#### 8.2.1 Adding the village population
+
+The population of each village (`P_CNT`) is added to `huff_share` through `VILLCODE`.
+
+```{r}
+huff_share_pp <- huff_share %>%
+  left_join(
+    village %>%
+      st_drop_geometry() %>%
+      select(VILLCODE, P_CNT),
+    by = "VILLCODE") %>%
+  relocate(distance, .after = last_col())
+```
+
+#### 8.2.2 Estimating the total demand of each store
+
+`shares.total()` of the **MCI** package multiplies the probability of each village by its population to give the expected number of customers per village, and sums the results across all villages to compute the total for each store.
+
+```{r}
+huff_total <- shares.total(
+  huff_share_pp,
+  "VILLCODE",
+  "Store_CD",
+  "p_ij",
+  "P_CNT")
+```
+
+The estimated demand is added to `stores` by matching `Store_CD` to the store identifier in `huff_total`.
+
+```{r}
+store_sales_est <- stores %>%
+  left_join(huff_total,
+            by = join_by("Store_CD" == "suppliers_single"))
+```
+
+#### 8.2.3 Comparing estimated demand with actual sales
+
+The estimated demand of each store is compared with its actual sales using `ggscatterstats()` of **ggstatsplot**.
+
+```{r}
+store_sales_nongeom <- store_sales_est %>%
+  st_drop_geometry()
+
+ggscatterstats(
+  store_sales_nongeom,
+  x = sum_E_j,
+  y = Total_Sales)
+```
+
+::: {.callout-note title="Analysis"}
+The scatter plot shows a moderate, statistically significant positive correlation (Pearson r = 0.58, p = 0.001) between the Huff model's predicted demand and actual store sales. This suggests that stores predicted to attract more people generally have higher revenue.
+
+However, estimated demand only accounts for about one-third of the variation in sales (R-squared = 0.34), with the data points scattered around the fitted line. While distance and population give a good baseline, they do not explain the full picture. Other factors like store size, competition, and customer demographics likely account for the remaining differences.
+:::
+
+#### 8.2.4 Additional In-class Analysis
+
+```{r}
+huff_share_wider <- huff_share %>%
+  select(VILLCODE, Store_CD, p_ij) %>%
+  pivot_wider(names_from = Store_CD,
+              values_from = p_ij)
+```
+
+```{r}
+huff_TA <- huff_share_wider %>%
+  mutate(
+    TA = names(pick(2:29))[
+      max.col(pick(2:29),
+              ties.method = "first")
+    ]
+  )
+```
+
+```{r}
+huff_TA_tidied <- huff_TA %>%
+  select(VILLCODE, TA)
+
+village_TA <- village %>%
+  left_join(huff_TA_tidied,
+            by = join_by(VILLCODE))
+```
+
+```{r}
+#| fig-width: 14
+#| fig-height: 12
+
+tm_shape(village_TA) +
+  tm_polygons(fill = "TA") +
+  tm_title("Trade Areas of Stores") +
+  tm_layout(frame = TRUE) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_compass(type = "8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(alpha = 0.2)
+```
