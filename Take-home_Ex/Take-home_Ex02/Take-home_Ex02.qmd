@@ -71,12 +71,24 @@ Measures of spatial autocorrelation describe only a single snapshot in time. Eme
 
 The study area is **Myanmar**, and the unit of analysis is the township. The study period runs from **1 January 2021 to 30 September 2025**.
 
+To capture how the spatial pattern of political violence has changed over time, the study period is also divided into different phases, anchored by two milestones that shaped the trajectory of political violence. On 7 September 2021, the National Unity Government declared a "people's defensive war" against the military (Al Jazeera, 2021). On 27 October 2023, the Three Brotherhood Alliance launched Operation 1027 in northern Shan State, a major coordinated offensive against the military (IISS, 2023).
+
+| Phase | Months | Length |
+|---|---|---|
+| Coup and crackdown | January 2021 to August 2021 | 8 months |
+| Armed resistance | September 2021 to October 2023 | 26 months |
+| After Operation 1027 | November 2023 to September 2025 | 23 months |
+
+::: {.callout-note}
+While January 2021 precedes the 1 February coup, it is retained in the first phase to maintain data continuity. Similarly, October 2023 is kept in the second phase, as Operation 1027 did not begin until 27 October.
+:::
+
 ### 3.3 Scope of Political Violence
 
 In this study, the scope of armed conflict is determined by the disorder type that ACLED assigns to each event. ACLED groups events under three primary disorder types: "Political violence", "Demonstrations" and "Strategic developments". Notably, one sub-event type ("excessive force against protesters") carries two labels - "Political violence; Demonstrations" (ACLED, n.d.). For this analysis, all events labelled "Political violence" (including those with the dual label) are retained. This ensures alignment with the objectives of the study, and using ACLED's predefined classification for this filtering provides a documented, reproducible methodology.
 
 | ACLED Disorder Type | Event Types (Sub-event Types) | Events | Inclusion Status |
-|---|---|---|---|
+|------------------|------------------|------------------|------------------|
 | Political violence | Battles; Explosions/Remote violence; Violence against civilians; Riots (mob violence) | 54,028 | Included |
 | Political violence; Demonstrations | Protests (excessive force against protesters) | 261 | Included |
 | Demonstrations | Protests (peaceful protest, protest with intervention); Riots (violent demonstration) | 14,987 | Excluded |
@@ -95,7 +107,7 @@ The following R packages are used:
 | **sfdep** | Spatial dependence analysis within a tidy workflow | Building the spatial weights and the space-time cube, computing Local Moran's I and Gi\*, and running Emerging Hot Spot Analysis |
 | **spdep** | Spatial weights and statistics for spatial dependence | Global Moran's I tests and the spatial correlogram |
 | **tmap** | Thematic map creation using a layered grammar of graphics | Mapping event patterns, clusters and EHSA classes |
-| **Kendall** | Mann-Kendall trend test | Testing the trend in each township's Gi* series in Emerging Hot Spot Analysis |
+| **Kendall** | Mann-Kendall trend test | Testing the trend in each township's Gi\* series in Emerging Hot Spot Analysis |
 
 ```{r}
 pacman::p_load(tidyverse, sf, sfdep, spdep, tmap, Kendall)
@@ -317,8 +329,8 @@ The monthly number of political violence events is checked for gaps across the s
 pv_month <- pv %>%
   mutate(month = floor_date(event_date, "month")) %>%
   count(month, name = "events") %>%
-  complete(month = seq(as.Date("2021-01-01"), 
-                       as.Date("2025-09-01"), 
+  complete(month = seq(as.Date("2021-01-01"),
+                       as.Date("2025-09-01"),
                        by = "month"),
            fill = list(events = 0))
 
@@ -330,11 +342,20 @@ pv_month %>%
             max = max(events))
 ```
 
-The monthly series is plotted:
+The monthly series is plotted below:
 
 ```{r}
+milestones <- tibble(
+  date  = as.Date(c("2021-02-01", "2021-09-07", "2023-10-27")),
+  label = c("Military coup", "NUG declares\n'defensive war'", "Operation 1027")
+)
+
 ggplot(pv_month, aes(x = month, y = events)) +
   geom_line() +
+  geom_vline(data = milestones, aes(xintercept = date),
+             linetype = "dashed", colour = "grey40") +
+  geom_text(data = milestones, aes(x = date, y = Inf, label = label),
+            vjust = 1.2, hjust = -0.05, size = 3) +
   labs(x = NULL, y = "Political violence events per month") +
   theme_minimal()
 ```
@@ -495,6 +516,9 @@ The summary statistics and histogram reveal that the distribution of political v
 The total number of political violence events per township is mapped to show where events are concentrated.
 
 ```{r}
+#| fig-width: 10
+#| fig-height: 10
+
 tm_shape(mmr_events) +
   tm_polygons(fill = "events",
               fill.scale = tm_scale_intervals(style = "quantile", 
@@ -529,8 +553,8 @@ mmr_utm <- st_transform(mmr_events, crs = 32647)
 
 Neighbours can be defined in three main ways:
 
-- **Contiguity:** Defines neighbours as townships that share a boundary (Rook), a corner (Bishop) or either (Queen). 
-- **Distance band:** Defines neighbours as all townships within a fixed distance. 
+- **Contiguity:** Defines neighbours as townships that share a boundary (Rook), a corner (Bishop) or either (Queen).
+- **Distance band:** Defines neighbours as all townships within a fixed distance.
 - **K-nearest neighbours (KNN):** Defines the neighbours of a township as its k closest townships, based on the distance between township points.
 
 To determine the most appropriate neighbour structure for this study, the distributions generated by the three definitions are evaluated below:
@@ -581,14 +605,14 @@ With five neighbours per township, each neighbour receives a weight of 0.2.
 
 ### 7.2 Global Moran's I
 
-Global Moran's I assesses the spatial dependence of political violence events across townships, analysing the total event counts on their original scale. If the events are randomly distributed across townships, Moran's I will indicate no significant spatial autocorrelation. 
+Global Moran's I assesses the spatial dependence of political violence events across townships, analysing the total event counts on their original scale. If the events are randomly distributed across townships, Moran's I will indicate no significant spatial autocorrelation.
 
 The test evaluates the following hypotheses:
 
 - **Null hypothesis (H0):** Political violence events are randomly distributed across townships.
 - **Alternative hypothesis (H1):** There is spatial autocorrelation, indicating that townships with similar event counts are clustered (positive) or dispersed (negative).
 
-The test is conducted at the 5% significance level (p < 0.05).
+The test is conducted at the 5% significance level (p \< 0.05).
 
 #### 7.2.1 Global Moran's I Test and Permutation Test
 
@@ -613,11 +637,11 @@ From the outputs above, the following statistical inferences are drawn:
 
 - Moran's I statistic: 0.450 (Expectation: -0.003)
 - Standard deviate: 14.075
-- p-value (Moran's I test): < 2.2e-16
-- p-value (Monte Carlo Permutation test): < 2.2e-16
+- p-value (Moran's I test): \< 2.2e-16
+- p-value (Monte Carlo Permutation test): \< 2.2e-16
 - Permutation test rank: 100 out of 100
 
-The Global Moran's I statistic of 0.450 sits well above its expectation, indicating positive spatial autocorrelation. Both the Moran's I test and the Monte Carlo permutation test return low p-values (p < 0.05). Hence, the null hypothesis is rejected at the 5% significance level, providing strong evidence that townships with similar political violence event counts tend to be located near each other. However, as the global statistic does not identify where the clusters are located, it will need to be examined using local measures.
+The Global Moran's I statistic of 0.450 sits well above its expectation, indicating positive spatial autocorrelation. Both the Moran's I test and the Monte Carlo permutation test return low p-values (p \< 0.05). Hence, the null hypothesis is rejected at the 5% significance level, providing strong evidence that townships with similar political violence event counts tend to be located near each other. However, as the global statistic does not identify where the clusters are located, it will need to be examined using local measures.
 :::
 
 #### 7.2.2 Visualising Monte Carlo Simulation of Global Moran's I
@@ -633,11 +657,12 @@ abline(v = gmoran$statistic, col = "red")
 
 ## 8 Local Measures of Spatial Association
 
-The global statistic shows that clustering exists, but it does not identify where these clusters are located. Local measures are calculated for each township, which allows clusters to be mapped. 
+The global statistic shows that clustering exists, but it does not identify where these clusters are located. Local measures are calculated for each township, which allows clusters to be mapped.
 
 Two measures are applied: 
-- **Local Moran's I**: Identifies clusters and outliers of similar or dissimilar event counts
-- **Local Gi***: Identifies hot spots and cold spots
+
+- **Local Moran's I**: Identifies clusters and outliers of similar or dissimilar event counts 
+- **Local Gi**\*: Identifies hot spots and cold spots
 
 ### 8.1 Local Moran's I
 
@@ -673,7 +698,7 @@ Given that the three classifications produce identical cluster counts, the `mean
 
 #### 8.1.1 Visualising the LISA Map
 
-The LISA map shows only townships with a significant result (p < 0.05). Townships without a significant result are shaded in grey.
+The LISA map shows only townships with a significant result (p \< 0.05). Townships without a significant result are shaded in grey.
 
 ```{r}
 lisa_sig <- lisa %>%
@@ -681,14 +706,20 @@ lisa_sig <- lisa %>%
   mutate(mean = factor(mean, levels = c("High-High", "Low-Low",
                                         "High-Low", "Low-High")))
 
+tmap_mode("view")
+
 tm_shape(lisa) +
-  tm_polygons(fill = "grey90", col = "black", lwd = 0.2) +
+  tm_polygons(fill = "grey90", col = "black", lwd = 0.2,
+              id = "TS", popup.vars = c("DT", "ST", "events")) +
 tm_shape(lisa_sig) +
   tm_polygons(fill = "mean",
               fill.scale = tm_scale_categorical(
                 values = c("#d7191c", "#2c7bb6", "#fdae61", "#abd9e9")),
               fill.legend = tm_legend(title = "LISA type"),
-              col = "black", lwd = 0.2)
+              col = "black", lwd = 0.2,
+              id = "TS", popup.vars = c("DT", "ST", "events", "mean"))
+
+tmap_mode("plot")
 ```
 
 ::: {.callout-note title="Analysis"}
@@ -698,23 +729,80 @@ The map shows 61 Low-Low, 25 High-High, and 2 Low-High townships, with no High-L
 - **Low-Low clusters** cover the north, a large area in the east, the south-west and a small area in the centre. These areas have low event counts across neighbouring townships.
 - **Low-High spatial outliers** consist of just two townships. These areas possess low event counts but are surrounded by high-count neighbours. Both outliers are situated next to a High-High cluster.
 
-Townships shaded in grey exhibit no statistically significant local spatial autocorrelation.
+Townships shaded in grey exhibit no statistically significant local spatial autocorrelation. The townships in each type are examined in Section 8.1.2.
 :::
 
-### 8.2 Local Gi*
+#### 8.1.2 LISA Clusters and Outliers by Township
 
-Local Gi* measures whether a township and its neighbours together have higher or lower event counts than expected by chance. While Local Moran's I identifies specific clusters and outliers, Local Gi* identifies hot spots and cold spots. 
+The High-High townships are listed below:
 
-A significant positive Gi* value indicates a hot spot (high counts around the township), and a significant negative value indicates a cold spot (low counts around it).
+```{r}
+lisa_sig %>%
+  st_drop_geometry() %>%
+  filter(mean == "High-High") %>%
+  arrange(desc(events)) %>%
+  mutate(ii = round(ii, 3)) %>%
+  select(TS, DT, ST, events, ii, p_ii_sim) %>%
+  knitr::kable()
+```
+
+::: {.callout-note title="Analysis"}
+The 25 High-High townships form three geographic groups. The largest is the central cluster spanning Sagaing, Magway, and Mandalay. Within this group, Monywa (1,058 events) and Myaing (936 events) record the highest concentration of political violence and strongest spatial associations of violence.
+
+Beyond this central cluster, a smaller group of three townships (Launglon, Yebyu, and Thayetchaung) lies in Tanintharyi in the south, while Myitkyina in Kachin stands alone in the north. Myitkyina (Kachin) and Tilin (Magway) exhibit the weakest spatial associations of violence.
+:::
+
+Due to the high volume of Low-Low townships, they are aggregated at the state and regional level.
+
+```{r}
+lisa_sig %>%
+  st_drop_geometry() %>%
+  filter(mean == "Low-Low") %>%
+  count(ST, name = "townships") %>%
+  arrange(desc(townships)) %>%
+  knitr::kable()
+```
+
+::: {.callout-note title="Analysis"}
+The 61 Low-Low townships form four clusters:
+
+- **South Region (27 townships):** Spanning across Yangon (14) and Ayeyarwady (13)
+- **East Region (22 townships):** Located in Shan State, comprising of Shan (East), Shan (North), and Shan (South)
+- **Central Region (6 townships):** Comprising Nay Pyi Taw (6) and Mandalay (1)
+- **North Region (5 townships):** Located in Kachin
+:::
+
+The spatial outliers are presented below, detailing individual township counts and their corresponding neighbourhood averages (`neighbour_mean`).
+
+```{r}
+lisa %>%
+  mutate(neighbour_mean = round(st_lag(events, nb, wt), 1)) %>%
+  st_drop_geometry() %>%
+  filter(p_ii_sim < 0.05, mean %in% c("High-Low", "Low-High")) %>%
+  select(TS, DT, ST, events, neighbour_mean, mean, p_ii_sim) %>%
+  knitr::kable()
+```
+
+::: {.callout-note title="Analysis"}
+Both spatial outliers are Low-High townships. Mogaung in Kachin records 77 events against a neighbour average of 428.4, while Kalewa in Sagaing records 30 events against a neighbour average of 342.0. This indicates that they are relatively calm townships surrounded by high-violence neighbours. While the data cannot confirm whether this reflects genuinely lower levels of political violence or simply under-reporting, their proximity to active violence areas makes them crucial areas to monitor.
+
+In addition, the absence of High-Low outliers indicates that no high-violence township stands alone among low-violence neighbours. This suggests that political violence does not appear as isolated spikes, but rather spreads across adjacent townships, reinforcing the clustering trends identified by the Global Moran's I statistic.
+:::
+
+### 8.2 Local Gi\*
+
+Local Gi\* measures whether a township and its neighbours together have higher or lower event counts than expected by chance. While Local Moran's I identifies specific clusters and outliers, Local Gi\* identifies hot spots and cold spots.
+
+A significant positive Gi\* value indicates a hot spot (high counts around the township), and a significant negative value indicates a cold spot (low counts around it).
 
 The test evaluates the following hypotheses:
 
 - **Null Hypothesis (H0)**: High or low event counts are not concentrated around the township.
 - **Alternative Hypothesis (H1)**: High event counts (hot spot) or low event counts (cold spot) are concentrated around the township.
 
-The test is conducted at the 5% significance level (p < 0.05), using the `local_gstar_perm()` function from the **sfdep** package.
+The test is conducted at the 5% significance level (p \< 0.05), using the `local_gstar_perm()` function from the **sfdep** package.
 
-#### 8.2.1 Spatial Weights for Gi*
+#### 8.2.1 Spatial Weights for Gi\*
 
 The neighbourhood of each township consists of its five nearest townships and the township itself. Inverse distance weights are used, so that nearer townships carry more weight than farther ones, which reflects the idea that nearby places are more related than distant ones (Tobler, 1970). The distances are in metres, since the boundaries are projected to UTM zone 47N.
 
@@ -725,9 +813,9 @@ wm_idw <- mmr_utm %>%
          .before = 1)
 ```
 
-#### 8.2.2 Local Gi* Test
+#### 8.2.2 Local Gi\* Test
 
-The `local_gstar_perm()` function returns the standardised statistic (`gi_star`) and the simulation-based p-value (`p_sim`) for each township. Townships with p < 0.05 are retained, and the sign of `gi_star` statistic determines the classification, where positive values indicate hot spots and negative values indicate cold spots.
+The `local_gstar_perm()` function returns the standardised statistic (`gi_star`) and the simulation-based p-value (`p_sim`) for each township. Townships with p \< 0.05 are retained, and the sign of `gi_star` statistic determines the classification, where positive values indicate hot spots and negative values indicate cold spots.
 
 ```{r}
 gi <- wm_idw %>%
@@ -744,11 +832,14 @@ gi_sig %>%
   count(type)
 ```
 
-#### 8.2.3 Visualising the Gi* Map
+#### 8.2.3 Visualising the Gi\* Map
 
-The map shows only townships identified as statistically significant hot spots or cold spots (p < 0.05). Townships without a significant result are shaded in grey.
+The map shows only townships identified as statistically significant hot spots or cold spots (p \< 0.05). Townships without a significant result are shaded in grey.
 
 ```{r}
+#| fig-width: 10
+#| fig-height: 10
+
 tm_shape(gi) +
   tm_polygons(fill = "grey90", col = "black", lwd = 0.2) +
 tm_shape(gi_sig) +
@@ -762,19 +853,161 @@ tm_shape(gi_sig) +
 ::: {.callout-note title="Analysis"}
 The map shows 24 statistically significant hot spots and 62 cold spots.
 
-- **Hot spots** are concentrated primarily in one large cluster in the central region, with two smaller groups along the narrow southern strip. In these townships and their contiguous neighbourhoods, event counts are significantly higher than expected by random chance. 
+- **Hot spots** are concentrated primarily in one large cluster in the central region, with two smaller groups along the narrow southern strip. In these townships and their contiguous neighbourhoods, event counts are significantly higher than expected by random chance.
 - **Cold spots** are more geographically extensive, covering the northern tip, a large area in the east, the south-west, and a small area in the centre. In these regions, event counts are significantly lower than expected.
 
 The hot and cold spots cover largely the same areas as the High-High and Low-Low clusters from Local Moran's I, demonstrating a high degree of spatial consistency between the two methodologies. It is important to note that the analysis identifies where high or low counts are concentrated, but does not identify the underlying socio-political reasons for these distributions.
 :::
 
+### 8.3 Hot Spots and Cold Spots by Conflict Phase
+
+Section 8.2 treats the whole study period as one snapshot. To see how hot spots and cold spots shift as the conflict develops, Local Gi\* is computed separately for each of the three phases defined in Section 3.2.
+
+#### 8.3.1 Events by Phase
+
+The events of each township are summed within each phase, and the phases are summarised below.
+
+```{r}
+phase_levels <- c("Coup and crackdown", "Armed resistance", "After Operation 1027")
+
+pv_phase <- pv_tm %>%
+  mutate(phase = case_when(month < as.Date("2021-09-01") ~ phase_levels[1],
+                           month < as.Date("2023-11-01") ~ phase_levels[2],
+                           TRUE ~ phase_levels[3]),
+         phase = factor(phase, levels = phase_levels)) %>%
+  group_by(phase, TS_PCODE) %>%
+  summarise(events = sum(events), months = n_distinct(month), .groups = "drop")
+
+pv_phase %>%
+  group_by(phase) %>%
+  summarise(months = first(months),
+            townships_with_events = sum(events > 0),
+            events = sum(events),
+            events_per_month = round(events / months))
+```
+
+::: {.callout-note title="Analysis"}
+Political violence intensifies across the phases, rising from an average of 464 events per month during the coup and crackdown, to 992 during the armed resistance, and reaching 1,078 after Operation 1027 (which is more than double the rate of the first phase).
+
+The number of townships recording at least one event rises from 264 in the first phase to 315 in the second (encompassing nearly all of Myanmar's 330 townships), before stabilizing at 313 after Operation 1027. This indicates that political violence spread spatially to most of the country during the armed resistance phase, whereas the subsequent spike in violence after Operation 1027 was driven by intensification within already-affected townships.
+:::
+
+#### 8.3.2 Local Gi\* by Phase
+
+Local Gi\* is computed for each phase with the same neighbours, weights and number of simulations as in Section 8.2. As Gi\* compares each township with the national average within the same phase, the results are comparable across phases of different lengths.
+
+```{r}
+gi_phase <- map_dfr(phase_levels, function(p) {
+  set.seed(123)
+  wm_idw %>%
+    select(TS_PCODE, TS, DT, ST, nb, wts) %>%
+    left_join(pv_phase %>% filter(phase == p) %>% select(TS_PCODE, events),
+              by = "TS_PCODE") %>%
+    mutate(local_gi = local_gstar_perm(events, nb, wts, nsim = 99)) %>%
+    unnest(local_gi) %>%
+    st_drop_geometry() %>%
+    select(TS_PCODE, TS, DT, ST, events, gi_star, p_sim) %>%
+    mutate(phase = factor(p, levels = phase_levels),
+           type = case_when(p_sim < 0.05 & gi_star > 0 ~ "Hot spot",
+                            p_sim < 0.05 & gi_star < 0 ~ "Cold spot",
+                            TRUE ~ "Not significant"))
+})
+
+gi_phase %>%
+  count(phase, type) %>%
+  pivot_wider(names_from = type, values_from = n, values_fill = 0)
+```
+
+::: {.callout-note title="Analysis"}
+The number of statistically significant townships rises from 31 in the first phase to 80 and 84 in the subsequent phases, indicating that the spatial pattern of political violence becomes much clearer as the conflict progresses.
+
+Hot spots peak during the armed resistance (31) but fall after Operation 1027 (16), even though the monthly rate of violence is at its highest during this final phase (Section 8.3.1). As Gi* compares each township against the national average within the same phase, this indicates that violence after Operation 1027 is so widespread and elevated that fewer townships stand out significantly above the new baseline. In contrast, cold spots grow steadily, demonstrating that the relatively low-violence areas become more clearly defined in each phase.
+:::
+
+#### 8.3.3 Visualising the Phase Maps
+
+The three maps show only townships that are significant hot spots or cold spots (p < 0.05) in each phase. Townships without a significant result are shaded in grey.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 7
+
+phase_map <- function(p) {
+  d <- mmr_utm %>%
+    select(TS_PCODE) %>%
+    left_join(gi_phase %>% filter(phase == p), by = "TS_PCODE")
+
+  tm_shape(d) +
+    tm_polygons(fill = "grey90", col = "black", lwd = 0.1) +
+  tm_shape(d %>% filter(type != "Not significant")) +
+    tm_polygons(fill = "type",
+                fill.scale = tm_scale_categorical(
+                  values = c("Hot spot" = "#d7191c", "Cold spot" = "#2c7bb6")),
+                fill.legend = tm_legend(title = "Gi* type"),
+                col = "black", lwd = 0.1) +
+    tm_title(p)
+}
+
+tmap_arrange(lapply(phase_levels, phase_map), ncol = 3)
+```
+
+::: {.callout-note title="Analysis"}
+The location of the hot spots shifts between phases. During the coup and crackdown, a small group of hot spots lies in the north and north-east. During the armed resistance, a cluster forms in the north-west and along the southern strip. After Operation 1027, the north-western cluster largely disappears, and the remaining hot spots are smaller and scattered across the centre, with a few on the west coast and in the south-east. In contrast, cold spots consolidate into one large block in the east and a growing area in the south.
+
+The whole-period map in Section 8.2 closely resembles the armed resistance phase, which is the longest and contains the most events. Summing the whole period therefore hides the later shift of hot spots away from the north-west, which only becomes visible when the phases are compared.
+:::
+
+#### 8.3.4 Hot Spots by Phase and Region
+
+The number of hot spot townships in each state or region is compared across the phases.
+
+```{r}
+gi_phase %>%
+  filter(type == "Hot spot") %>%
+  count(ST, phase) %>%
+  pivot_wider(names_from = phase, values_from = n,
+              values_fill = 0, names_sort = TRUE) %>%
+  arrange(desc(rowSums(across(where(is.numeric))))) %>%
+  knitr::kable()
+```
+
+::: {.callout-note title="Analysis"}
+The large cluster during the armed resistance was heavily concentrated in Sagaing (16) and Magway (5), but this decreases after Operation 1027. Conversely, Bago (East), Kayin, and Rakhine emerge as significant hot spots only in the final phase, demonstrating a shift in the spatial distribution of political violence.
+:::
+
+As the final phase reflects the most recent pattern of violence, its hot spot townships are listed below.
+
+```{r}
+gi_phase %>%
+  filter(type == "Hot spot", phase == "After Operation 1027") %>%
+  arrange(desc(gi_star)) %>%
+  mutate(gi_star = round(gi_star, 3)) %>%
+  select(TS, DT, ST, events, gi_star, p_sim) %>%
+  knitr::kable()
+```
+
 ## 9 Emerging Hot Spot Analysis (EHSA)
 
-Emerging Hot Spot Analysis (EHSA) evaluates how hot spots and cold spots change over time. It consists of four steps: building a space-time cube, calculating the Gi* statistic for each township in each month, testing the temporal trend of the Gi* values over time with the Mann-Kendall test, and classifying each township from the trend and pattern of significant months. EHSA therefore adds the time dimension to the static Gi* map.
+Emerging Hot Spot Analysis (EHSA) evaluates how hot spots and cold spots change over time. It consists of four steps: building a space-time cube, calculating the Gi\* statistic for each township in each month, testing the temporal trend of the Gi\* values over time with the Mann-Kendall test, and classifying each township based on the trend and statistical significance. EHSA adds the time dimension to the static Gi\* map.
+
+Each township is assigned to one class, based on how many months are significant hot or cold spots (at the 5% level), whether the most recent month is significant, as well as the Mann-Kendall trend.
+
+The classes follow the standard definitions established by Esri (n.d.) for space-time pattern mining. The key classes are as follows:
+
+| Class | Meaning |
+|---|---|
+| Intensifying hot spot | A statistically significant hot spot for at least 90% of the time periods, including the final month, with a significant upward trend in the intensity of clustering |
+| Oscillating hot spot | A statistically significant hot spot for the final month, but a statistically significant cold spot in earlier months |
+| Sporadic hot spot | An on-and-off hot spot; less than 90% of the time periods are significant hot spots, and it has never been a significant cold spot |
+| Persistent cold spot | A statistically significant cold spot for at least 90% of the time periods, with no discernible trend indicating an increase or decrease in clustering intensity |
+| Diminishing cold spot | A statistically significant cold spot for at least 90% of the months, including the final month, with a significant upward trend in the Gi\* values (indicating the cold spot is weakening) |
+| Oscillating cold spot | A statistically significant cold spot for the final month, but a statistically significant hot spot in earlier months |
+| Sporadic cold spot | An on-and-off cold spot; less than 90% of the time periods are significant cold spots, and it has never been a significant hot spot |
+| No pattern detected | Does not fall into any of the hot spot or cold spot categories |
 
 ### 9.1 Neighbours and Weights in Space and Time
 
-The neighbours and weights from Section 8.2.1 are reused in place of standard Queen contiguity, ensuring that EHSA and the Local Gi* analysis share the same neighbourhoods. The time lag is set to `k = 1`, allowing the Gi* value of a township in a month to also use its neighbours' values in the previous month.
+The neighbours and weights from Section 8.2.1 are reused in place of standard Queen contiguity, ensuring that EHSA and the Local Gi\* analysis share the same neighbourhoods. The time lag is set to `k = 1`, allowing the Gi\* value of a township in a month to also use its neighbours' values in the previous month.
 
 ```{r}
 pv_st <- pv_st %>%
@@ -785,33 +1018,559 @@ pv_st <- pv_st %>%
   activate("data")
 ```
 
-### 9.2 Mann-Kendall Test
+### 9.2 Mann-Kendall Test and EHSA
 
-For each township, the Mann-Kendall test examines the series of 57 monthly Gi* values to check whether it shows a consistent upward or downward trend over time. 
+For each township, the Mann-Kendall test examines the series of 57 monthly Gi\* values to check whether it shows a consistent upward or downward trend over time.
 
 The test evaluates the following hypotheses:
 
-- **Null hypothesis (H0):** There is no monotonic trend in the township's Gi* values over time.
-- **Alternative hypothesis (H1):** There is a monotonic trend, indicating that the Gi* values rise or fall over time.
+- **Null hypothesis (H0):** There is no monotonic trend in the township's Gi\* values over time.
+- **Alternative hypothesis (H1):** There is a monotonic trend, indicating that the Gi\* values rise or fall over time.
 
-The tests are conducted at the 5% significance level (p < 0.05).
+The tests are conducted at the 5% significance level (p \< 0.05).
+
+`emerging_hotspot_analysis()` calculates the Gi\* of each township in each month:
 
 ```{r}
+set.seed(123)
 ehsa <- emerging_hotspot_analysis(x = pv_st,
                                   .var = "events",
                                   k = 1,
                                   nb_col = "nb",
                                   wt_col = "wts",
                                   nsim = 99,
-                                  threshold = 0.05)
+                                  threshold = 0.05,
+                                  include_gi = TRUE)
 
-ehsa %>%
-  count(classification, sort = TRUE)
+glimpse(ehsa)
+```
+
+The monthly Gi\* values of each township are extracted from the output. The cube is ordered by month and then by township, in the order of the township boundaries.
+
+```{r}
+n_locs <- n_distinct(pv_tm$TS_PCODE)
+n_times <- n_distinct(pv_tm$month)
+
+gi_month <- attr(ehsa, "gi_star") %>%
+  mutate(location = rep(attr(pv_st, "geometry")$TS_PCODE, times = n_times),
+         month_id = rep(seq_len(n_times), each = n_locs))
+```
+
+#### 9.2.1 Mann-Kendall Trends
+
+The number of townships with a significant trend in Gi\* at the 5% level is shown below:
+
+```{r}
+mmr_trend <- mmr_utm %>%
+  left_join(ehsa %>% select(location, tau, p_value),
+            by = c("TS_PCODE" = "location")) %>%
+  mutate(trend = case_when(p_value < 0.05 & tau > 0 ~ "Significant increase",
+                           p_value < 0.05 & tau < 0 ~ "Significant decrease",
+                           TRUE ~ "No significant trend"))
+
+mmr_trend %>%
+  st_drop_geometry() %>%
+  count(trend)
 ```
 
 ::: {.callout-note title="Analysis"}
-The 330 townships fall into seven classes. 121 townships (36.7%) show no pattern, and 120 (36.4%) are sporadic cold spots. Hot spot classes cover 61 townships (18.5%): 32 oscillating, 18 sporadic and 11 intensifying. The remaining cold spot classes cover 28 townships: 19 oscillating and 9 persistent. No township is a persistent, diminishing, new, consecutive or historical hot spot.
+Of the 330 townships, 203 (61.5%) have a significant trend in their Gi\* values, hence the null hypothesis is rejected. 98 townships (29.7%) show a significant increase and 105 (31.8%) show a significant decrease, while the null hypothesis is not rejected for the remaining 127 (38.5%).
 :::
 
+```{r}
+#| fig-width: 10
+#| fig-height: 10
 
+tm_shape(mmr_trend) +
+  tm_polygons(fill = "grey90", col = "black", lwd = 0.2) +
+tm_shape(mmr_trend %>% filter(trend != "No significant trend")) +
+  tm_polygons(fill = "trend",
+              fill.scale = tm_scale_categorical(
+                values = c("Significant increase" = "#7b3294",
+                           "Significant decrease" = "#008837")),
+              fill.legend = tm_legend(title = "Mann-Kendall trend"),
+              col = "black", lwd = 0.2)
+```
+
+::: {.callout-note title="Analysis"}
+The map shows a clear split between north and south. Significant decreases dominate a broad band across the north-west and the upper centre, with smaller groups in the far north. Significant increases cover the south-west and lower centre, a block in the east, and the narrow southern strip. Relative to the rest of the country, the concentration of violence is therefore moving away from the north-west and upper centre, towards the south and the east.
+
+These trends are relative, not absolute. The Gi\* of each month is measured against the national average for that month, so a rising or falling trend shows how a township's neighbourhood changes compared with the rest of the country, not necessarily a change in the absolute number of events. A rising Gi\* also has two readings: For a hot spot, violence is becoming more concentrated. On the other hand, for a cold spot, the cold spot is weakening.
+:::
+
+#### 9.2.2 Rate of Change (Sen's Slope)
+
+The Mann-Kendall statistic (`tau`) shows how consistently a township's Gi\* rises or falls, but not how fast. The rate of change is therefore estimated using Sen's slope (Sen, 1968), the median of the slopes between every pair of months in a township's Gi\* series. As it uses the median, it is not skewed by extreme values, making it the standard measure of trend size paired with the Mann-Kendall test. The slope is calculated per month and multiplied by 12 to give the change in Gi\* per year.
+
+```{r}
+pairs <- combn(n_times, 2)
+
+sen_slope <- function(y) {
+  median((y[pairs[2, ]] - y[pairs[1, ]]) / (pairs[2, ] - pairs[1, ]))
+}
+
+sen <- gi_month %>%
+  arrange(location, month_id) %>%
+  group_by(location) %>%
+  summarise(sen_per_year = round(sen_slope(gi_star) * 12, 3))
+
+sen_tbl <- mmr_trend %>%
+  left_join(sen, by = c("TS_PCODE" = "location"))
+```
+
+The rate of change is summarised for each trend direction:
+
+```{r}
+sen_tbl %>%
+  st_drop_geometry() %>%
+  group_by(trend) %>%
+  summarise(townships = n(),
+            median = median(sen_per_year),
+            min = min(sen_per_year),
+            max = max(sen_per_year))
+```
+
+::: {.callout-note title="Analysis"}
+Sen's slope aligns with the Mann-Kendall results. All 105 townships with a significant decrease have a negative slope, and all 98 with a significant increase have a positive one. In areas where the concentration of political violence is falling, it decreases at a median rate of 0.333 per year, slightly faster than the median rise of 0.267 per year in areas where it is increasing.
+
+Over the entire study period, a typical change of about 0.3 per year translates to a shift of approximately 1.4 in Gi\*. This is a substantial change, as Gi\* values beyond about +/- 1.96 are usually significant at the 5% level. A shift of 1.4 is therefore large enough to move a previously average township close to becoming a significant hot or cold spot.
+
+The townships without a significant trend have a median slope close to zero (0.007), yet some may still reach -0.96 or 0.463 per year. In such cases, the Gi\* changes considerably but not consistently, which is why the Mann-Kendall test does not confirm a trend. Sen's slope therefore complements the Mann-Kendall test.
+:::
+
+The townships with a significant trend are mapped below by their rate of change. Purple shows a rising Gi\* and green shows a falling one, and darker shades indicate faster change. Townships without a significant trend are shaded in grey.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 10
+
+tm_shape(sen_tbl) +
+  tm_polygons(fill = "grey90", col = "black", lwd = 0.2) +
+tm_shape(sen_tbl %>% filter(trend != "No significant trend")) +
+  tm_polygons(fill = "sen_per_year",
+              fill.scale = tm_scale_intervals(style = "pretty",
+                                              values = "-brewer.prgn",
+                                              midpoint = 0),
+              fill.legend = tm_legend(title = "Change in Gi* per year"),
+              col = "black", lwd = 0.2)
+```
+
+::: {.callout-note title="Analysis"}
+The fastest changes are concentrated in a few places:
+
+- The steepest declines form a compact core in the north-west and upper centre, corresponding to the large hot spot cluster from the armed resistance phase (Section 8.3). There is another group in the south-east.
+- The steepest increases are dispersed, occurring in single townships scattered across the central, southern, and western regions.
+:::
+
+The 10 fastest-rising and 10 fastest-falling townships are listed below:
+
+```{r}
+sen_tbl %>%
+  st_drop_geometry() %>%
+  filter(trend == "Significant increase") %>%
+  slice_max(sen_per_year, n = 10) %>%
+  mutate(tau = round(tau, 3)) %>%
+  select(TS, DT, ST, tau, sen_per_year) %>%
+  knitr::kable()
+
+sen_tbl %>%
+  st_drop_geometry() %>%
+  filter(trend == "Significant decrease") %>%
+  slice_min(sen_per_year, n = 10) %>%
+  mutate(tau = round(tau, 3)) %>%
+  select(TS, DT, ST, tau, sen_per_year) %>%
+  knitr::kable()
+```
+
+::: {.callout-note title="Analysis"}
+The fastest rises are spread across six states, led by Kyaukme in Shan (North) and Kyauktaga in Bago (East). Six of the ten (Kyaukme, Kyauktaga, Myeik, Myawaddy, Pyinoolwin and Mogoke) are also hot spots after Operation 1027 (Section 8.3.4), indicating that violence is building fastest where it is already concentrated. The other four (Hpapun, Kyaukkyi, Ramree, and Munaung) are rising quickly without yet being hot spots, which marks them as critical townships to monitor.
+
+The fastest declines are concentrated in Sagaing, which has seven of the eleven townships (due to a tie at 10th position), led by Budalin. This highlights that the primary hot spot cluster from the armed resistance phase is easing faster than anywhere else.
+:::
+
+#### 9.2.3 Checking the Classes
+
+For each township, the number of months in which it is a significant cold spot or hot spot is counted, and the townships labelled "intensifying hotspot" are listed:
+
+```{r}
+sig_months <- gi_month %>%
+  group_by(location) %>%
+  summarise(cold_months = sum(p_sim <= 0.05 & gi_star < 0),
+            hot_months = sum(p_sim <= 0.05 & gi_star > 0))
+
+ehsa %>%
+  filter(classification == "intensifying hotspot") %>%
+  left_join(sig_months, by = "location") %>%
+  left_join(mmr_events %>% st_drop_geometry() %>% select(TS_PCODE, TS, ST, events),
+            by = c("location" = "TS_PCODE")) %>%
+  select(TS, ST, events, tau, p_value, cold_months, hot_months)
+```
+
+::: {.callout-warning title="Classification check"}
+`emerging_hotspot_analysis()` of **sfdep** labels 10 townships as "intensifying hotspot", but the table above shows that they are significant cold spots in almost every month (>90%), with at most one significant hot month, and record very few events. The **sfdep** rule for "intensifying hotspot" counts significant months without checking whether they are hot or cold. These townships meet every condition of the "diminishing coldspot" rule: a significant cold spot for at least 90% of the months, a significant final month, and a significant upward trend. Therefore, they are relabelled as **diminishing cold spots**. Only the class name changes, while the other fields remain unchanged.
+:::
+
+To correct this, the relabelling explicitly checks for the 90% cold spot condition. This ensures that any genuine intensifying hot spots retain their correct label.
+
+```{r}
+ehsa <- ehsa %>%
+  left_join(sig_months, by = "location") %>%
+  mutate(classification = if_else(classification == "intensifying hotspot" &
+                                    cold_months >= 0.9 * n_times,
+                                  "diminishing coldspot",
+                                  classification)) %>%
+  select(-cold_months, -hot_months)
+```
+
+#### 9.2.4 Distribution of EHSA Classes
+
+The number of townships in each class is shown below:
+
+```{r}
+#| fig-width: 8
+#| fig-height: 6
+
+ehsa_cols <- c("intensifying hotspot" = "#b2182b",
+               "oscilating hotspot"   = "#f46d43",
+               "sporadic hotspot"     = "#fdae61",
+               "diminishing coldspot" = "#5ab4ac",
+               "persistent coldspot"  = "#2166ac",
+               "oscilating coldspot"  = "#4393c3",
+               "sporadic coldspot"    = "#92c5de",
+               "no pattern detected"  = "grey70")
+
+ehsa %>%
+  count(classification) %>%
+  ggplot(aes(x = n, y = reorder(classification, n), fill = classification)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = n), hjust = -0.2, size = 3) +
+  scale_fill_manual(values = ehsa_cols) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(x = "Number of townships", y = NULL)
+```
+
+::: {.callout-note title="Analysis"}
+The 330 townships fall into seven classes. 126 townships (38.2%) are sporadic cold spots and 123 (37.3%) show no pattern. Hot spot classes cover 47 townships (14.2%): 35 oscillating and 12 sporadic. The other cold spot classes cover 34 townships (10.3%): 16 oscillating, 10 diminishing and 8 persistent.
+:::
+
+### 9.3 EHSA Map
+
+The EHSA results are joined to the township boundaries, and only townships with a significant Mann-Kendall trend (p < 0.05) and an assigned EHSA class are shown. Townships without a significant trend or without a detected pattern are shaded in grey. By definition, persistent cold spots lack a significant trend and are excluded from this map.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 10
+
+mmr_ehsa <- mmr_utm %>%
+  left_join(ehsa, by = c("TS_PCODE" = "location"))
+
+ehsa_sig <- mmr_ehsa %>%
+  filter(p_value < 0.05, classification != "no pattern detected") %>%
+  mutate(classification = factor(classification,
+                                 levels = intersect(names(ehsa_cols), classification)))
+
+tm_shape(mmr_ehsa) +
+  tm_polygons(fill = "grey90", col = "black", lwd = 0.2) +
+tm_shape(ehsa_sig) +
+  tm_polygons(fill = "classification",
+              fill.scale = tm_scale_categorical(
+                values = unname(ehsa_cols[levels(ehsa_sig$classification)])),
+              fill.legend = tm_legend(title = "EHSA class"),
+              col = "black", lwd = 0.2)
+```
+
+The number of townships in each class shown on the map:
+
+```{r}
+ehsa_sig %>%
+  st_drop_geometry() %>%
+  count(classification)
+```
+
+::: {.callout-note title="Analysis"}
+The map shows 120 townships with a significant trend and an EHSA class. Cold spots classes (95 townships) dominate, mainly in the south-west and east region. In contrast, the 25 hot spots are highly scattered, mostly along the edges of the country - the west coast, the far north and the southern strip.
+
+Overall, the hot spots are highly fragmented; they do not form a single stable core, which reflects the absence of persistent or intensifying hot spots in the data.
+
+Each class is further examined by township in Section 9.4.
+:::
+
+### 9.4 EHSA Classes by Township
+
+The townships in each class shown on the map are examined below, starting with the hot spot classes. Each table lists the townships by their total number of events over the period, with the Mann-Kendall statistic (`tau`) and its p-value.
+
+#### 9.4.1 Oscillating Hot Spots
+
+Oscillating hot spots are hot spots in the final month after being significant cold spots in at least one earlier month, making them the most critical class for current peace-building efforts.
+
+```{r}
+ehsa_sig %>%
+  st_drop_geometry() %>%
+  filter(classification == "oscilating hotspot") %>%
+  arrange(desc(events)) %>%
+  mutate(tau = round(tau, 3),
+         p_value = signif(p_value, 3)) %>%
+  select(TS, DT, ST, events, tau, p_value) %>%
+  knitr::kable()
+```
+
+::: {.callout-note title="Analysis"}
+The 20 oscillating hot spots are spread across 10 states and regions. Rakhine has the most townships in this class (Ann, Buthidaung, Toungup and Ramree), followed by Tanintharyi (Palaw, Dawei and Myeik), Kayah (Loikaw, Hpruso and Shadaw) and Sagaing (Budalin, Mingin and Nanyun). These are primarily high conflict areas, where 13 of the townships record over 200 events.
+
+The trend separates these hot spots into two distinct groups:
+
+- **Rising concentration (13 townships):** These areas show a rising Gi\*, indicating violence has become increasingly concentrated. The townships with the most consistent upward trends are in Rakhine (Ann, Toungup and Ramree; tau > 0.53), in Bago (East) (Kyauktaga; tau = 0.492) and in Kayin (Myawaddy; tau = 0.477).
+- **Easing concentration (7 townships):** These areas show a falling Gi\*, which includes three townships in Kayah and three in Sagaing. 
+Even though they remain hot spots in the final month, their concentration of violence has decreased relative to the rest of the country.
+:::
+
+#### 9.4.2 Sporadic Hot Spots
+
+Sporadic hot spots experience intermittent spikes in violence, without becoming significant cold spots.
+
+```{r}
+ehsa_sig %>%
+  st_drop_geometry() %>%
+  filter(classification == "sporadic hotspot") %>%
+  arrange(desc(events)) %>%
+  mutate(tau = round(tau, 3),
+         p_value = signif(p_value, 3)) %>%
+  select(TS, DT, ST, events, tau, p_value) %>%
+  knitr::kable()
+```
+
+::: {.callout-note title="Analysis"}
+The 5 sporadic hot spots lie in Shan (North) (Muse and Hseni), Mandalay (Mogoke), Kayin (Hlaingbwe), and Kayah (Mese). These townships have been hot spots in some months but never significant cold spots, which indicates that violence in these areas fluctuates without the area ever becoming calm relative to the rest of the country.
+
+The trend separates the hot spots into two groups:
+
+- **Rising concentration (2 townships):** Mogoke (tau = 0.437) and Hlaingbwe (0.192) have a rising Gi\*, with Mogoke showing the most consistent upward trend in this class. 
+- **Easing concentration (3 townships):** Muse (which records the most events of 648), Hseni and Mese have a falling Gi*. The violence around them has become less concentrated over the period.
+
+Interestingly, Mese records only 27 events. This demonstrates that a township can be flagged as a hot spot due to intense violence in its neighbouring areas rather than just within its own borders.
+:::
+
+#### 9.4.3 Diminishing Cold Spots
+
+Diminishing cold spots are significant cold spots in almost every month, with a rising Gi\* over the period.
+
+```{r}
+ehsa_sig %>%
+  st_drop_geometry() %>%
+  filter(classification == "diminishing coldspot") %>%
+  arrange(desc(events)) %>%
+  mutate(tau = round(tau, 3),
+         p_value = signif(p_value, 3)) %>%
+  select(TS, DT, ST, events, tau, p_value) %>%
+  knitr::kable()
+```
+
+::: {.callout-note title="Analysis"}
+All 10 diminishing cold spots are located in Shan: six in Shan (East), three in Shan (North), and one in Shan (South). These townships are among the least active in the country, recording between 0 and 18 events over the entire period.
+
+However, these cold spots exhibit a rising Gi* (tau ranging from 0.180 to 0.253). As a township's Gi* score incorporates neighbouring spatial data, this rising trend reflects escalating violence in adjacent townships. Hence, these areas remain critical to monitor, as their relative stability may soon be compromised by encroaching violence.
+:::
+
+#### 9.4.4 Oscillating Cold Spots
+
+Oscillating cold spots are areas that were significant hot spots previously but transitioned to significant cold spots by the final month.
+
+```{r}
+ehsa_sig %>%
+  st_drop_geometry() %>%
+  filter(classification == "oscilating coldspot") %>%
+  arrange(desc(events)) %>%
+  mutate(tau = round(tau, 3),
+         p_value = signif(p_value, 3)) %>%
+  select(TS, DT, ST, events, tau, p_value) %>%
+  knitr::kable()
+```
+
+::: {.callout-note title="Analysis"}
+The 13 oscillating cold spots are heavily concentrated in two regions: Mandalay and Shan (North).
+
+With the exception of Mongnai (tau = 0.179), all townships in this class exhibit a falling Gi*. The most consistent downward trends occurred in Mandalay and Sagaing. In these areas, the relative concentration of violence has dropped sharply. Meanwhile, the five townships in Shan (North) show less consistent but still significant downward trends.
+
+In contrast to oscillating hot spots, this class represents areas where violence was previously highly concentrated but has since eased.
+:::
+
+#### 9.4.5 Sporadic Cold Spots
+
+Given the large number of sporadic cold spots, they are summarised by state and region along with their trend directions.
+
+```{r}
+ehsa_sig %>%
+  st_drop_geometry() %>%
+  filter(classification == "sporadic coldspot") %>%
+  count(ST, trend = if_else(tau > 0, "Rising", "Falling")) %>%
+  pivot_wider(names_from = trend, values_from = n, values_fill = 0) %>%
+  mutate(Total = rowSums(across(-ST))) %>%
+  arrange(desc(Total)) %>%
+  knitr::kable()
+```
+
+::: {.callout-note title="Analysis"}
+The 72 sporadic cold spots span eight states and regions. Yangon accounts for 39 of them, though this high count is partly because the city is divided into numerous small urban townships. These are areas that experience intermittent periods as significant cold spots but never escalate into significant hot spots.
+
+- **Rising concentration (25 townships):** Concentrated mainly in Bago(West), Magway, and Mandalay, where a rising Gi* signals that these quiet areas are becoming more active relative to the rest of the country.
+- **Easing concentration (47 townships):** Predominantly located in Yangon (38 townships), where a falling Gi* indicates the relative intensity of violence continues to steadily decline.
+:::
+
+## 10 Integrated Findings
+
+This section brings together the local measures (Section 8), the conflict phases (Section 8.3) and the Emerging Hot Spot Analysis (Section 9) to show the full picture of where political violence is concentrated, how it has shifted and where it is heading.
+
+### 10.1 Agreement Between the Local Measures
+
+As Local Moran's I and Local Gi\* measure local clustering in different ways, areas identified by both methods ensure that the clusters do not depend on the choice of method.
+
+The LISA type of each township is compared with its Gi\* result:
+
+```{r}
+lisa %>%
+  st_drop_geometry() %>%
+  transmute(TS_PCODE,
+            lisa = if_else(p_ii_sim < 0.05, as.character(mean), "Not significant")) %>%
+  left_join(gi %>%
+              st_drop_geometry() %>%
+              transmute(TS_PCODE,
+                        gi = case_when(p_sim < 0.05 & gi_star > 0 ~ "Hot spot",
+                                       p_sim < 0.05 & gi_star < 0 ~ "Cold spot",
+                                       TRUE ~ "Not significant")),
+            by = "TS_PCODE") %>%
+  count(lisa, gi) %>%
+  pivot_wider(names_from = gi, values_from = n, values_fill = 0) %>%
+  knitr::kable()
+```
+
+::: {.callout-note title="Analysis"}
+The two measures show strong agreement, indicating that the identified clusters are robust and do not depend on the choice of method. 
+
+21 of the 25 High-High townships (84%) identified by Local Moran's I are also Gi\* hot spots, and 55 of the 61 Low-Low townships (90%) align as cold spots. Furthermore, there are no contradictions, as no High-High township is classified as a cold spot and no Low-Low township as a hot spot.
+:::
+
+### 10.2 How the Pattern Shifts Across Phases
+
+Both the phase maps (Section 8.3) and the monthly trends (Section 9.2) capture the same geographic shift in the conflict. Following Operation 1027, the previously dense hot spot cluster in Sagaing begins to shrink, which is directly reflected by the steepest falling trends in the monthly data. New hot spots also appear in scattered townships, matching the locations of the fastest-rising monthly trends.
+
+As the armed resistance phase was the longest and contains the most events, it dominates the whole-period Gi\* map. As a result, the whole-period map understates how far the geographical pattern of violence has already shifted. To accurately understand the current situation, the final phase map and the monthly trends provide a much better representation than the whole-period baseline.
+
+### 10.3 Where the Evidence Converges
+
+To bring the evidence together, townships are grouped into four types. The rules are applied in order, so each township belongs to at most one type:
+
+| Type | Rule |
+|---|---|
+| Escalating hot spot | A hot spot after Operation 1027 (Section 8.3) with a significant rising trend (Section 9.2) |
+| Emerging hot spot | Not a hot spot after Operation 1027 and not an EHSA cold spot class, but rising at 0.5 or more per year |
+| Fading hot spot | A hot spot over the whole period (Section 8.2) with a significant falling trend |
+| Weakening cold spot | An EHSA cold spot class with a significant rising trend |
+
+A rate of 0.5 per year adds up to about 2.4 in Gi\* over the study period, enough to move an average township beyond the usual significance threshold of about 1.96 (p < 0.05).
+
+```{r}
+phase3_hot <- gi_phase %>%
+  filter(phase == "After Operation 1027", type == "Hot spot") %>%
+  pull(TS_PCODE)
+
+static_hot <- gi_sig %>%
+  filter(type == "Hot spot") %>%
+  pull(TS_PCODE)
+
+type_levels <- c("Escalating hot spot", "Emerging hot spot",
+                 "Fading hot spot", "Weakening cold spot")
+
+typology <- sen_tbl %>%
+  st_drop_geometry() %>%
+  left_join(ehsa %>% select(location, classification),
+            by = c("TS_PCODE" = "location")) %>%
+  mutate(cold_class = str_detect(classification, "coldspot"),
+         type = case_when(
+           TS_PCODE %in% phase3_hot & trend == "Significant increase" ~ type_levels[1],
+           !(TS_PCODE %in% phase3_hot) & trend == "Significant increase" &
+             sen_per_year >= 0.5 & !cold_class ~ type_levels[2],
+           TS_PCODE %in% static_hot & trend == "Significant decrease" ~ type_levels[3],
+           cold_class & trend == "Significant increase" ~ type_levels[4]),
+         type = factor(type, levels = type_levels)) %>%
+  filter(!is.na(type))
+```
+
+The number of townships in each type, their main states and regions, and the fastest-changing townships are summarised below.
+
+```{r}
+typology %>%
+  arrange(type, desc(abs(sen_per_year))) %>%
+  group_by(type) %>%
+  summarise(townships = n(),
+            main_regions = paste(
+              names(sort(table(ST), 
+                         decreasing = TRUE))[1:min(3, n_distinct(ST))],
+              collapse = ", "),
+            fastest_changing = paste(head(TS, 5), collapse = ", ")) %>%
+  knitr::kable()
+```
+
+::: {.callout-note title="Analysis"}
+The evidence categorises 67 townships into the four types. Only 8 townships are classified as escalating hot spots (Kyaukme and Kyauktaga), while almost twice as many are classified as emerging hot spots (primarily in Bago (East), Rakhine and Tanintharyi). This indicates that more townships are on the verge of becoming hot spots than are already entrenched in escalating violence. Notably, Bago (East) appears in both categories, highlighting it as an expanding zone of conflict.
+
+The "fading hot spot" category is small and confined to just 8 townships in Sagaing and Magway. The largest category is "weakening cold spot" (36 townships), mainly located in Bago (West), Magway, and Mandalay. As Magway appears in both fading hot spot and weakening cold spot, this suggests that violence may be spreading outward from the former core into neighbouring areas that had been relatively calm.
+:::
+
+### 10.4 When the Change Happens
+
+The Mann-Kendall trend test and Sen's slope summarise each township's 57 months in a single value, so they do not show when the change happened. To see how the conflict developed over time, the township with the largest Sen's slope is selected from each type.
+
+```{r}
+reps <- typology %>%
+  group_by(type) %>%
+  mutate(townships_in_type = n()) %>%
+  slice_max(abs(sen_per_year), n = 1, with_ties = FALSE) %>%
+  ungroup()
+
+reps %>%
+  select(type, townships_in_type, TS, DT, ST, sen_per_year) %>%
+  knitr::kable()
+```
+
+The monthly Gi\* of these four townships is shown below, with the three conflict phases shaded in the background. Values above zero mean that violence around the township is more concentrated than the national average in that month, and values below zero mean that it is less concentrated.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6.5
+
+month_dates <- seq(as.Date("2021-01-01"), by = "month", length.out = n_times)
+
+phases <- tibble(start = as.Date(c("2021-01-01", "2021-09-01", "2023-11-01")),
+                 end   = as.Date(c("2021-09-01", "2023-11-01", "2025-10-01")),
+                 phase = factor(phase_levels, levels = phase_levels))
+
+panels <- reps %>%
+  transmute(location = TS_PCODE, panel = paste0(type, ": ", TS))
+
+gi_month %>%
+  inner_join(panels, by = "location") %>%
+  mutate(month = month_dates[month_id],
+         panel = factor(panel, levels = panels$panel)) %>%
+  ggplot(aes(x = month, y = gi_star)) +
+  geom_rect(data = phases,
+            aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf, fill = phase),
+            inherit.aes = FALSE, alpha = 0.7) +
+  geom_hline(yintercept = 0, colour = "grey50") +
+  geom_line() +
+  scale_fill_manual(values = c("#fee0d2", "#e5f5e0", "#deebf7"), name = "Phase") +
+  facet_wrap(~ panel, ncol = 2) +
+  labs(x = NULL, y = "Monthly Gi*") +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 9),
+        strip.text = element_text(size = 10, face = "bold"))
+```
+
+::: {.callout-note title="Analysis"}
+The timing of the shift in political violence differs across the four townships. Kyaukme, the fastest escalating hot spot, stays close to zero for most of the first two phases. It mainly rises after Operation 1027, reaching its highest peaks in 2024 and 2025. Hpapun, the fastest emerging hot spot, starts to build up during the armed resistance phase and keeps rising after Operation 1027.
+
+On the other hand, Budalin (the fastest fading hot spot) already shows a sharp rise during the coup and crackdown. It peaks in early 2022 and then declines steadily through the armed resistance. This shows that the fading of the former core was well underway long before Operation 1027 even began. Finally, Kyaukpadaung, the fastest weakening cold spot, stays below zero for most of the study period and only moves into positive values after Operation 1027.
+
+Overall, this suggests that the escalation of the newest hot spots is concentrated mainly after Operation 1027, whereas the decline of the former hot spots began much earlier.
+:::
 
