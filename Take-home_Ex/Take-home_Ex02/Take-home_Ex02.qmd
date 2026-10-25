@@ -345,19 +345,29 @@ pv_month %>%
 The monthly series is plotted below:
 
 ```{r}
+phases <- tibble(start = as.Date(c("2021-01-01", "2021-09-01", "2023-11-01")),
+                 end   = as.Date(c("2021-09-01", "2023-11-01", "2025-10-01")),
+                 phase = factor(c("Coup and crackdown", "Armed resistance", "After Operation 1027"),
+                                levels = c("Coup and crackdown", "Armed resistance", "After Operation 1027")))
+
 milestones <- tibble(
   date  = as.Date(c("2021-02-01", "2021-09-07", "2023-10-27")),
   label = c("Military coup", "NUG declares\n'defensive war'", "Operation 1027")
 )
 
 ggplot(pv_month, aes(x = month, y = events)) +
+  geom_rect(data = phases,
+            aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf, fill = phase),
+            inherit.aes = FALSE, alpha = 0.7) +
   geom_line() +
   geom_vline(data = milestones, aes(xintercept = date),
              linetype = "dashed", colour = "grey40") +
   geom_text(data = milestones, aes(x = date, y = Inf, label = label),
             vjust = 1.2, hjust = -0.05, size = 3) +
+  scale_fill_manual(values = c("#fee0d2", "#e5f5e0", "#deebf7"), name = "Phase") +
   labs(x = NULL, y = "Political violence events per month") +
-  theme_minimal()
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
 
 ::: {.callout-note title="Analysis"}
@@ -837,9 +847,6 @@ gi_sig %>%
 The map shows only townships identified as statistically significant hot spots or cold spots (p \< 0.05). Townships without a significant result are shaded in grey.
 
 ```{r}
-#| fig-width: 10
-#| fig-height: 10
-
 tmap_mode("view")
 
 tm_shape(gi) +
@@ -1513,6 +1520,27 @@ typology %>%
               collapse = ", "),
             fastest_changing = paste(head(TS, 5), collapse = ", ")) %>%
   knitr::kable()
+```
+
+```{r}
+#| fig-width: 10
+#| fig-height: 10
+
+mmr_category <- mmr_utm %>%
+  select(TS_PCODE) %>%
+  left_join(typology %>% select(TS_PCODE, type), by = "TS_PCODE")
+
+tm_shape(mmr_category) +
+  tm_polygons(fill = "grey90", col = "black", lwd = 0.2) +
+tm_shape(mmr_category %>% filter(!is.na(type))) +
+  tm_polygons(fill = "type",
+              fill.scale = tm_scale_categorical(
+                values = c("Escalating hot spot" = "#b2182b",
+                           "Emerging hot spot"   = "#fdae61",
+                           "Fading hot spot"     = "#9e9ac8",
+                           "Weakening cold spot" = "#92c5de")),
+              fill.legend = tm_legend(title = "Township category"),
+              col = "black", lwd = 0.2)
 ```
 
 ::: {.callout-note title="Analysis"}

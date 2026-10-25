@@ -49,6 +49,8 @@ website:
             href: "Take-home_Ex/Take-home_Ex01/Take-home_Ex01_summary.html"
           - text: "Take-home Exercise 2 - Technical Report"
             href: "Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html"
+          - text: "Take-home Exercise 2 - Executive Summary"
+            href: "Take-home_Ex/Take-home_Ex02/Take-home_Ex02_summary.html"
       
     right:
       - href: index.qmd
