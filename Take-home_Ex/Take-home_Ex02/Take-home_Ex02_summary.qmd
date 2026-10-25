@@ -14,12 +14,12 @@ format:
 ## Content Page {.center}
 
 - Overview
-- Research Questions & Objectives
+- Research Questions
 - Study Area & Data
 - Analytical Approach
 - Key Finding 1: Violence Is Clustered
 - Key Finding 2: Hot Spots Have Shifted
-- Key Finding 3: Where Violence Is Rising and Fading
+- Key Finding 3: Rising and Fading Trends
 - Key Finding 4: Four Conflict Profiles
 - Peace-Building Implications
 - Limitations & Conclusion
