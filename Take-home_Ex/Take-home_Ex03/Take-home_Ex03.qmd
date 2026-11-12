@@ -1,0 +1,881 @@
+---
+title: "Take-home Exercise 3: Geospatial Analytics for Urban Sustainability"
+subtitle: "Modelling Station Ridership and Market Area Impact of the Jurong Region and Cross Island Lines"
+date: "November 06, 2026"
+date-modified: "last-modified"
+format: html
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  freeze: true
+editor: visual
+---
+
+## 1 Introduction
+
+### 1.1 Study Context
+
+Urban rail transit supports sustainable urban development by providing high-capacity mobility and encouraging transit-oriented development around stations. It also connects residents to jobs, services and education. In Singapore, the Mass Rapid Transit (MRT) system has been the backbone of public transport since 1987. It carried an average of 3.49 million rides a day in 2025 (Land Transport Authority, n.d.). The Land Transport Master Plan 2040 sets a rail network of 360 km and a target of eight in ten households within a 10-minute walk of a train station, both by 2030 (Land Transport Authority, 2019).
+
+Stations are sometimes built ahead of demand to limit future construction disruption. Some then open years after their station boxes are completed. Hume station is one example: its box was built as part of the second phase of the Downtown Line, and it opened on 28 February 2025 (Land Transport Authority, 2025). Catchment-area analysis and station-level ridership prediction support such decisions.
+
+Two further lines are being delivered. The Jurong Region Line (JRL) has 24 stations, and Phase 1 of the Cross Island Line (CRL) has 12 stations. JRL Stage 1 is expected around mid-2028 instead of end-2027, and the dates for Stages 2 and 3 are yet to be announced. CRL Phase 1 is targeted to open in 2030 (Land Transport Authority, 2026). The analysis treats all 36 stations as operating at the same time, and opening dates are not modelled.
+
+### 1.2 Purpose and Objectives
+
+Ridership at a station depends on the people who live within reach, the activities that the area offers, and the competing stations nearby. The planned JRL and CRL Phase 1 stations change this competitive position for existing stations. Some of the 36 stations are new, while the others are existing interchange stations that gain a new line.
+
+Whether a new station draws riders from existing stations is a question of market areas. Probabilistic spatial interaction models address this question by dividing the trips of each origin among the available stations. The share going to a station depends on its attractiveness and its distance from the origin. The Huff model combines attractiveness with distance decay, and the Multiplicative Competitive Interaction (MCI) model estimates weights for several attractiveness variables from observed flows.
+
+This exercise calibrates these models on observed MRT and LRT ridership and applies the calibrated model to the proposed stations. The objectives are:
+
+1. To calibrate a probabilistic spatial interaction model for station-level ridership estimation.
+2. To predict the potential ridership of MRT stations along the proposed JRL and CRL.
+3. To evaluate the potential impact of the newly planned MRT stations on the ridership patterns of the existing stations.
+
+### 1.3 Research Questions
+
+1. Which attraction variables, and which distance decay, explain station-level ridership on the existing network?
+2. Does the calibrated model outperform reference models, namely equal market shares and a Huff model with fixed parameters?
+3. What ridership is predicted for each proposed station, and how does it compare with existing stations on the same lines?
+4. Which existing stations lose market share and ridership to the new stations, and where are the losses concentrated?
+
+## 2 Data and Study Design
+
+### 2.1 Data Sources
+
+The analysis uses the datasets in the table below. All datasets were retrieved in November 2026.
+
+| Data | Format | Description | Source |
+|---|---|---|---|
+| Passenger Volume by Origin Destination Train Stations | CSV | Monthly trips between pairs of train stations, by day type and hour, for July to September 2026. | [LTA DataMall](https://datamall.lta.gov.sg) |
+| Train Station (RapidTransitSystemStation) | Shapefile | Polygons of existing rail stations, September 2026. | [LTA DataMall](https://datamall.lta.gov.sg) |
+| Master Plan 2025 Rail Station Layer | GeoJSON | Polygons of planned stations, with name, rail type and ground level. | URA, via [data.gov.sg](https://data.gov.sg) |
+| future_stations | CSV | Station codes, names and coordinates of planned stations. | [GitHub: singapore_train_station_coordinates](https://github.com/elliotwutingfeng/singapore_train_station_coordinates) |
+| operational_and_future_stations | CSV | Station codes, names and coordinates of operational and planned stations. | [GitHub: singapore_train_station_coordinates](https://github.com/elliotwutingfeng/singapore_train_station_coordinates) |
+| HDB Existing Building | GeoJSON | Footprints of HDB blocks, with block number, street code and postal code. | HDB, via [data.gov.sg](https://data.gov.sg) |
+| Bus Stop Location | Shapefile | Locations of bus stops, September 2026. | [LTA DataMall](https://datamall.lta.gov.sg) |
+| Points of Interest | Shapefile | Points and polygons of points of interest. Stored as the layers `gis_osm_pois_free_1` (points) and `gis_osm_pois_a_free_1` (polygons). | OpenStreetMap, via [Geofabrik](https://download.geofabrik.de) (Malaysia, Singapore and Brunei extract) |
+
+### 2.2 Study Scope
+
+The study covers the existing MRT and LRT network and the proposed stations of the JRL and CRL Phase 1. The proposed stations are identified by code in `future_stations`. The JRL stations are `JE1` to `JE7`, `JS1` to `JS12` and `JW1` to `JW5` ([Land Transport Authority](https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/jurong_region_line.html)). The CRL Phase 1 stations are `CR2` to `CR13` ([Land Transport Authority](https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/cross_island_line.html)).
+
+Each station in scope is either new or an existing interchange. A new station has no ridership in the origin-destination data. An existing interchange is already in the network under its current line code and gains a new line.
+
+Other entries in `future_stations` are out of scope. These include `JS2A`, which is targeted to open in the mid-2030s (Land Transport Authority, 2026), as well as CRL stations outside Phase 1 and stations on other lines.
+
+### 2.3 Study Window
+
+The study window is the weekday morning peak, from 07:00 to 08:59. This corresponds to hours 7 and 8 of `TIME_PER_HOUR` on days where `DAY_TYPE` is `WEEKDAY`. Observed ridership in this window is the quantity that the model calibrates and predicts.
+
+The weekday morning peak is assumed to consist mainly of trips from homes to workplaces and schools. This matches the model, which describes origins by the residential population around a station and destinations by the activities around a station. In the evening and at weekends, trips are assumed to serve a wider mix of purposes, such as shopping and leisure. The link between residential origins and activity destinations is then less clear.
+
+The window covers July, August and September 2026. These are the most recent months available, because October 2026 was not yet published at the time of retrieval. The origin-destination data are supplied as one file for each month, and the way the three months are combined is described in the Data Preparation section.
+
+## 3 The Setup
+
+### 3.1 Installing and Loading the R Packages
+
+The following R packages are used:
+
+| Package | Purpose | Use Case in This Exercise |
+|---|---|---|
+| **tidyverse** | Collection of packages for data import, manipulation and visualisation | Importing the origin-destination data, wrangling it into the interaction data frames, and producing charts |
+| **sf** | Imports, manages and processes vector-based geospatial data | Importing the station, building and point-of-interest data, transforming coordinate reference systems, and building station catchments |
+| **tmap** | Thematic map creation using a layered grammar of graphics | Mapping ridership, market areas and the impact of the new stations |
+| **igraph** | Builds and analyses networks as graphs | Building the rail network and computing distances along it |
+| **MCI** | Calibrates the Huff and Multiplicative Competitive Interaction models | Estimating the model parameters and the market shares of the stations |
+
+The packages are loaded with the following code chunk:
+
+```{r}
+pacman::p_load(tidyverse, sf, tmap, igraph, MCI)
+```
+
+### 3.2 Reproducibility
+
+A fixed seed value of 123 is set for reproducibility of any simulation-based procedure used later in this exercise.
+
+```{r}
+set.seed(123)
+```
+
+## 4 Data Preparation and Quality Assessment 
+
+### 4.1 Origin-Destination Data
+
+#### 4.1.1 Importing the Monthly Data
+
+The monthly origin-destination data for July, August and September 2026 are imported with *read_csv()* of the **readr** package.
+
+```{r}
+od_202607 <- read_csv("data/aspatial/202607/origin_destination_train_202607.csv")
+od_202608 <- read_csv("data/aspatial/202608/origin_destination_train_202608.csv")
+od_202609 <- read_csv("data/aspatial/202609/origin_destination_train_202609.csv")
+```
+
+The three months are combined into one data frame, and its structure is inspected:
+
+```{r}
+od_raw <- bind_rows(od_202607, od_202608, od_202609)
+
+glimpse(od_raw)
+```
+
+The number of records and trips in each month is summarised:
+
+```{r}
+od_raw %>%
+  group_by(YEAR_MONTH) %>%
+  summarise(rows = n(), trips = sum(TOTAL_TRIPS))
+```
+
+Missing values are checked across every column:
+
+```{r}
+colSums(is.na(od_raw))
+```
+
+Exact duplicate rows are checked next:
+
+```{r}
+sum(duplicated(od_raw))
+```
+
+::: {.callout-note title="Analysis"}
+- The three months hold 2,702,429 records and 267,075,945 trips, with seven columns.
+- Every column has 0 missing values, and there are 0 duplicate rows.
+:::
+
+#### 4.1.2 Checking and Standardising the Station Codes
+
+Each station is identified by a station code in the origin-destination data. Each line that serves a station gives it a station code. An interchange station carries the line code of every line that serves it (e.g. `NS27/CC33/TE20`). The number of distinct station codes in each month is counted first:
+
+```{r}
+stations_202607 <- unique(c(od_202607$ORIGIN_PT_CODE, od_202607$DESTINATION_PT_CODE))
+stations_202608 <- unique(c(od_202608$ORIGIN_PT_CODE, od_202608$DESTINATION_PT_CODE))
+stations_202609 <- unique(c(od_202609$ORIGIN_PT_CODE, od_202609$DESTINATION_PT_CODE))
+
+tibble(
+  month = c("2026-07", "2026-08", "2026-09"),
+  code_strings = c(length(stations_202607), length(stations_202608), length(stations_202609))
+)
+```
+
+The station codes that differ between months are listed:
+
+```{r}
+setdiff(stations_202607, stations_202608)
+setdiff(stations_202607, stations_202609)
+```
+
+::: {.callout-note title="Analysis"}
+Both `CE1/DT16` and `NS27/CE2/TE20` appear in July but not in August or September.
+:::
+
+A station recorded under more than one station code would have its trips split between two rows. Station names are used to find such stations. The station coordinates file lists one row for each line code, together with the station name:
+
+```{r}
+stations_ref <- read_csv("data/aspatial/operational_and_future_stations.csv")
+
+glimpse(stations_ref)
+```
+
+Each station code is split into its line codes. The line codes are matched to the station names, and the names that appear under more than one station code are listed:
+
+```{r}
+od_labels <- tibble(station_label = unique(c(od_raw$ORIGIN_PT_CODE, 
+                                             od_raw$DESTINATION_PT_CODE)))
+
+od_labels %>%
+  mutate(station_code = station_label) %>%
+  separate_rows(station_code, sep = "/") %>%
+  left_join(stations_ref, by = "station_code") %>%
+  group_by(station_name) %>%
+  summarise(labels = n_distinct(station_label),
+            station_labels = paste(unique(station_label), collapse = "; ")) %>%
+  filter(labels > 1)
+```
+
+::: {.callout-note title="Analysis"}
+- Three stations appear under two different codes each: Bayfront, Marina Bay and Stevens.
+- Bayfront and Marina Bay are interchange stations. Their two codes differ only in the Circle Line part.
+- The two codes of Stevens, `DT10` and `TE11`, have no part in common.
+- The row without a station name holds `CC34/DT16` and `NS27/CC33/TE20`. The station file has no entry for `CC34` or `CC33`. These two codes are matched to Bayfront and Marina Bay through their other parts, `DT16`, `NS27` and `TE20`.
+:::
+
+##### 4.1.2.1 Bayfront and Marina Bay
+
+The Circle Line codes of Bayfront and Marina Bay changed when Circle Line Stage 6 opened on 12 July 2026 ([Land Transport Guru](https://landtransportguru.net/circle-line-stage-6-start-service-12jul26/)). The presence of the new codes in each month is checked:
+
+```{r}
+new_codes <- c("CC34/DT16", "NS27/CC33/TE20")
+
+new_codes %in% stations_202607
+new_codes %in% stations_202608
+new_codes %in% stations_202609
+```
+
+::: {.callout-note title="Analysis"}
+- Bayfront and Marina Bay each have an old and a new code string. The two differ only in the Circle Line code.
+- The new strings appear in all three months. The old strings appear only in July. July therefore holds both the old and the new string for each of the two stations. This explains why July has 187 code strings, against 185 in August and September.
+- The change took effect on 12 July, so the July file contains records under both versions.
+- Each old string is recoded to its new string. Every station then has one code in all three months.
+:::
+
+##### 4.1.2.2 Stevens
+
+Stevens is a single interchange station served by the Downtown Line (`DT10`) and the Thomson-East Coast Line (`TE11`) ([Land Transport Guru](https://landtransportguru.net/stevens-station/)). The origin-destination data list the two as separate codes.. The trips recorded between them are counted.
+
+```{r}
+od_raw %>%
+  filter((ORIGIN_PT_CODE == "DT10" & DESTINATION_PT_CODE == "TE11") |
+         (ORIGIN_PT_CODE == "TE11" & DESTINATION_PT_CODE == "DT10")) %>%
+  summarise(rows = n(), trips = sum(TOTAL_TRIPS))
+```
+
+::: {.callout-note title="Analysis"}
+- The two codes of Stevens record 202 rows and 1,032 trips between each other.
+- These rows are trips between two codes of the same station. They carry no information about movement between stations.
+:::
+
+##### 4.1.2.3 Applying the Recodes
+
+The new codes for Bayfront and Marina Bay are applied, and the two codes of Stevens are combined into `DT10/TE11`.
+
+```{r}
+od_harmonised <- od_raw %>%
+  mutate(
+    ORIGIN_PT_CODE = recode(ORIGIN_PT_CODE,
+                            "CE1/DT16" = "CC34/DT16",
+                            "NS27/CE2/TE20" = "NS27/CC33/TE20",
+                            "DT10" = "DT10/TE11",
+                            "TE11" = "DT10/TE11"),
+    DESTINATION_PT_CODE = recode(DESTINATION_PT_CODE,
+                                 "CE1/DT16" = "CC34/DT16",
+                                 "NS27/CE2/TE20" = "NS27/CC33/TE20",
+                                 "DT10" = "DT10/TE11",
+                                 "TE11" = "DT10/TE11")
+  )
+
+n_distinct(c(od_harmonised$ORIGIN_PT_CODE, od_harmonised$DESTINATION_PT_CODE))
+```
+
+::: {.callout-note title="Analysis"}
+- After the recodes, the data hold 184 distinct codes. This is 187 less the two old codes and one merged pair: `DT10` and `TE11` become `DT10/TE11`.
+:::
+
+After the merge, the trips between `DT10` and `TE11` start and end at the same station. These records are removed:
+
+```{r}
+od_harmonised %>%
+  filter(ORIGIN_PT_CODE == DESTINATION_PT_CODE) %>%
+  summarise(rows = n(), trips = sum(TOTAL_TRIPS))
+
+od_harmonised <- od_harmonised %>%
+  filter(ORIGIN_PT_CODE != DESTINATION_PT_CODE)
+
+od_harmonised %>%
+  summarise(rows = n(), trips = sum(TOTAL_TRIPS))
+```
+
+::: {.callout-note title="Analysis"}
+- After the recodes, 202 rows and 1,032 trips have the same origin and destination. These are the same rows and trips counted between `DT10` and `TE11` earlier.
+- Removing them leaves 2,702,227 rows and 267,074,913 trips. This is 202 rows and 1,032 trips fewer than the 2,702,429 rows and 267,075,945 trips in the raw data.
+- A trip from a station to itself is not a movement between two stations. Hence, such rows cannot be used in the model and are removed.
+:::
+
+### 4.2 Pooling the Months
+
+The analysis uses the weekday morning peak, pooled over July, August and September 2026. Pooling adds the trips of the three months for each station pair. The aim is to have more trips for each pair than a single month gives. This only suits the data if the three months look alike, and the months are compared for this reason. This section counts the weekdays in each month, checks the public holiday, selects the morning peak, compares the months and pools them.
+
+#### 4.2.1 Counting the Weekdays
+
+A calendar of the three months is built, and the days of the week are counted in each month:
+
+```{r}
+calendar <- tibble(date = seq(ymd("2026-07-01"), ymd("2026-09-30"), by = "day"))
+
+calendar <- calendar %>%
+  mutate(YEAR_MONTH = format(date, "%Y-%m"),
+         day = wday(date, label = TRUE))
+
+calendar %>%
+  group_by(YEAR_MONTH) %>%
+  summarise(days = n(),
+            weekdays = sum(!day %in% c("Sat", "Sun")),
+            weekend_days = sum(day %in% c("Sat", "Sun")))
+```
+
+::: {.callout-note title="Analysis"}
+- July has 23 weekdays and 8 weekend days.
+- August has 21 weekdays and 10 weekend days.
+- September has 22 weekdays and 8 weekend days.
+:::
+
+#### 4.2.2 Checking the Public Holiday
+
+National Day falls on 9 August. In 2026, this date is a Sunday, and the following Monday is observed as a public holiday ([Ministry of Manpower, 2025](https://www.mom.gov.sg/newsroom/press-releases/2025/0616-public-holidays-for-2026)). The two dates are checked in the calendar:
+
+```{r}
+calendar %>%
+  filter(date %in% ymd(c("2026-08-09", "2026-08-10")))
+```
+
+The origin-destination data label every day as either `WEEKDAY` or `WEEKENDS/HOLIDAY`. The trips labelled `WEEKENDS/HOLIDAY` are added up for each month. They are divided by the number of days in each month that carry this label. This is done twice: first counting only the Saturdays and Sundays, and then also counting 10 August as a day labelled `WEEKENDS/HOLIDAY`.
+
+```{r}
+holiday_days <- tibble(YEAR_MONTH = c("2026-07", 
+                                      "2026-08", 
+                                      "2026-09"),
+                       holidays = c(0, 1, 0))
+
+od_raw %>%
+  filter(DAY_TYPE == "WEEKENDS/HOLIDAY") %>%
+  group_by(YEAR_MONTH) %>%
+  summarise(trips = sum(TOTAL_TRIPS)) %>%
+  left_join(holiday_days, by = "YEAR_MONTH") %>%
+  mutate(weekend_days = c(8, 10, 8),
+         per_day_without_holiday = round(trips / weekend_days),
+         per_day_with_holiday = round(trips / (weekend_days + holidays))) %>%
+  select(YEAR_MONTH, trips, per_day_without_holiday, per_day_with_holiday)
+```
+
+::: {.callout-note title="Analysis"}
+- 9 August 2026 is a Sunday, and 10 August is a Monday.
+- Without the public holiday, August has 2,731,502 weekend and holiday trips per day. This is higher than July (2,467,454) and September (2,386,985).
+- With 10 August counted as a public holiday, August falls to 2,483,184 trips per day. This is in line with the other two months.
+- Hence, 10 August is treated as a public holiday, and August is taken to have 20 weekdays, not 21.
+:::
+
+The weekdays of each month are counted. 10 August is left out, because it is treated as a public holiday and its trips are not in the `WEEKDAY` rows.
+
+```{r}
+weekday_counts <- calendar %>%
+  filter(!day %in% c("Sat", "Sun"), date != ymd("2026-08-10")) %>%
+  group_by(YEAR_MONTH) %>%
+  summarise(weekdays = n())
+
+weekday_counts
+```
+
+#### 4.2.3 Selecting the Morning Peak
+
+This study analyses the morning peak period, when most trips are assumed to run from homes to workplaces and schools.
+
+Each row of the origin-destination data holds the trips made in one hour of the day. `TIME_PER_HOUR` is assumed to be the hour in which a trip starts. The weekday trips in each hour are summarised to find the busiest hours of the morning.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 4
+
+od_hourly <- od_harmonised %>%
+  filter(DAY_TYPE == "WEEKDAY") %>%
+  group_by(TIME_PER_HOUR) %>%
+  summarise(trips = sum(TOTAL_TRIPS)) %>%
+  mutate(share = round(100 * trips / sum(trips), 1),
+         peak = ifelse(TIME_PER_HOUR %in% c(7, 8), "Morning peak", "Other hours"))
+
+ggplot(od_hourly, aes(x = TIME_PER_HOUR, y = share, fill = peak)) +
+  geom_col() +
+  geom_text(aes(label = share), vjust = -0.3, size = 3) +
+  scale_fill_manual(values = c("Morning peak" = "#d95f02", "Other hours" = "grey70")) +
+  scale_x_continuous(breaks = 0:23) +
+  labs(x = "Hour of the day", y = "Share of weekday trips (%)", fill = NULL)
+```
+
+::: {.callout-note title="Analysis"}
+- No trips are recorded in hours 1 to 4.
+- Hours 7 and 8 carry 9.2% and 9.3% of weekday trips. They are the two busiest hours of the morning.
+- The morning peak is therefore taken as hours 7 and 8.
+:::
+
+The weekday trips in hours 7 and 8 are selected, and the trips in each month are summarised:
+
+```{r}
+od_am <- od_harmonised %>%
+  filter(DAY_TYPE == "WEEKDAY", TIME_PER_HOUR %in% c(7, 8))
+
+od_am %>%
+  group_by(YEAR_MONTH) %>%
+  summarise(trips = sum(TOTAL_TRIPS))
+```
+
+#### 4.2.4 Comparing the Months
+
+Trips are added up for each station pair in each month. This also combines rows that became identical after the recodes, such as July rows for the old and new codes of Bayfront. The number of pairs with fewer than 10 trips is counted for each month.
+
+```{r}
+od_pairs <- od_am %>%
+  group_by(YEAR_MONTH, ORIGIN_PT_CODE, DESTINATION_PT_CODE) %>%
+  summarise(trips = sum(TOTAL_TRIPS), .groups = "drop")
+
+od_pairs %>%
+  group_by(YEAR_MONTH) %>%
+  summarise(pairs = n(),
+            under_10 = sum(trips < 10),
+            share = round(100 * under_10 / pairs, 1))
+```
+
+The same count is made after the three months are added together:
+
+```{r}
+od_pooled <- od_pairs %>%
+  group_by(ORIGIN_PT_CODE, DESTINATION_PT_CODE) %>%
+  summarise(trips = sum(trips), .groups = "drop")
+
+od_pooled %>%
+  summarise(pairs = n(),
+            under_10 = sum(trips < 10),
+            share = round(100 * under_10 / pairs, 1))
+```
+
+The months have different numbers of weekdays. Trips per weekday are compared between months, across all station pairs.
+
+```{r}
+od_wide <- od_pairs %>%
+  left_join(weekday_counts, by = "YEAR_MONTH") %>%
+  mutate(trips_per_weekday = trips / weekdays) %>%
+  select(-trips, -weekdays) %>%
+  pivot_wider(names_from = YEAR_MONTH, values_from = trips_per_weekday, values_fill = 0)
+
+round(cor(od_wide[, 3:5]), 3)
+```
+
+::: {.callout-note title="Analysis"}
+- Each month has between 27,090 and 27,384 station pairs with morning peak trips. Between 21.7% and 21.8% of these pairs have fewer than 10 trips.
+- The three months together have 29,287 pairs. Of these, 4,987 pairs (17%) have fewer than 10 trips.
+- The pooled data hold more pairs than any single month, and a lower share of pairs with few trips. Pairs with few trips remain.
+- The correlation of trips per weekday across station pairs is 0.998 between July and August, 0.994 between July and September, and 0.996 between August and September. The three months show very similar patterns. Pooling therefore adds trips without mixing different patterns.
+:::
+
+#### 4.2.5 Averaging per Weekday
+
+The pooled trips are divided by the total number of weekdays in the three months:
+
+```{r}
+od_pooled <- od_pooled %>%
+  mutate(trips_per_weekday = trips / sum(weekday_counts$weekdays))
+
+od_pooled %>%
+  summarise(pairs = n(),
+            trips = sum(trips),
+            trips_per_weekday = round(sum(trips_per_weekday)))
+```
+
+::: {.callout-note title="Analysis"}
+- The pooled data hold 29,287 station pairs and 37,114,536 trips. This equals the sum of the three monthly totals.
+- Divided by the 65 weekdays of the three months, the average is 570,993 trips per weekday.
+:::
+
+#### 4.2.6 Stability of Station Ridership
+
+A pooled average describes a station poorly if its ridership changes strongly between months. The morning peak trips arriving at each station per weekday are compared between July and September. A ratio of 1 means no change. The ratio is summarised first:
+
+```{r}
+od_destination <- od_pairs %>%
+  group_by(YEAR_MONTH, DESTINATION_PT_CODE) %>%
+  summarise(trips = sum(trips), .groups = "drop") %>%
+  left_join(weekday_counts, by = "YEAR_MONTH") %>%
+  mutate(trips_per_weekday = trips / weekdays) %>%
+  select(-trips, -weekdays) %>%
+  pivot_wider(names_from = YEAR_MONTH, values_from = trips_per_weekday, values_fill = 0) %>%
+  mutate(ratio = `2026-09` / `2026-07`)
+
+summary(od_destination$ratio)
+```
+
+The stations with a ratio below 0.8 or above 1.25 are listed with their names:
+
+```{r}
+od_destination %>%
+  filter(ratio < 0.8 | ratio > 1.25) %>%
+  left_join(stations_ref %>% select(station_code, station_name),
+            by = c("DESTINATION_PT_CODE" = "station_code")) %>%
+  mutate(`2026-07` = round(`2026-07`, 1),
+         `2026-08` = round(`2026-08`, 1),
+         `2026-09` = round(`2026-09`, 1),
+         ratio = round(ratio, 2)) %>%
+  select(DESTINATION_PT_CODE, station_name, `2026-07`, `2026-08`, `2026-09`, ratio) %>%
+  arrange(ratio) %>%
+  print(n = 20)
+```
+
+::: {.callout-note title="Analysis"}
+- Most stations are stable. The median ratio is 0.98, and the middle half of the stations lie between 0.923 and 1.005.
+- 16 stations fall outside the range of 0.8 to 1.25. Nine have a ratio below 0.8, and seven have a ratio above 1.25. TE27 is shown as 0.8 because the ratio is rounded.
+- Keppel (`CC30`), Cantonment (`CC31`) and Prince Edward Road (`CC32`) opened on 12 July 2026 (Land Transport Authority, 2026). July therefore includes weekdays before they opened. Their ratios are 1.74, 1.37 and 2.07 respectively.
+- Hume (`DT4`) opened on 28 February 2025 (Land Transport Authority, 2025). Its ridership is still small (101 to 164 trips per weekday) and rises each month.
+- The falls at Dover (0.32), Teck Whye (0.44), Woodlands North (0.51) and Yio Chu Kang (0.66) are the largest. The rise at Punggol Coast (1.59) is the largest among the stations that were already open. The data do not show the causes of these changes.
+- These 16 stations stay in the pooled data and are flagged. In the Model Calibration section, the model is fitted twice, with and without them, to check whether they affect the result.
+:::
+
+### 4.3 Existing Stations
+
+#### 4.3.1 Importing the Train Station Layer
+
+The train station layer holds the outline of each station as a polygon. It is imported with `st_read()` of the **sf** package.
+
+```{r}
+ts_raw <- st_read(dsn = "data/geospatial/TrainStation_Sep2026",
+                  layer = "RapidTransitSystemStation")
+
+glimpse(ts_raw)
+```
+
+The coordinate reference system of the layer is checked:
+
+```{r}
+st_crs(ts_raw)$input
+```
+
+The layer is transformed to the Singapore projection, EPSG:3414.
+
+```{r}
+ts <- st_transform(ts_raw, crs = 3414)
+```
+
+::: {.callout-note title="Analysis"}
+- The layer holds 234 polygons and 15 attribute columns.
+- The coordinate reference system is labelled `SVY21` and has no EPSG code. The layer is transformed to EPSG:3414, so that all layers use the same code.
+:::
+
+#### 4.3.2 Checking the Layer
+
+The columns holding the station code, the type and the line are checked for missing values, and the geometries are checked for validity.
+
+```{r}
+colSums(is.na(st_drop_geometry(ts_raw[, c("STN_NAM", "TYP_CD", "LIN_NAM")])))
+
+sum(!st_is_valid(ts))
+```
+
+A station can be drawn as more than one polygon. The codes that appear on more than one polygon are listed below.
+
+```{r}
+ts %>%
+  st_drop_geometry() %>%
+  count(STN_NAM) %>%
+  filter(n > 1)
+```
+
+::: {.callout-note title="Analysis"}
+- `STN_NAM`, `TYP_CD` and `LIN_NAM` have no missing values, and all geometries are valid.
+- Eight codes appear on more than one polygon: `CE2` on three and the other seven on two each. A station can therefore be drawn as several polygons.
+:::
+
+#### 4.3.3 Matching the Layer to the Station Codes
+
+The layer labels each polygon with one or more codes. The polygons whose label holds more than one code are listed.
+
+```{r}
+ts %>%
+  st_drop_geometry() %>%
+  filter(grepl("/", STN_NAM)) %>%
+  select(STN_NAM, LIN_NAM)
+```
+
+The codes of the origin-destination data have to be matched to these labels. Each code of the origin-destination data is split into its parts, and one part is added for the old Circle Line code of Marina Bay, which the layer still uses.
+
+```{r}
+station_parts <- tibble(station_code = unique(c(od_harmonised$ORIGIN_PT_CODE,
+                                                od_harmonised$DESTINATION_PT_CODE))) %>%
+  mutate(part = station_code) %>%
+  separate_rows(part, sep = "/")
+
+station_parts <- bind_rows(station_parts,
+                           tibble(station_code = "NS27/CC33/TE20", part = "CE2"))
+
+nrow(distinct(station_parts, station_code))
+```
+
+Each polygon label is split in the same way:
+
+```{r}
+ts_parts <- ts %>%
+  st_drop_geometry() %>%
+  mutate(poly_id = row_number(), part = STN_NAM) %>%
+  separate_rows(part, sep = "/") %>%
+  mutate(part = trimws(part)) %>%
+  select(poly_id, STN_NAM, LIN_NAM, part)
+
+poly_station <- ts_parts %>%
+  inner_join(station_parts, by = "part") %>%
+  distinct(poly_id, station_code)
+```
+
+Three checks follow. The first counts the polygons that match more than one station. The second lists the stations without a polygon. The third lists the polygons without a station.
+
+```{r}
+poly_station %>%
+  count(poly_id) %>%
+  filter(n > 1) %>%
+  nrow()
+
+station_parts %>%
+  distinct(station_code) %>%
+  anti_join(poly_station, by = "station_code")
+
+ts %>%
+  st_drop_geometry() %>%
+  mutate(poly_id = row_number()) %>%
+  anti_join(poly_station, by = "poly_id") %>%
+  select(poly_id, STN_NAM, LIN_NAM)
+```
+
+::: {.callout-note title="Analysis"}
+- All 184 stations match at least one polygon, and no polygon matches more than one station.
+- 19 polygons match no station. None of their codes appears among the 184 codes of the origin-destination data.
+- Four of the 19, `TE22A`, `TE10`, `CC18` and `TE21`, have the form of a station code. They have no trips in the origin-destination data.
+- The other 15 have codes made of letters only, such as `SMD` and `BPLD`. They are left out.
+:::
+
+#### 4.3.4 Building the Station Points
+
+Each station is represented by one point. The polygons of a station are combined, and the centre of the combined shape is taken:
+
+```{r}
+stations_exist <- ts %>%
+  mutate(poly_id = row_number()) %>%
+  inner_join(poly_station, by = "poly_id") %>%
+  group_by(station_code) %>%
+  summarise(polygons = n()) %>%
+  st_centroid()
+
+nrow(stations_exist)
+table(stations_exist$polygons)
+```
+
+The station names are taken from the station coordinates file, matched on the parts of each code:
+
+```{r}
+station_names <- station_parts %>%
+  left_join(stations_ref %>% select(station_code, station_name),
+            by = c("part" = "station_code")) %>%
+  filter(!is.na(station_name)) %>%
+  distinct(station_code, station_name)
+
+stations_exist <- stations_exist %>%
+  left_join(station_names, by = "station_code")
+
+sum(is.na(stations_exist$station_name))
+```
+
+::: {.callout-note title="Analysis"}
+- The 184 stations have 157 with one polygon, 24 with two, 2 with three and 1 with four.
+- Every station has a name from the station coordinates file.
+:::
+
+### 4.4 Proposed Stations
+
+#### 4.4.1 Importing the Planned Stations
+
+The planned stations are stored in `future_stations.csv`. The file is imported with `read_csv()` of the **readr** package:
+
+```{r}
+future_raw <- read_csv("data/aspatial/future_stations.csv")
+
+glimpse(future_raw)
+```
+
+Missing values and duplicated station codes are checked:
+
+```{r}
+colSums(is.na(future_raw))
+
+sum(duplicated(future_raw$station_code))
+```
+
+::: {.callout-note title="Analysis"}
+- The file holds 65 planned stations, with a code, a name and a latitude and longitude for each.
+- The columns `station_code`, `station_name`, `lat` and `lon` have no missing values.
+- The `comment` column is empty for 63 stations. It is not used in this study.
+- No station code appears twice.
+:::
+
+#### 4.4.2 Defining the Study Scope
+
+The study covers the 24 stations of the Jurong Region Line (JRL) and the 12 stations of Phase 1 of the Cross Island Line (CRL). Their codes are listed, and each planned station is assigned to a line.
+
+```{r}
+jrl_codes <- c("JE1", "JE2", "JE3", "JE4", "JE5", "JE6", "JE7",
+               "JS1", "JS2", "JS3", "JS4", "JS5", "JS6", "JS7", "JS8", "JS9", "JS10", "JS11", "JS12",
+               "JW1", "JW2", "JW3", "JW4", "JW5")
+
+crl_codes <- c("CR2", "CR3", "CR4", "CR5", "CR6", "CR7", "CR8", "CR9", "CR10", "CR11", "CR12", "CR13")
+
+future_scope <- future_raw %>%
+  mutate(line = case_when(station_code %in% jrl_codes ~ "JRL",
+                          station_code %in% crl_codes ~ "CRL",
+                          TRUE ~ "Other"),
+         in_scope = line != "Other")
+
+future_scope %>%
+  count(in_scope)
+```
+
+::: {.callout-note title="Analysis"}
+- 36 of the 65 planned stations are in scope: 24 on the Jurong Region Line and 12 on Phase 1 of the Cross Island Line.
+- The other 29 stations belong to other planned lines or extensions, and are excluded.
+:::
+
+Some stations of the two lines are existing stations where the new line connects. These are identified by their station names, which are also in the existing stations built earlier.
+
+```{r}
+future_scope <- future_scope %>%
+  mutate(status = ifelse(station_name %in% stations_exist$station_name,
+                         "Existing interchange", "New station"))
+
+future_scope %>%
+  filter(in_scope) %>%
+  count(line, status)
+```
+
+::: {.callout-note title="Analysis"}
+- Phase 1 of the Cross Island Line has 4 existing interchange stations and 8 new stations. The Jurong Region Line has 3 existing interchange stations and 21 new stations.
+- The 7 existing interchange stations already appear in the origin-destination data under their current codes, such as `NS4/BP1` for Choa Chu Kang. The planned code, such as `JS1`, is only a second code for the same station.
+- The 29 new stations are the proposed stations in this study.
+:::
+
+The existing interchange stations are matched to their station codes in the origin-destination data.
+
+```{r}
+future_scope %>%
+  filter(in_scope, status == "Existing interchange") %>%
+  select(planned_code = station_code, station_name, line) %>%
+  left_join(stations_exist %>% st_drop_geometry() %>% select(station_code, station_name),
+            by = "station_name")
+```
+
+A new station should have no trips in the origin-destination data. Each planned code of a new station, such as `JE1`, is therefore searched for among the parts of the existing station codes. The number of matches is counted:
+
+```{r}
+future_scope %>%
+  filter(in_scope, status == "New station") %>%
+  inner_join(station_parts, by = c("station_code" = "part")) %>%
+  nrow()
+```
+
+::: {.callout-note title="Analysis"}
+- None of the 29 new station codes appears in the origin-destination data. Their ridership is therefore unobserved, and is predicted by the model.
+:::
+
+#### 4.4.3 Locating the Proposed Stations
+
+The Master Plan 2025 Rail Station Layer holds the planned station footprints. It is imported with *st_read()*:
+
+```{r}
+mp_raw <- st_read(dsn = "data/geospatial/MasterPlan2025RailStationLayer.geojson")
+
+glimpse(mp_raw)
+```
+
+::: {.callout-note title="Analysis"}
+- The layer holds 272 polygons, each with 8 attribute fields.
+- The coordinates are in longitude and latitude (WGS 84). A transformation to EPSG:3414 is needed before distances can be measured in metres.
+:::
+
+The coordinate reference system and the validity of the geometries are checked.
+
+```{r}
+st_crs(mp_raw)$input
+```
+
+```{r}
+sum(!st_is_valid(mp_raw))
+```
+
+```{r}
+n_distinct(mp_raw$NAME)
+```
+
+::: {.callout-note title="Analysis"}
+- The coordinate reference system is WGS 84.
+- All 272 geometries are valid.
+- The layer has 272 polygons but 236 distinct names. Some stations are therefore made up of more than one polygon.
+:::
+
+The new stations are matched to the layer by name. Names that carry a space at the start or end cannot be matched, so the spaces are removed first. The names that differ before and after the removal are listed:
+
+```{r}
+mp_raw %>%
+  st_drop_geometry() %>%
+  mutate(NAME_trimmed = str_trim(NAME)) %>%
+  filter(NAME != NAME_trimmed) %>%
+  select(NAME, NAME_trimmed)
+```
+
+::: {.callout-note title="Analysis"}
+- 9 polygons carry a space at the start or end of the name, such as `PANDAN RESERVOIR `.
+- Pandan Reservoir is a new station. Without the removal of the space, its name does not match, and only 28 of the 29 new stations are found.
+:::
+
+The layer is transformed to **EPSG:3414**. The polygons with the same name are combined, and the centre of each is taken as the station point:
+
+```{r}
+mp <- mp_raw %>%
+  mutate(NAME = str_trim(NAME)) %>%
+  st_transform(crs = 3414)
+
+mp_points <- mp %>%
+  group_by(NAME) %>%
+  summarise(polygons = n()) %>%
+  st_centroid()
+```
+
+The new stations are matched to these points by name:
+
+```{r}
+stations_new <- mp_points %>%
+  inner_join(future_scope %>%
+               filter(in_scope, status == "New station") %>%
+               mutate(NAME = toupper(station_name)),
+             by = "NAME")
+
+nrow(stations_new)
+
+table(stations_new$polygons)
+```
+
+The station points are compared with the coordinates in `future_stations.csv`. The distance between the two is calculated for each station, in metres:
+
+```{r}
+csv_points <- stations_new %>%
+  st_drop_geometry() %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%
+  st_transform(crs = 3414)
+
+summary(as.numeric(st_distance(stations_new, csv_points, by_element = TRUE)))
+```
+
+::: {.callout-note title="Analysis"}
+- The largest distance is 0.00009 metres. The 29 matched polygons therefore lie at the positions given in `future_stations.csv`, which confirms that each name is matched to the correct station.
+:::
+
+#### 4.4.4 Combining Existing and Proposed Stations
+
+The existing stations and the proposed stations are placed in one layer.
+
+```{r}
+stations_existing <- stations_exist %>%
+  select(station_code, station_name) %>%
+  mutate(status = "Existing")
+
+stations_proposed <- stations_new %>%
+  select(station_code, station_name, line) %>%
+  mutate(status = "Proposed")
+
+stations_all <- bind_rows(stations_existing, stations_proposed)
+
+stations_all %>%
+  st_drop_geometry() %>%
+  count(status)
+```
+
+::: {.callout-note title="Analysis"}
+- The combined layer holds 213 stations: 184 existing and 29 proposed.
+- The 7 existing interchange stations where the new lines connect stay in the layer once, under their existing codes. The proposed stations are the 29 new stations only.
+:::

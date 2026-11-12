@@ -1,0 +1,2292 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2026-11-06">
+
+<title>Take-home Exercise 3: Geospatial Analytics for Urban Sustainability – ISSS626 Geospatial Analytics</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-172ba59bd5e0b52282274ba0c0cc16fc.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">ISSS626 Geospatial Analytics</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-hands-on-exercises" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Hands-on Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-hands-on-exercises">    
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex01A/Hands-on_Ex01A.html">
+ <span class="dropdown-text">Hands-on Exercise 1A</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex01B/Hands-on_Ex01B.html">
+ <span class="dropdown-text">Hands-on Exercise 1B</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex02A/Hands-on_Ex02A.html">
+ <span class="dropdown-text">Hands-on Exercise 2A</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex02B/Hands-on_Ex02B.html">
+ <span class="dropdown-text">Hands-on Exercise 2B</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex03/Hands-on_Ex03.html">
+ <span class="dropdown-text">Hands-on Exercise 3</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04.html">
+ <span class="dropdown-text">Hands-on Exercise 4</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex05A/Hands-on_Ex05A.html">
+ <span class="dropdown-text">Hands-on Exercise 5A</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex05B/Hands-on_Ex05B.html">
+ <span class="dropdown-text">Hands-on Exercise 5B</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex06/Hands-on_Ex06.html">
+ <span class="dropdown-text">Hands-on Exercise 6</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex07/Hands-on_Ex07.html">
+ <span class="dropdown-text">Hands-on Exercise 7</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex08/Hands-on_Ex08.html">
+ <span class="dropdown-text">Hands-on Exercise 8</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex09/Hands-on_Ex09.html">
+ <span class="dropdown-text">Hands-on Exercise 9</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-in-class-exercises" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">In-class Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-in-class-exercises">    
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex04/In-class_Ex04.html">
+ <span class="dropdown-text">In-class Exercise 4</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex05/In-class_Ex05.html">
+ <span class="dropdown-text">In-class Exercise 5</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex06/In-class_Ex06.html">
+ <span class="dropdown-text">In-class Exercise 6</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex07/In-class_Ex07.html">
+ <span class="dropdown-text">In-class Exercise 7</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex08/In-class_Ex08.html">
+ <span class="dropdown-text">In-class Exercise 8</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-take-home-exercises" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Take-home Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-take-home-exercises">    
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html">
+ <span class="dropdown-text">Take-home Exercise 1 - Technical Report</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex01/Take-home_Ex01_summary.html">
+ <span class="dropdown-text">Take-home Exercise 1 - Executive Summary</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html">
+ <span class="dropdown-text">Take-home Exercise 2 - Technical Report</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex02/Take-home_Ex02_summary.html">
+ <span class="dropdown-text">Take-home Exercise 2 - Executive Summary</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex03/Take-home_Ex03.html">
+ <span class="dropdown-text">Take-home Exercise 3 - Technical Report</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex03/Take-home_Ex03_summary.html">
+ <span class="dropdown-text">Take-home Exercise 3 - Executive Summary</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/Yxlinn/ISSS626-GAA"> <i class="bi bi-github" role="img" aria-label="GitHub Repository">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">1 Introduction</a>
+  <ul>
+  <li><a href="#study-context" id="toc-study-context" class="nav-link" data-scroll-target="#study-context">1.1 Study Context</a></li>
+  <li><a href="#purpose-and-objectives" id="toc-purpose-and-objectives" class="nav-link" data-scroll-target="#purpose-and-objectives">1.2 Purpose and Objectives</a></li>
+  <li><a href="#research-questions" id="toc-research-questions" class="nav-link" data-scroll-target="#research-questions">1.3 Research Questions</a></li>
+  </ul></li>
+  <li><a href="#data-and-study-design" id="toc-data-and-study-design" class="nav-link" data-scroll-target="#data-and-study-design">2 Data and Study Design</a>
+  <ul>
+  <li><a href="#data-sources" id="toc-data-sources" class="nav-link" data-scroll-target="#data-sources">2.1 Data Sources</a></li>
+  <li><a href="#study-scope" id="toc-study-scope" class="nav-link" data-scroll-target="#study-scope">2.2 Study Scope</a></li>
+  <li><a href="#study-window" id="toc-study-window" class="nav-link" data-scroll-target="#study-window">2.3 Study Window</a></li>
+  </ul></li>
+  <li><a href="#the-setup" id="toc-the-setup" class="nav-link" data-scroll-target="#the-setup">3 The Setup</a>
+  <ul>
+  <li><a href="#installing-and-loading-the-r-packages" id="toc-installing-and-loading-the-r-packages" class="nav-link" data-scroll-target="#installing-and-loading-the-r-packages">3.1 Installing and Loading the R Packages</a></li>
+  <li><a href="#reproducibility" id="toc-reproducibility" class="nav-link" data-scroll-target="#reproducibility">3.2 Reproducibility</a></li>
+  </ul></li>
+  <li><a href="#data-preparation-and-quality-assessment" id="toc-data-preparation-and-quality-assessment" class="nav-link" data-scroll-target="#data-preparation-and-quality-assessment">4 Data Preparation and Quality Assessment</a>
+  <ul>
+  <li><a href="#origin-destination-data" id="toc-origin-destination-data" class="nav-link" data-scroll-target="#origin-destination-data">4.1 Origin-Destination Data</a>
+  <ul class="collapse">
+  <li><a href="#importing-the-monthly-data" id="toc-importing-the-monthly-data" class="nav-link" data-scroll-target="#importing-the-monthly-data">4.1.1 Importing the Monthly Data</a></li>
+  <li><a href="#checking-and-standardising-the-station-codes" id="toc-checking-and-standardising-the-station-codes" class="nav-link" data-scroll-target="#checking-and-standardising-the-station-codes">4.1.2 Checking and Standardising the Station Codes</a></li>
+  </ul></li>
+  <li><a href="#pooling-the-months" id="toc-pooling-the-months" class="nav-link" data-scroll-target="#pooling-the-months">4.2 Pooling the Months</a>
+  <ul class="collapse">
+  <li><a href="#counting-the-weekdays" id="toc-counting-the-weekdays" class="nav-link" data-scroll-target="#counting-the-weekdays">4.2.1 Counting the Weekdays</a></li>
+  <li><a href="#checking-the-public-holiday" id="toc-checking-the-public-holiday" class="nav-link" data-scroll-target="#checking-the-public-holiday">4.2.2 Checking the Public Holiday</a></li>
+  <li><a href="#selecting-the-morning-peak" id="toc-selecting-the-morning-peak" class="nav-link" data-scroll-target="#selecting-the-morning-peak">4.2.3 Selecting the Morning Peak</a></li>
+  <li><a href="#comparing-the-months" id="toc-comparing-the-months" class="nav-link" data-scroll-target="#comparing-the-months">4.2.4 Comparing the Months</a></li>
+  <li><a href="#averaging-per-weekday" id="toc-averaging-per-weekday" class="nav-link" data-scroll-target="#averaging-per-weekday">4.2.5 Averaging per Weekday</a></li>
+  <li><a href="#stability-of-station-ridership" id="toc-stability-of-station-ridership" class="nav-link" data-scroll-target="#stability-of-station-ridership">4.2.6 Stability of Station Ridership</a></li>
+  </ul></li>
+  <li><a href="#existing-stations" id="toc-existing-stations" class="nav-link" data-scroll-target="#existing-stations">4.3 Existing Stations</a>
+  <ul class="collapse">
+  <li><a href="#importing-the-train-station-layer" id="toc-importing-the-train-station-layer" class="nav-link" data-scroll-target="#importing-the-train-station-layer">4.3.1 Importing the Train Station Layer</a></li>
+  <li><a href="#checking-the-layer" id="toc-checking-the-layer" class="nav-link" data-scroll-target="#checking-the-layer">4.3.2 Checking the Layer</a></li>
+  <li><a href="#matching-the-layer-to-the-station-codes" id="toc-matching-the-layer-to-the-station-codes" class="nav-link" data-scroll-target="#matching-the-layer-to-the-station-codes">4.3.3 Matching the Layer to the Station Codes</a></li>
+  <li><a href="#building-the-station-points" id="toc-building-the-station-points" class="nav-link" data-scroll-target="#building-the-station-points">4.3.4 Building the Station Points</a></li>
+  </ul></li>
+  <li><a href="#proposed-stations" id="toc-proposed-stations" class="nav-link" data-scroll-target="#proposed-stations">4.4 Proposed Stations</a>
+  <ul class="collapse">
+  <li><a href="#importing-the-planned-stations" id="toc-importing-the-planned-stations" class="nav-link" data-scroll-target="#importing-the-planned-stations">4.4.1 Importing the Planned Stations</a></li>
+  <li><a href="#defining-the-study-scope" id="toc-defining-the-study-scope" class="nav-link" data-scroll-target="#defining-the-study-scope">4.4.2 Defining the Study Scope</a></li>
+  <li><a href="#locating-the-proposed-stations" id="toc-locating-the-proposed-stations" class="nav-link" data-scroll-target="#locating-the-proposed-stations">4.4.3 Locating the Proposed Stations</a></li>
+  <li><a href="#combining-existing-and-proposed-stations" id="toc-combining-existing-and-proposed-stations" class="nav-link" data-scroll-target="#combining-existing-and-proposed-stations">4.4.4 Combining Existing and Proposed Stations</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Take-home Exercise 3: Geospatial Analytics for Urban Sustainability</h1>
+<p class="subtitle lead">Modelling Station Ridership and Market Area Impact of the Jurong Region and Cross Island Lines</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 6, 2026</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">November 12, 2026</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">1 Introduction</h2>
+<section id="study-context" class="level3">
+<h3 class="anchored" data-anchor-id="study-context">1.1 Study Context</h3>
+<p>Urban rail transit supports sustainable urban development by providing high-capacity mobility and encouraging transit-oriented development around stations. It also connects residents to jobs, services and education. In Singapore, the Mass Rapid Transit (MRT) system has been the backbone of public transport since 1987. It carried an average of 3.49 million rides a day in 2025 (Land Transport Authority, n.d.). The Land Transport Master Plan 2040 sets a rail network of 360 km and a target of eight in ten households within a 10-minute walk of a train station, both by 2030 (Land Transport Authority, 2019).</p>
+<p>Stations are sometimes built ahead of demand to limit future construction disruption. Some then open years after their station boxes are completed. Hume station is one example: its box was built as part of the second phase of the Downtown Line, and it opened on 28 February 2025 (Land Transport Authority, 2025). Catchment-area analysis and station-level ridership prediction support such decisions.</p>
+<p>Two further lines are being delivered. The Jurong Region Line (JRL) has 24 stations, and Phase 1 of the Cross Island Line (CRL) has 12 stations. JRL Stage 1 is expected around mid-2028 instead of end-2027, and the dates for Stages 2 and 3 are yet to be announced. CRL Phase 1 is targeted to open in 2030 (Land Transport Authority, 2026). The analysis treats all 36 stations as operating at the same time, and opening dates are not modelled.</p>
+</section>
+<section id="purpose-and-objectives" class="level3">
+<h3 class="anchored" data-anchor-id="purpose-and-objectives">1.2 Purpose and Objectives</h3>
+<p>Ridership at a station depends on the people who live within reach, the activities that the area offers, and the competing stations nearby. The planned JRL and CRL Phase 1 stations change this competitive position for existing stations. Some of the 36 stations are new, while the others are existing interchange stations that gain a new line.</p>
+<p>Whether a new station draws riders from existing stations is a question of market areas. Probabilistic spatial interaction models address this question by dividing the trips of each origin among the available stations. The share going to a station depends on its attractiveness and its distance from the origin. The Huff model combines attractiveness with distance decay, and the Multiplicative Competitive Interaction (MCI) model estimates weights for several attractiveness variables from observed flows.</p>
+<p>This exercise calibrates these models on observed MRT and LRT ridership and applies the calibrated model to the proposed stations. The objectives are:</p>
+<ol type="1">
+<li>To calibrate a probabilistic spatial interaction model for station-level ridership estimation.</li>
+<li>To predict the potential ridership of MRT stations along the proposed JRL and CRL.</li>
+<li>To evaluate the potential impact of the newly planned MRT stations on the ridership patterns of the existing stations.</li>
+</ol>
+</section>
+<section id="research-questions" class="level3">
+<h3 class="anchored" data-anchor-id="research-questions">1.3 Research Questions</h3>
+<ol type="1">
+<li>Which attraction variables, and which distance decay, explain station-level ridership on the existing network?</li>
+<li>Does the calibrated model outperform reference models, namely equal market shares and a Huff model with fixed parameters?</li>
+<li>What ridership is predicted for each proposed station, and how does it compare with existing stations on the same lines?</li>
+<li>Which existing stations lose market share and ridership to the new stations, and where are the losses concentrated?</li>
+</ol>
+</section>
+</section>
+<section id="data-and-study-design" class="level2">
+<h2 class="anchored" data-anchor-id="data-and-study-design">2 Data and Study Design</h2>
+<section id="data-sources" class="level3">
+<h3 class="anchored" data-anchor-id="data-sources">2.1 Data Sources</h3>
+<p>The analysis uses the datasets in the table below. All datasets were retrieved in November 2026.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Data</th>
+<th>Format</th>
+<th>Description</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Passenger Volume by Origin Destination Train Stations</td>
+<td>CSV</td>
+<td>Monthly trips between pairs of train stations, by day type and hour, for July to September 2026.</td>
+<td><a href="https://datamall.lta.gov.sg">LTA DataMall</a></td>
+</tr>
+<tr class="even">
+<td>Train Station (RapidTransitSystemStation)</td>
+<td>Shapefile</td>
+<td>Polygons of existing rail stations, September 2026.</td>
+<td><a href="https://datamall.lta.gov.sg">LTA DataMall</a></td>
+</tr>
+<tr class="odd">
+<td>Master Plan 2025 Rail Station Layer</td>
+<td>GeoJSON</td>
+<td>Polygons of planned stations, with name, rail type and ground level.</td>
+<td>URA, via <a href="https://data.gov.sg">data.gov.sg</a></td>
+</tr>
+<tr class="even">
+<td>future_stations</td>
+<td>CSV</td>
+<td>Station codes, names and coordinates of planned stations.</td>
+<td><a href="https://github.com/elliotwutingfeng/singapore_train_station_coordinates">GitHub: singapore_train_station_coordinates</a></td>
+</tr>
+<tr class="odd">
+<td>operational_and_future_stations</td>
+<td>CSV</td>
+<td>Station codes, names and coordinates of operational and planned stations.</td>
+<td><a href="https://github.com/elliotwutingfeng/singapore_train_station_coordinates">GitHub: singapore_train_station_coordinates</a></td>
+</tr>
+<tr class="even">
+<td>HDB Existing Building</td>
+<td>GeoJSON</td>
+<td>Footprints of HDB blocks, with block number, street code and postal code.</td>
+<td>HDB, via <a href="https://data.gov.sg">data.gov.sg</a></td>
+</tr>
+<tr class="odd">
+<td>Bus Stop Location</td>
+<td>Shapefile</td>
+<td>Locations of bus stops, September 2026.</td>
+<td><a href="https://datamall.lta.gov.sg">LTA DataMall</a></td>
+</tr>
+<tr class="even">
+<td>Points of Interest</td>
+<td>Shapefile</td>
+<td>Points and polygons of points of interest. Stored as the layers <code>gis_osm_pois_free_1</code> (points) and <code>gis_osm_pois_a_free_1</code> (polygons).</td>
+<td>OpenStreetMap, via <a href="https://download.geofabrik.de">Geofabrik</a> (Malaysia, Singapore and Brunei extract)</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="study-scope" class="level3">
+<h3 class="anchored" data-anchor-id="study-scope">2.2 Study Scope</h3>
+<p>The study covers the existing MRT and LRT network and the proposed stations of the JRL and CRL Phase 1. The proposed stations are identified by code in <code>future_stations</code>. The JRL stations are <code>JE1</code> to <code>JE7</code>, <code>JS1</code> to <code>JS12</code> and <code>JW1</code> to <code>JW5</code> (<a href="https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/jurong_region_line.html">Land Transport Authority</a>). The CRL Phase 1 stations are <code>CR2</code> to <code>CR13</code> (<a href="https://www.lta.gov.sg/content/ltagov/en/upcoming_projects/rail_expansion/cross_island_line.html">Land Transport Authority</a>).</p>
+<p>Each station in scope is either new or an existing interchange. A new station has no ridership in the origin-destination data. An existing interchange is already in the network under its current line code and gains a new line.</p>
+<p>Other entries in <code>future_stations</code> are out of scope. These include <code>JS2A</code>, which is targeted to open in the mid-2030s (Land Transport Authority, 2026), as well as CRL stations outside Phase 1 and stations on other lines.</p>
+</section>
+<section id="study-window" class="level3">
+<h3 class="anchored" data-anchor-id="study-window">2.3 Study Window</h3>
+<p>The study window is the weekday morning peak, from 07:00 to 08:59. This corresponds to hours 7 and 8 of <code>TIME_PER_HOUR</code> on days where <code>DAY_TYPE</code> is <code>WEEKDAY</code>. Observed ridership in this window is the quantity that the model calibrates and predicts.</p>
+<p>The weekday morning peak is assumed to consist mainly of trips from homes to workplaces and schools. This matches the model, which describes origins by the residential population around a station and destinations by the activities around a station. In the evening and at weekends, trips are assumed to serve a wider mix of purposes, such as shopping and leisure. The link between residential origins and activity destinations is then less clear.</p>
+<p>The window covers July, August and September 2026. These are the most recent months available, because October 2026 was not yet published at the time of retrieval. The origin-destination data are supplied as one file for each month, and the way the three months are combined is described in the Data Preparation section.</p>
+</section>
+</section>
+<section id="the-setup" class="level2">
+<h2 class="anchored" data-anchor-id="the-setup">3 The Setup</h2>
+<section id="installing-and-loading-the-r-packages" class="level3">
+<h3 class="anchored" data-anchor-id="installing-and-loading-the-r-packages">3.1 Installing and Loading the R Packages</h3>
+<p>The following R packages are used:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Package</th>
+<th>Purpose</th>
+<th>Use Case in This Exercise</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>tidyverse</strong></td>
+<td>Collection of packages for data import, manipulation and visualisation</td>
+<td>Importing the origin-destination data, wrangling it into the interaction data frames, and producing charts</td>
+</tr>
+<tr class="even">
+<td><strong>sf</strong></td>
+<td>Imports, manages and processes vector-based geospatial data</td>
+<td>Importing the station, building and point-of-interest data, transforming coordinate reference systems, and building station catchments</td>
+</tr>
+<tr class="odd">
+<td><strong>tmap</strong></td>
+<td>Thematic map creation using a layered grammar of graphics</td>
+<td>Mapping ridership, market areas and the impact of the new stations</td>
+</tr>
+<tr class="even">
+<td><strong>igraph</strong></td>
+<td>Builds and analyses networks as graphs</td>
+<td>Building the rail network and computing distances along it</td>
+</tr>
+<tr class="odd">
+<td><strong>MCI</strong></td>
+<td>Calibrates the Huff and Multiplicative Competitive Interaction models</td>
+<td>Estimating the model parameters and the market shares of the stations</td>
+</tr>
+</tbody>
+</table>
+<p>The packages are loaded with the following code chunk:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(tidyverse, sf, tmap, igraph, MCI)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="reproducibility" class="level3">
+<h3 class="anchored" data-anchor-id="reproducibility">3.2 Reproducibility</h3>
+<p>A fixed seed value of 123 is set for reproducibility of any simulation-based procedure used later in this exercise.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="data-preparation-and-quality-assessment" class="level2">
+<h2 class="anchored" data-anchor-id="data-preparation-and-quality-assessment">4 Data Preparation and Quality Assessment</h2>
+<section id="origin-destination-data" class="level3">
+<h3 class="anchored" data-anchor-id="origin-destination-data">4.1 Origin-Destination Data</h3>
+<section id="importing-the-monthly-data" class="level4">
+<h4 class="anchored" data-anchor-id="importing-the-monthly-data">4.1.1 Importing the Monthly Data</h4>
+<p>The monthly origin-destination data for July, August and September 2026 are imported with <em>read_csv()</em> of the <strong>readr</strong> package.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>od_202607 <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/202607/origin_destination_train_202607.csv"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>od_202608 <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/202608/origin_destination_train_202608.csv"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>od_202609 <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/202609/origin_destination_train_202609.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The three months are combined into one data frame, and its structure is inspected:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>od_raw <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(od_202607, od_202608, od_202609)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(od_raw)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 2,702,429
+Columns: 7
+$ YEAR_MONTH          &lt;chr&gt; "2026-07", "2026-07", "2026-07", "2026-07", "2026-…
+$ DAY_TYPE            &lt;chr&gt; "WEEKENDS/HOLIDAY", "WEEKENDS/HOLIDAY", "WEEKDAY",…
+$ TIME_PER_HOUR       &lt;dbl&gt; 8, 14, 20, 19, 17, 11, 7, 9, 16, 5, 15, 16, 20, 17…
+$ PT_TYPE             &lt;chr&gt; "TRAIN", "TRAIN", "TRAIN", "TRAIN", "TRAIN", "TRAI…
+$ ORIGIN_PT_CODE      &lt;chr&gt; "EW33", "CE1/DT16", "NE4/DT19", "EW30", "DT30", "D…
+$ DESTINATION_PT_CODE &lt;chr&gt; "TE18", "NS23", "SW4", "NS12", "SW4", "NE18", "DT3…
+$ TOTAL_TRIPS         &lt;dbl&gt; 3, 141, 159, 4, 5, 29, 426, 25, 7, 12, 107, 124, 4…</code></pre>
+</div>
+</div>
+<p>The number of records and trips in each month is summarised:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>od_raw <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(YEAR_MONTH) <span class="sc">%&gt;%</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">rows =</span> <span class="fu">n</span>(), <span class="at">trips =</span> <span class="fu">sum</span>(TOTAL_TRIPS))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 3
+  YEAR_MONTH   rows    trips
+  &lt;chr&gt;       &lt;int&gt;    &lt;dbl&gt;
+1 2026-07    907966 91034142
+2 2026-08    906985 90161381
+3 2026-09    887478 85880422</code></pre>
+</div>
+</div>
+<p>Missing values are checked across every column:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">is.na</span>(od_raw))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         YEAR_MONTH            DAY_TYPE       TIME_PER_HOUR             PT_TYPE 
+                  0                   0                   0                   0 
+     ORIGIN_PT_CODE DESTINATION_PT_CODE         TOTAL_TRIPS 
+                  0                   0                   0 </code></pre>
+</div>
+</div>
+<p>Exact duplicate rows are checked next:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(od_raw))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>The three months hold 2,702,429 records and 267,075,945 trips, with seven columns.</li>
+<li>Every column has 0 missing values, and there are 0 duplicate rows.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="checking-and-standardising-the-station-codes" class="level4">
+<h4 class="anchored" data-anchor-id="checking-and-standardising-the-station-codes">4.1.2 Checking and Standardising the Station Codes</h4>
+<p>Each station is identified by a station code in the origin-destination data. Each line that serves a station gives it a station code. An interchange station carries the line code of every line that serves it (e.g.&nbsp;<code>NS27/CC33/TE20</code>). The number of distinct station codes in each month is counted first:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>stations_202607 <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">c</span>(od_202607<span class="sc">$</span>ORIGIN_PT_CODE, od_202607<span class="sc">$</span>DESTINATION_PT_CODE))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>stations_202608 <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">c</span>(od_202608<span class="sc">$</span>ORIGIN_PT_CODE, od_202608<span class="sc">$</span>DESTINATION_PT_CODE))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>stations_202609 <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">c</span>(od_202609<span class="sc">$</span>ORIGIN_PT_CODE, od_202609<span class="sc">$</span>DESTINATION_PT_CODE))</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">month =</span> <span class="fu">c</span>(<span class="st">"2026-07"</span>, <span class="st">"2026-08"</span>, <span class="st">"2026-09"</span>),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">code_strings =</span> <span class="fu">c</span>(<span class="fu">length</span>(stations_202607), <span class="fu">length</span>(stations_202608), <span class="fu">length</span>(stations_202609))</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 2
+  month   code_strings
+  &lt;chr&gt;          &lt;int&gt;
+1 2026-07          187
+2 2026-08          185
+3 2026-09          185</code></pre>
+</div>
+</div>
+<p>The station codes that differ between months are listed:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(stations_202607, stations_202608)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "CE1/DT16"      "NS27/CE2/TE20"</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setdiff</span>(stations_202607, stations_202609)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "CE1/DT16"      "NS27/CE2/TE20"</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Both <code>CE1/DT16</code> and <code>NS27/CE2/TE20</code> appear in July but not in August or September.</p>
+</div>
+</div>
+<p>A station recorded under more than one station code would have its trips split between two rows. Station names are used to find such stations. The station coordinates file lists one row for each line code, together with the station name:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>stations_ref <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/operational_and_future_stations.csv"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(stations_ref)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 278
+Columns: 6
+$ station_code &lt;chr&gt; "BP1", "BP2", "BP3", "BP4", "BP5", "BP6", "BP7", "BP8", "…
+$ station_name &lt;chr&gt; "Choa Chu Kang", "South View", "Keat Hong", "Teck Whye", …
+$ lat          &lt;dbl&gt; 1.385125, 1.380298, 1.378612, 1.376659, 1.378625, 1.37848…
+$ lon          &lt;dbl&gt; 103.7443, 103.7453, 103.7491, 103.7537, 103.7580, 103.762…
+$ source       &lt;chr&gt; "ura", "ura", "ura", "ura", "ura", "ura", "ura", "ura", "…
+$ comment      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N…</code></pre>
+</div>
+</div>
+<p>Each station code is split into its line codes. The line codes are matched to the station names, and the names that appear under more than one station code are listed:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>od_labels <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">station_label =</span> <span class="fu">unique</span>(<span class="fu">c</span>(od_raw<span class="sc">$</span>ORIGIN_PT_CODE, </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                                             od_raw<span class="sc">$</span>DESTINATION_PT_CODE)))</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>od_labels <span class="sc">%&gt;%</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">station_code =</span> station_label) <span class="sc">%&gt;%</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate_rows</span>(station_code, <span class="at">sep =</span> <span class="st">"/"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(stations_ref, <span class="at">by =</span> <span class="st">"station_code"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(station_name) <span class="sc">%&gt;%</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">labels =</span> <span class="fu">n_distinct</span>(station_label),</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">station_labels =</span> <span class="fu">paste</span>(<span class="fu">unique</span>(station_label), <span class="at">collapse =</span> <span class="st">"; "</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(labels <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 3
+  station_name labels station_labels               
+  &lt;chr&gt;         &lt;int&gt; &lt;chr&gt;                        
+1 Bayfront          2 CE1/DT16; CC34/DT16          
+2 Marina Bay        2 NS27/CE2/TE20; NS27/CC33/TE20
+3 Stevens           2 DT10; TE11                   
+4 &lt;NA&gt;              2 CC34/DT16; NS27/CC33/TE20    </code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Three stations appear under two different codes each: Bayfront, Marina Bay and Stevens.</li>
+<li>Bayfront and Marina Bay are interchange stations. Their two codes differ only in the Circle Line part.</li>
+<li>The two codes of Stevens, <code>DT10</code> and <code>TE11</code>, have no part in common.</li>
+<li>The row without a station name holds <code>CC34/DT16</code> and <code>NS27/CC33/TE20</code>. The station file has no entry for <code>CC34</code> or <code>CC33</code>. These two codes are matched to Bayfront and Marina Bay through their other parts, <code>DT16</code>, <code>NS27</code> and <code>TE20</code>.</li>
+</ul>
+</div>
+</div>
+<section id="bayfront-and-marina-bay" class="level5">
+<h5 class="anchored" data-anchor-id="bayfront-and-marina-bay">4.1.2.1 Bayfront and Marina Bay</h5>
+<p>The Circle Line codes of Bayfront and Marina Bay changed when Circle Line Stage 6 opened on 12 July 2026 (<a href="https://landtransportguru.net/circle-line-stage-6-start-service-12jul26/">Land Transport Guru</a>). The presence of the new codes in each month is checked:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>new_codes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"CC34/DT16"</span>, <span class="st">"NS27/CC33/TE20"</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>new_codes <span class="sc">%in%</span> stations_202607</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE TRUE</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>new_codes <span class="sc">%in%</span> stations_202608</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE TRUE</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>new_codes <span class="sc">%in%</span> stations_202609</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE TRUE</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Bayfront and Marina Bay each have an old and a new code string. The two differ only in the Circle Line code.</li>
+<li>The new strings appear in all three months. The old strings appear only in July. July therefore holds both the old and the new string for each of the two stations. This explains why July has 187 code strings, against 185 in August and September.</li>
+<li>The change took effect on 12 July, so the July file contains records under both versions.</li>
+<li>Each old string is recoded to its new string. Every station then has one code in all three months.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="stevens" class="level5">
+<h5 class="anchored" data-anchor-id="stevens">4.1.2.2 Stevens</h5>
+<p>Stevens is a single interchange station served by the Downtown Line (<code>DT10</code>) and the Thomson-East Coast Line (<code>TE11</code>) (<a href="https://landtransportguru.net/stevens-station/">Land Transport Guru</a>). The origin-destination data list the two as separate codes.. The trips recorded between them are counted.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>od_raw <span class="sc">%&gt;%</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>((ORIGIN_PT_CODE <span class="sc">==</span> <span class="st">"DT10"</span> <span class="sc">&amp;</span> DESTINATION_PT_CODE <span class="sc">==</span> <span class="st">"TE11"</span>) <span class="sc">|</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>         (ORIGIN_PT_CODE <span class="sc">==</span> <span class="st">"TE11"</span> <span class="sc">&amp;</span> DESTINATION_PT_CODE <span class="sc">==</span> <span class="st">"DT10"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">rows =</span> <span class="fu">n</span>(), <span class="at">trips =</span> <span class="fu">sum</span>(TOTAL_TRIPS))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 2
+   rows trips
+  &lt;int&gt; &lt;dbl&gt;
+1   202  1032</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>The two codes of Stevens record 202 rows and 1,032 trips between each other.</li>
+<li>These rows are trips between two codes of the same station. They carry no information about movement between stations.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="applying-the-recodes" class="level5">
+<h5 class="anchored" data-anchor-id="applying-the-recodes">4.1.2.3 Applying the Recodes</h5>
+<p>The new codes for Bayfront and Marina Bay are applied, and the two codes of Stevens are combined into <code>DT10/TE11</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>od_harmonised <span class="ot">&lt;-</span> od_raw <span class="sc">%&gt;%</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">ORIGIN_PT_CODE =</span> <span class="fu">recode</span>(ORIGIN_PT_CODE,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"CE1/DT16"</span> <span class="ot">=</span> <span class="st">"CC34/DT16"</span>,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"NS27/CE2/TE20"</span> <span class="ot">=</span> <span class="st">"NS27/CC33/TE20"</span>,</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"DT10"</span> <span class="ot">=</span> <span class="st">"DT10/TE11"</span>,</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"TE11"</span> <span class="ot">=</span> <span class="st">"DT10/TE11"</span>),</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">DESTINATION_PT_CODE =</span> <span class="fu">recode</span>(DESTINATION_PT_CODE,</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>                                 <span class="st">"CE1/DT16"</span> <span class="ot">=</span> <span class="st">"CC34/DT16"</span>,</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>                                 <span class="st">"NS27/CE2/TE20"</span> <span class="ot">=</span> <span class="st">"NS27/CC33/TE20"</span>,</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>                                 <span class="st">"DT10"</span> <span class="ot">=</span> <span class="st">"DT10/TE11"</span>,</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>                                 <span class="st">"TE11"</span> <span class="ot">=</span> <span class="st">"DT10/TE11"</span>)</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(<span class="fu">c</span>(od_harmonised<span class="sc">$</span>ORIGIN_PT_CODE, od_harmonised<span class="sc">$</span>DESTINATION_PT_CODE))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 184</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>After the recodes, the data hold 184 distinct codes. This is 187 less the two old codes and one merged pair: <code>DT10</code> and <code>TE11</code> become <code>DT10/TE11</code>.</li>
+</ul>
+</div>
+</div>
+<p>After the merge, the trips between <code>DT10</code> and <code>TE11</code> start and end at the same station. These records are removed:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>od_harmonised <span class="sc">%&gt;%</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(ORIGIN_PT_CODE <span class="sc">==</span> DESTINATION_PT_CODE) <span class="sc">%&gt;%</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">rows =</span> <span class="fu">n</span>(), <span class="at">trips =</span> <span class="fu">sum</span>(TOTAL_TRIPS))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 2
+   rows trips
+  &lt;int&gt; &lt;dbl&gt;
+1   202  1032</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>od_harmonised <span class="ot">&lt;-</span> od_harmonised <span class="sc">%&gt;%</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(ORIGIN_PT_CODE <span class="sc">!=</span> DESTINATION_PT_CODE)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>od_harmonised <span class="sc">%&gt;%</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">rows =</span> <span class="fu">n</span>(), <span class="at">trips =</span> <span class="fu">sum</span>(TOTAL_TRIPS))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 2
+     rows     trips
+    &lt;int&gt;     &lt;dbl&gt;
+1 2702227 267074913</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>After the recodes, 202 rows and 1,032 trips have the same origin and destination. These are the same rows and trips counted between <code>DT10</code> and <code>TE11</code> earlier.</li>
+<li>Removing them leaves 2,702,227 rows and 267,074,913 trips. This is 202 rows and 1,032 trips fewer than the 2,702,429 rows and 267,075,945 trips in the raw data.</li>
+<li>A trip from a station to itself is not a movement between two stations. Hence, such rows cannot be used in the model and are removed.</li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="pooling-the-months" class="level3">
+<h3 class="anchored" data-anchor-id="pooling-the-months">4.2 Pooling the Months</h3>
+<p>The analysis uses the weekday morning peak, pooled over July, August and September 2026. Pooling adds the trips of the three months for each station pair. The aim is to have more trips for each pair than a single month gives. This only suits the data if the three months look alike, and the months are compared for this reason. This section counts the weekdays in each month, checks the public holiday, selects the morning peak, compares the months and pools them.</p>
+<section id="counting-the-weekdays" class="level4">
+<h4 class="anchored" data-anchor-id="counting-the-weekdays">4.2.1 Counting the Weekdays</h4>
+<p>A calendar of the three months is built, and the days of the week are counted in each month:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>calendar <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">date =</span> <span class="fu">seq</span>(<span class="fu">ymd</span>(<span class="st">"2026-07-01"</span>), <span class="fu">ymd</span>(<span class="st">"2026-09-30"</span>), <span class="at">by =</span> <span class="st">"day"</span>))</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>calendar <span class="ot">&lt;-</span> calendar <span class="sc">%&gt;%</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">YEAR_MONTH =</span> <span class="fu">format</span>(date, <span class="st">"%Y-%m"</span>),</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">day =</span> <span class="fu">wday</span>(date, <span class="at">label =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>calendar <span class="sc">%&gt;%</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(YEAR_MONTH) <span class="sc">%&gt;%</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">days =</span> <span class="fu">n</span>(),</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">weekdays =</span> <span class="fu">sum</span>(<span class="sc">!</span>day <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Sat"</span>, <span class="st">"Sun"</span>)),</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">weekend_days =</span> <span class="fu">sum</span>(day <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Sat"</span>, <span class="st">"Sun"</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 4
+  YEAR_MONTH  days weekdays weekend_days
+  &lt;chr&gt;      &lt;int&gt;    &lt;int&gt;        &lt;int&gt;
+1 2026-07       31       23            8
+2 2026-08       31       21           10
+3 2026-09       30       22            8</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>July has 23 weekdays and 8 weekend days.</li>
+<li>August has 21 weekdays and 10 weekend days.</li>
+<li>September has 22 weekdays and 8 weekend days.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="checking-the-public-holiday" class="level4">
+<h4 class="anchored" data-anchor-id="checking-the-public-holiday">4.2.2 Checking the Public Holiday</h4>
+<p>National Day falls on 9 August. In 2026, this date is a Sunday, and the following Monday is observed as a public holiday (<a href="https://www.mom.gov.sg/newsroom/press-releases/2025/0616-public-holidays-for-2026">Ministry of Manpower, 2025</a>). The two dates are checked in the calendar:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>calendar <span class="sc">%&gt;%</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date <span class="sc">%in%</span> <span class="fu">ymd</span>(<span class="fu">c</span>(<span class="st">"2026-08-09"</span>, <span class="st">"2026-08-10"</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 3
+  date       YEAR_MONTH day  
+  &lt;date&gt;     &lt;chr&gt;      &lt;ord&gt;
+1 2026-08-09 2026-08    Sun  
+2 2026-08-10 2026-08    Mon  </code></pre>
+</div>
+</div>
+<p>The origin-destination data label every day as either <code>WEEKDAY</code> or <code>WEEKENDS/HOLIDAY</code>. The trips labelled <code>WEEKENDS/HOLIDAY</code> are added up for each month. They are divided by the number of days in each month that carry this label. This is done twice: first counting only the Saturdays and Sundays, and then also counting 10 August as a day labelled <code>WEEKENDS/HOLIDAY</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>holiday_days <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">YEAR_MONTH =</span> <span class="fu">c</span>(<span class="st">"2026-07"</span>, </span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"2026-08"</span>, </span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>                                      <span class="st">"2026-09"</span>),</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">holidays =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>od_raw <span class="sc">%&gt;%</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(DAY_TYPE <span class="sc">==</span> <span class="st">"WEEKENDS/HOLIDAY"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(YEAR_MONTH) <span class="sc">%&gt;%</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">trips =</span> <span class="fu">sum</span>(TOTAL_TRIPS)) <span class="sc">%&gt;%</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(holiday_days, <span class="at">by =</span> <span class="st">"YEAR_MONTH"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">weekend_days =</span> <span class="fu">c</span>(<span class="dv">8</span>, <span class="dv">10</span>, <span class="dv">8</span>),</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">per_day_without_holiday =</span> <span class="fu">round</span>(trips <span class="sc">/</span> weekend_days),</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">per_day_with_holiday =</span> <span class="fu">round</span>(trips <span class="sc">/</span> (weekend_days <span class="sc">+</span> holidays))) <span class="sc">%&gt;%</span></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(YEAR_MONTH, trips, per_day_without_holiday, per_day_with_holiday)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 4
+  YEAR_MONTH    trips per_day_without_holiday per_day_with_holiday
+  &lt;chr&gt;         &lt;dbl&gt;                   &lt;dbl&gt;                &lt;dbl&gt;
+1 2026-07    19739633                 2467454              2467454
+2 2026-08    27315022                 2731502              2483184
+3 2026-09    19095879                 2386985              2386985</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>9 August 2026 is a Sunday, and 10 August is a Monday.</li>
+<li>Without the public holiday, August has 2,731,502 weekend and holiday trips per day. This is higher than July (2,467,454) and September (2,386,985).</li>
+<li>With 10 August counted as a public holiday, August falls to 2,483,184 trips per day. This is in line with the other two months.</li>
+<li>Hence, 10 August is treated as a public holiday, and August is taken to have 20 weekdays, not 21.</li>
+</ul>
+</div>
+</div>
+<p>The weekdays of each month are counted. 10 August is left out, because it is treated as a public holiday and its trips are not in the <code>WEEKDAY</code> rows.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>weekday_counts <span class="ot">&lt;-</span> calendar <span class="sc">%&gt;%</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>day <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Sat"</span>, <span class="st">"Sun"</span>), date <span class="sc">!=</span> <span class="fu">ymd</span>(<span class="st">"2026-08-10"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(YEAR_MONTH) <span class="sc">%&gt;%</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">weekdays =</span> <span class="fu">n</span>())</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>weekday_counts</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 2
+  YEAR_MONTH weekdays
+  &lt;chr&gt;         &lt;int&gt;
+1 2026-07          23
+2 2026-08          20
+3 2026-09          22</code></pre>
+</div>
+</div>
+</section>
+<section id="selecting-the-morning-peak" class="level4">
+<h4 class="anchored" data-anchor-id="selecting-the-morning-peak">4.2.3 Selecting the Morning Peak</h4>
+<p>This study analyses the morning peak period, when most trips are assumed to run from homes to workplaces and schools.</p>
+<p>Each row of the origin-destination data holds the trips made in one hour of the day. <code>TIME_PER_HOUR</code> is assumed to be the hour in which a trip starts. The weekday trips in each hour are summarised to find the busiest hours of the morning.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>od_hourly <span class="ot">&lt;-</span> od_harmonised <span class="sc">%&gt;%</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(DAY_TYPE <span class="sc">==</span> <span class="st">"WEEKDAY"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(TIME_PER_HOUR) <span class="sc">%&gt;%</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">trips =</span> <span class="fu">sum</span>(TOTAL_TRIPS)) <span class="sc">%&gt;%</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">share =</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> trips <span class="sc">/</span> <span class="fu">sum</span>(trips), <span class="dv">1</span>),</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">peak =</span> <span class="fu">ifelse</span>(TIME_PER_HOUR <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">7</span>, <span class="dv">8</span>), <span class="st">"Morning peak"</span>, <span class="st">"Other hours"</span>))</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(od_hourly, <span class="fu">aes</span>(<span class="at">x =</span> TIME_PER_HOUR, <span class="at">y =</span> share, <span class="at">fill =</span> peak)) <span class="sc">+</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>() <span class="sc">+</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> share), <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.3</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Morning peak"</span> <span class="ot">=</span> <span class="st">"#d95f02"</span>, <span class="st">"Other hours"</span> <span class="ot">=</span> <span class="st">"grey70"</span>)) <span class="sc">+</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">23</span>) <span class="sc">+</span></span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Hour of the day"</span>, <span class="at">y =</span> <span class="st">"Share of weekday trips (%)"</span>, <span class="at">fill =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Take-home_Ex03_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>No trips are recorded in hours 1 to 4.</li>
+<li>Hours 7 and 8 carry 9.2% and 9.3% of weekday trips. They are the two busiest hours of the morning.</li>
+<li>The morning peak is therefore taken as hours 7 and 8.</li>
+</ul>
+</div>
+</div>
+<p>The weekday trips in hours 7 and 8 are selected, and the trips in each month are summarised:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>od_am <span class="ot">&lt;-</span> od_harmonised <span class="sc">%&gt;%</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(DAY_TYPE <span class="sc">==</span> <span class="st">"WEEKDAY"</span>, TIME_PER_HOUR <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">7</span>, <span class="dv">8</span>))</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>od_am <span class="sc">%&gt;%</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(YEAR_MONTH) <span class="sc">%&gt;%</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">trips =</span> <span class="fu">sum</span>(TOTAL_TRIPS))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 2
+  YEAR_MONTH    trips
+  &lt;chr&gt;         &lt;dbl&gt;
+1 2026-07    13208730
+2 2026-08    11611974
+3 2026-09    12293832</code></pre>
+</div>
+</div>
+</section>
+<section id="comparing-the-months" class="level4">
+<h4 class="anchored" data-anchor-id="comparing-the-months">4.2.4 Comparing the Months</h4>
+<p>Trips are added up for each station pair in each month. This also combines rows that became identical after the recodes, such as July rows for the old and new codes of Bayfront. The number of pairs with fewer than 10 trips is counted for each month.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>od_pairs <span class="ot">&lt;-</span> od_am <span class="sc">%&gt;%</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(YEAR_MONTH, ORIGIN_PT_CODE, DESTINATION_PT_CODE) <span class="sc">%&gt;%</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">trips =</span> <span class="fu">sum</span>(TOTAL_TRIPS), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>od_pairs <span class="sc">%&gt;%</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(YEAR_MONTH) <span class="sc">%&gt;%</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">pairs =</span> <span class="fu">n</span>(),</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">under_10 =</span> <span class="fu">sum</span>(trips <span class="sc">&lt;</span> <span class="dv">10</span>),</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">share =</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> under_10 <span class="sc">/</span> pairs, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 4
+  YEAR_MONTH pairs under_10 share
+  &lt;chr&gt;      &lt;int&gt;    &lt;int&gt; &lt;dbl&gt;
+1 2026-07    27384     5964  21.8
+2 2026-08    27090     5875  21.7
+3 2026-09    27297     5927  21.7</code></pre>
+</div>
+</div>
+<p>The same count is made after the three months are added together:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>od_pooled <span class="ot">&lt;-</span> od_pairs <span class="sc">%&gt;%</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ORIGIN_PT_CODE, DESTINATION_PT_CODE) <span class="sc">%&gt;%</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">trips =</span> <span class="fu">sum</span>(trips), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>od_pooled <span class="sc">%&gt;%</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">pairs =</span> <span class="fu">n</span>(),</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">under_10 =</span> <span class="fu">sum</span>(trips <span class="sc">&lt;</span> <span class="dv">10</span>),</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">share =</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> under_10 <span class="sc">/</span> pairs, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  pairs under_10 share
+  &lt;int&gt;    &lt;int&gt; &lt;dbl&gt;
+1 29287     4987    17</code></pre>
+</div>
+</div>
+<p>The months have different numbers of weekdays. Trips per weekday are compared between months, across all station pairs.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>od_wide <span class="ot">&lt;-</span> od_pairs <span class="sc">%&gt;%</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(weekday_counts, <span class="at">by =</span> <span class="st">"YEAR_MONTH"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">trips_per_weekday =</span> trips <span class="sc">/</span> weekdays) <span class="sc">%&gt;%</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>trips, <span class="sc">-</span>weekdays) <span class="sc">%&gt;%</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> YEAR_MONTH, <span class="at">values_from =</span> trips_per_weekday, <span class="at">values_fill =</span> <span class="dv">0</span>)</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">cor</span>(od_wide[, <span class="dv">3</span><span class="sc">:</span><span class="dv">5</span>]), <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        2026-07 2026-08 2026-09
+2026-07   1.000   0.998   0.994
+2026-08   0.998   1.000   0.996
+2026-09   0.994   0.996   1.000</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Each month has between 27,090 and 27,384 station pairs with morning peak trips. Between 21.7% and 21.8% of these pairs have fewer than 10 trips.</li>
+<li>The three months together have 29,287 pairs. Of these, 4,987 pairs (17%) have fewer than 10 trips.</li>
+<li>The pooled data hold more pairs than any single month, and a lower share of pairs with few trips. Pairs with few trips remain.</li>
+<li>The correlation of trips per weekday across station pairs is 0.998 between July and August, 0.994 between July and September, and 0.996 between August and September. The three months show very similar patterns. Pooling therefore adds trips without mixing different patterns.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="averaging-per-weekday" class="level4">
+<h4 class="anchored" data-anchor-id="averaging-per-weekday">4.2.5 Averaging per Weekday</h4>
+<p>The pooled trips are divided by the total number of weekdays in the three months:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>od_pooled <span class="ot">&lt;-</span> od_pooled <span class="sc">%&gt;%</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">trips_per_weekday =</span> trips <span class="sc">/</span> <span class="fu">sum</span>(weekday_counts<span class="sc">$</span>weekdays))</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>od_pooled <span class="sc">%&gt;%</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">pairs =</span> <span class="fu">n</span>(),</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">trips =</span> <span class="fu">sum</span>(trips),</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">trips_per_weekday =</span> <span class="fu">round</span>(<span class="fu">sum</span>(trips_per_weekday)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  pairs    trips trips_per_weekday
+  &lt;int&gt;    &lt;dbl&gt;             &lt;dbl&gt;
+1 29287 37114536            570993</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>The pooled data hold 29,287 station pairs and 37,114,536 trips. This equals the sum of the three monthly totals.</li>
+<li>Divided by the 65 weekdays of the three months, the average is 570,993 trips per weekday.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="stability-of-station-ridership" class="level4">
+<h4 class="anchored" data-anchor-id="stability-of-station-ridership">4.2.6 Stability of Station Ridership</h4>
+<p>A pooled average describes a station poorly if its ridership changes strongly between months. The morning peak trips arriving at each station per weekday are compared between July and September. A ratio of 1 means no change. The ratio is summarised first:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>od_destination <span class="ot">&lt;-</span> od_pairs <span class="sc">%&gt;%</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(YEAR_MONTH, DESTINATION_PT_CODE) <span class="sc">%&gt;%</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">trips =</span> <span class="fu">sum</span>(trips), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(weekday_counts, <span class="at">by =</span> <span class="st">"YEAR_MONTH"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">trips_per_weekday =</span> trips <span class="sc">/</span> weekdays) <span class="sc">%&gt;%</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>trips, <span class="sc">-</span>weekdays) <span class="sc">%&gt;%</span></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> YEAR_MONTH, <span class="at">values_from =</span> trips_per_weekday, <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ratio =</span> <span class="st">`</span><span class="at">2026-09</span><span class="st">`</span> <span class="sc">/</span> <span class="st">`</span><span class="at">2026-07</span><span class="st">`</span>)</span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(od_destination<span class="sc">$</span>ratio)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.3222  0.9233  0.9776  0.9758  1.0050  2.0666 </code></pre>
+</div>
+</div>
+<p>The stations with a ratio below 0.8 or above 1.25 are listed with their names:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>od_destination <span class="sc">%&gt;%</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(ratio <span class="sc">&lt;</span> <span class="fl">0.8</span> <span class="sc">|</span> ratio <span class="sc">&gt;</span> <span class="fl">1.25</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(stations_ref <span class="sc">%&gt;%</span> <span class="fu">select</span>(station_code, station_name),</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"DESTINATION_PT_CODE"</span> <span class="ot">=</span> <span class="st">"station_code"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">2026-07</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(<span class="st">`</span><span class="at">2026-07</span><span class="st">`</span>, <span class="dv">1</span>),</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">2026-08</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(<span class="st">`</span><span class="at">2026-08</span><span class="st">`</span>, <span class="dv">1</span>),</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">2026-09</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(<span class="st">`</span><span class="at">2026-09</span><span class="st">`</span>, <span class="dv">1</span>),</span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">ratio =</span> <span class="fu">round</span>(ratio, <span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(DESTINATION_PT_CODE, station_name, <span class="st">`</span><span class="at">2026-07</span><span class="st">`</span>, <span class="st">`</span><span class="at">2026-08</span><span class="st">`</span>, <span class="st">`</span><span class="at">2026-09</span><span class="st">`</span>, ratio) <span class="sc">%&gt;%</span></span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(ratio) <span class="sc">%&gt;%</span></span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">20</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 16 × 6
+   DESTINATION_PT_CODE station_name       `2026-07` `2026-08` `2026-09` ratio
+   &lt;chr&gt;               &lt;chr&gt;                  &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt;
+ 1 EW22                Dover                 5538      3931.     1784.   0.32
+ 2 BP4                 Teck Whye             1209.     1550.      532.   0.44
+ 3 TE1                 Woodlands North       3966      2808      2035    0.51
+ 4 NS15                Yio Chu Kang          8226.     7558.     5401.   0.66
+ 5 DT8                 Tan Kah Kee           1979.     1981.     1382.   0.7 
+ 6 PE5                 Kadaloor               472.      476.      365.   0.77
+ 7 TE24                Katong Park            492.      499.      384.   0.78
+ 8 DT6                 King Albert Park      1731.     1604.     1362.   0.79
+ 9 TE27                Marine Terrace         797.      816.      637.   0.8 
+10 DT13                Rochor                1613.     1969.     2096.   1.3 
+11 CC2                 Bras Basah            1254.     1463.     1679.   1.34
+12 CC31                Cantonment             148.      225.      204.   1.37
+13 NE18                Punggol Coast         2790.     2788.     4440.   1.59
+14 DT4                 Hume                   101.      141.      164    1.62
+15 CC30                Keppel                  12.5      21.4      21.7  1.74
+16 CC32                Prince Edward Road     329.      604       679    2.07</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Most stations are stable. The median ratio is 0.98, and the middle half of the stations lie between 0.923 and 1.005.</li>
+<li>16 stations fall outside the range of 0.8 to 1.25. Nine have a ratio below 0.8, and seven have a ratio above 1.25. TE27 is shown as 0.8 because the ratio is rounded.</li>
+<li>Keppel (<code>CC30</code>), Cantonment (<code>CC31</code>) and Prince Edward Road (<code>CC32</code>) opened on 12 July 2026 (Land Transport Authority, 2026). July therefore includes weekdays before they opened. Their ratios are 1.74, 1.37 and 2.07 respectively.</li>
+<li>Hume (<code>DT4</code>) opened on 28 February 2025 (Land Transport Authority, 2025). Its ridership is still small (101 to 164 trips per weekday) and rises each month.</li>
+<li>The falls at Dover (0.32), Teck Whye (0.44), Woodlands North (0.51) and Yio Chu Kang (0.66) are the largest. The rise at Punggol Coast (1.59) is the largest among the stations that were already open. The data do not show the causes of these changes.</li>
+<li>These 16 stations stay in the pooled data and are flagged. In the Model Calibration section, the model is fitted twice, with and without them, to check whether they affect the result.</li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+<section id="existing-stations" class="level3">
+<h3 class="anchored" data-anchor-id="existing-stations">4.3 Existing Stations</h3>
+<section id="importing-the-train-station-layer" class="level4">
+<h4 class="anchored" data-anchor-id="importing-the-train-station-layer">4.3.1 Importing the Train Station Layer</h4>
+<p>The train station layer holds the outline of each station as a polygon. It is imported with <code>st_read()</code> of the <strong>sf</strong> package.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>ts_raw <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial/TrainStation_Sep2026"</span>,</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">layer =</span> <span class="st">"RapidTransitSystemStation"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `RapidTransitSystemStation' from data source 
+  `C:\yxlinn\ISSS626-GAA\Take-home_Ex\Take-home_Ex03\data\geospatial\TrainStation_Sep2026' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 234 features and 15 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 6068.209 ymin: 27478.44 xmax: 45377.5 ymax: 47913.58
+Projected CRS: SVY21</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(ts_raw)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 234
+Columns: 16
+$ JOB_NUM    &lt;chr&gt; "GDMDM20190314-025", "GDMDM20190314-025", "GDMDM20190314-02…
+$ TYP_CD     &lt;int&gt; 33, 34, 33, 34, 33, 33, 34, 34, 34, 34, 34, 33, 33, 34, 34,…
+$ STN_NAM    &lt;chr&gt; "PE3", "EW5", "PTC", "DT33", "PW7", "BP10", "CC24", "TE23",…
+$ EXCEPTION_ &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ LAST_UPD_U &lt;chr&gt; "SAID", "SAID", "SAID", "RATINAR", "RATINAR", "SAID", "SAID…
+$ LAST_UPD_D &lt;date&gt; 2019-03-14, 2019-03-14, 2019-03-14, 2017-07-13, 2009-04-30…
+$ CRT_USRID_ &lt;chr&gt; "RATINAR", "system", "RATINAR", "RATINAR", "RATINAR", "syst…
+$ CRT_DTTM   &lt;date&gt; 2005-06-24, 2004-10-27, 2005-06-24, 2017-07-13, 2005-06-24…
+$ RTS_LVL_NU &lt;int&gt; 3, 3, 3, 1, 3, 3, 1, 1, 1, 1, 3, 3, 3, 3, 3, 2, 1, 1, 3, 3,…
+$ LIN_NAM    &lt;chr&gt; "PLRT", "EWL", "PLRT", "DTL", "PLRT", "BPLRT", "CCL", "TEC"…
+$ PKG_REF    &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ REMARKS    &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ ATTACHEMEN &lt;chr&gt; NA, NA, NA, NA, NA, NA, "CC24_KRG STN.zip", NA, "CC20_FRR S…
+$ SHAPE_AREA &lt;dbl&gt; 1054.6116, 4710.6458, 11506.5035, 10262.5232, 1050.0883, 76…
+$ SHAPE_LEN  &lt;dbl&gt; 170.5610, 384.7860, 648.1159, 990.5214, 170.4578, 129.9227,…
+$ geometry   &lt;MULTIPOLYGON [m]&gt; MULTIPOLYGON (((36786.93 41..., MULTIPOLYGON (…</code></pre>
+</div>
+</div>
+<p>The coordinate reference system of the layer is checked:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(ts_raw)<span class="sc">$</span>input</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "SVY21"</code></pre>
+</div>
+</div>
+<p>The layer is transformed to the Singapore projection, EPSG:3414.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>ts <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(ts_raw, <span class="at">crs =</span> <span class="dv">3414</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>The layer holds 234 polygons and 15 attribute columns.</li>
+<li>The coordinate reference system is labelled <code>SVY21</code> and has no EPSG code. The layer is transformed to EPSG:3414, so that all layers use the same code.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="checking-the-layer" class="level4">
+<h4 class="anchored" data-anchor-id="checking-the-layer">4.3.2 Checking the Layer</h4>
+<p>The columns holding the station code, the type and the line are checked for missing values, and the geometries are checked for validity.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">is.na</span>(<span class="fu">st_drop_geometry</span>(ts_raw[, <span class="fu">c</span>(<span class="st">"STN_NAM"</span>, <span class="st">"TYP_CD"</span>, <span class="st">"LIN_NAM"</span>)])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>STN_NAM  TYP_CD LIN_NAM 
+      0       0       0 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="sc">!</span><span class="fu">st_is_valid</span>(ts))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>A station can be drawn as more than one polygon. The codes that appear on more than one polygon are listed below.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>ts <span class="sc">%&gt;%</span></span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(STN_NAM) <span class="sc">%&gt;%</span></span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  STN_NAM n
+1    CC17 2
+2    CC29 2
+3     CE2 3
+4    DT10 2
+5    EW16 2
+6    NS22 2
+7    TE26 2
+8    TE29 2</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><code>STN_NAM</code>, <code>TYP_CD</code> and <code>LIN_NAM</code> have no missing values, and all geometries are valid.</li>
+<li>Eight codes appear on more than one polygon: <code>CE2</code> on three and the other seven on two each. A station can therefore be drawn as several polygons.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="matching-the-layer-to-the-station-codes" class="level4">
+<h4 class="anchored" data-anchor-id="matching-the-layer-to-the-station-codes">4.3.3 Matching the Layer to the Station Codes</h4>
+<p>The layer labels each polygon with one or more codes. The polygons whose label holds more than one code are listed.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>ts <span class="sc">%&gt;%</span></span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"/"</span>, STN_NAM)) <span class="sc">%&gt;%</span></span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(STN_NAM, LIN_NAM)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      STN_NAM LIN_NAM
+1  DT16 / CE1    DTCC
+2 EW14 / NS26    EWNS
+3 EW13 / NS25    EWNS
+4  EW24 / NS1    EWNS</code></pre>
+</div>
+</div>
+<p>The codes of the origin-destination data have to be matched to these labels. Each code of the origin-destination data is split into its parts, and one part is added for the old Circle Line code of Marina Bay, which the layer still uses.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>station_parts <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">station_code =</span> <span class="fu">unique</span>(<span class="fu">c</span>(od_harmonised<span class="sc">$</span>ORIGIN_PT_CODE,</span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>                                                od_harmonised<span class="sc">$</span>DESTINATION_PT_CODE))) <span class="sc">%&gt;%</span></span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">part =</span> station_code) <span class="sc">%&gt;%</span></span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate_rows</span>(part, <span class="at">sep =</span> <span class="st">"/"</span>)</span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a>station_parts <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(station_parts,</span>
+<span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a>                           <span class="fu">tibble</span>(<span class="at">station_code =</span> <span class="st">"NS27/CC33/TE20"</span>, <span class="at">part =</span> <span class="st">"CE2"</span>))</span>
+<span id="cb74-8"><a href="#cb74-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb74-9"><a href="#cb74-9" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(<span class="fu">distinct</span>(station_parts, station_code))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 184</code></pre>
+</div>
+</div>
+<p>Each polygon label is split in the same way:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>ts_parts <span class="ot">&lt;-</span> ts <span class="sc">%&gt;%</span></span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">poly_id =</span> <span class="fu">row_number</span>(), <span class="at">part =</span> STN_NAM) <span class="sc">%&gt;%</span></span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate_rows</span>(part, <span class="at">sep =</span> <span class="st">"/"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">part =</span> <span class="fu">trimws</span>(part)) <span class="sc">%&gt;%</span></span>
+<span id="cb76-6"><a href="#cb76-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(poly_id, STN_NAM, LIN_NAM, part)</span>
+<span id="cb76-7"><a href="#cb76-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb76-8"><a href="#cb76-8" aria-hidden="true" tabindex="-1"></a>poly_station <span class="ot">&lt;-</span> ts_parts <span class="sc">%&gt;%</span></span>
+<span id="cb76-9"><a href="#cb76-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(station_parts, <span class="at">by =</span> <span class="st">"part"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb76-10"><a href="#cb76-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(poly_id, station_code)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Three checks follow. The first counts the polygons that match more than one station. The second lists the stations without a polygon. The third lists the polygons without a station.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>poly_station <span class="sc">%&gt;%</span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(poly_id) <span class="sc">%&gt;%</span></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>station_parts <span class="sc">%&gt;%</span></span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(station_code) <span class="sc">%&gt;%</span></span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(poly_station, <span class="at">by =</span> <span class="st">"station_code"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 0 × 1
+# ℹ 1 variable: station_code &lt;chr&gt;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>ts <span class="sc">%&gt;%</span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">poly_id =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(poly_station, <span class="at">by =</span> <span class="st">"poly_id"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(poly_id, STN_NAM, LIN_NAM)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   poly_id STN_NAM LIN_NAM
+1       16     SMD     NEL
+2       23    BPLD   BPLRT
+3       36     UPD     EWL
+4       37      MD     TEC
+5       40   TE22A     TEC
+6       59      TD     TWE
+7       91     SLD    SLRT
+8      104 TSCDTFB     CCL
+9      134    TSFB     DTL
+10     136    TE10     TEC
+11     141     KCD     CCL
+12     143      ST     DTL
+13     152   HSSCT     DTL
+14     184      CD     EWL
+15     185    BOCC     DTL
+16     193     GBD     DTL
+17     198      BD     NSL
+18     214    CC18     CCL
+19     233    TE21     TEC</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>All 184 stations match at least one polygon, and no polygon matches more than one station.</li>
+<li>19 polygons match no station. None of their codes appears among the 184 codes of the origin-destination data.</li>
+<li>Four of the 19, <code>TE22A</code>, <code>TE10</code>, <code>CC18</code> and <code>TE21</code>, have the form of a station code. They have no trips in the origin-destination data.</li>
+<li>The other 15 have codes made of letters only, such as <code>SMD</code> and <code>BPLD</code>. They are left out.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="building-the-station-points" class="level4">
+<h4 class="anchored" data-anchor-id="building-the-station-points">4.3.4 Building the Station Points</h4>
+<p>Each station is represented by one point. The polygons of a station are combined, and the centre of the combined shape is taken:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>stations_exist <span class="ot">&lt;-</span> ts <span class="sc">%&gt;%</span></span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">poly_id =</span> <span class="fu">row_number</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(poly_station, <span class="at">by =</span> <span class="st">"poly_id"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(station_code) <span class="sc">%&gt;%</span></span>
+<span id="cb83-5"><a href="#cb83-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">polygons =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb83-6"><a href="#cb83-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_centroid</span>()</span>
+<span id="cb83-7"><a href="#cb83-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-8"><a href="#cb83-8" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(stations_exist)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 184</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(stations_exist<span class="sc">$</span>polygons)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  1   2   3   4 
+157  24   2   1 </code></pre>
+</div>
+</div>
+<p>The station names are taken from the station coordinates file, matched on the parts of each code:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>station_names <span class="ot">&lt;-</span> station_parts <span class="sc">%&gt;%</span></span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(stations_ref <span class="sc">%&gt;%</span> <span class="fu">select</span>(station_code, station_name),</span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"part"</span> <span class="ot">=</span> <span class="st">"station_code"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(station_name)) <span class="sc">%&gt;%</span></span>
+<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(station_code, station_name)</span>
+<span id="cb87-6"><a href="#cb87-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-7"><a href="#cb87-7" aria-hidden="true" tabindex="-1"></a>stations_exist <span class="ot">&lt;-</span> stations_exist <span class="sc">%&gt;%</span></span>
+<span id="cb87-8"><a href="#cb87-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(station_names, <span class="at">by =</span> <span class="st">"station_code"</span>)</span>
+<span id="cb87-9"><a href="#cb87-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-10"><a href="#cb87-10" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(stations_exist<span class="sc">$</span>station_name))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>The 184 stations have 157 with one polygon, 24 with two, 2 with three and 1 with four.</li>
+<li>Every station has a name from the station coordinates file.</li>
+</ul>
+</div>
+</div>
+</section>
+</section>
+<section id="proposed-stations" class="level3">
+<h3 class="anchored" data-anchor-id="proposed-stations">4.4 Proposed Stations</h3>
+<section id="importing-the-planned-stations" class="level4">
+<h4 class="anchored" data-anchor-id="importing-the-planned-stations">4.4.1 Importing the Planned Stations</h4>
+<p>The planned stations are stored in <code>future_stations.csv</code>. The file is imported with <code>read_csv()</code> of the <strong>readr</strong> package:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a>future_raw <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/future_stations.csv"</span>)</span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-3"><a href="#cb89-3" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(future_raw)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 65
+Columns: 6
+$ station_code &lt;chr&gt; "TE30", "TE31", "DT36", "DT37", "CC30", "CC31", "CC32", "…
+$ station_name &lt;chr&gt; "Bedok South", "Sungei Bedok", "Xilin", "Sungei Bedok", "…
+$ lat          &lt;dbl&gt; 1.316646, 1.320396, 1.328735, 1.320396, 1.270172, 1.27308…
+$ lon          &lt;dbl&gt; 103.9492, 103.9572, 103.9649, 103.9572, 103.8303, 103.836…
+$ source       &lt;chr&gt; "ura", "ura", "ura", "ura", "ura", "ura", "ura", "ura", "…
+$ comment      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, "missing_from_masterp…</code></pre>
+</div>
+</div>
+<p>Missing values and duplicated station codes are checked:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">is.na</span>(future_raw))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>station_code station_name          lat          lon       source      comment 
+           0            0            0            0            0           63 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(future_raw<span class="sc">$</span>station_code))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>The file holds 65 planned stations, with a code, a name and a latitude and longitude for each.</li>
+<li>The columns <code>station_code</code>, <code>station_name</code>, <code>lat</code> and <code>lon</code> have no missing values.</li>
+<li>The <code>comment</code> column is empty for 63 stations. It is not used in this study.</li>
+<li>No station code appears twice.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="defining-the-study-scope" class="level4">
+<h4 class="anchored" data-anchor-id="defining-the-study-scope">4.4.2 Defining the Study Scope</h4>
+<p>The study covers the 24 stations of the Jurong Region Line (JRL) and the 12 stations of Phase 1 of the Cross Island Line (CRL). Their codes are listed, and each planned station is assigned to a line.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>jrl_codes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"JE1"</span>, <span class="st">"JE2"</span>, <span class="st">"JE3"</span>, <span class="st">"JE4"</span>, <span class="st">"JE5"</span>, <span class="st">"JE6"</span>, <span class="st">"JE7"</span>,</span>
+<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a>               <span class="st">"JS1"</span>, <span class="st">"JS2"</span>, <span class="st">"JS3"</span>, <span class="st">"JS4"</span>, <span class="st">"JS5"</span>, <span class="st">"JS6"</span>, <span class="st">"JS7"</span>, <span class="st">"JS8"</span>, <span class="st">"JS9"</span>, <span class="st">"JS10"</span>, <span class="st">"JS11"</span>, <span class="st">"JS12"</span>,</span>
+<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a>               <span class="st">"JW1"</span>, <span class="st">"JW2"</span>, <span class="st">"JW3"</span>, <span class="st">"JW4"</span>, <span class="st">"JW5"</span>)</span>
+<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a>crl_codes <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"CR2"</span>, <span class="st">"CR3"</span>, <span class="st">"CR4"</span>, <span class="st">"CR5"</span>, <span class="st">"CR6"</span>, <span class="st">"CR7"</span>, <span class="st">"CR8"</span>, <span class="st">"CR9"</span>, <span class="st">"CR10"</span>, <span class="st">"CR11"</span>, <span class="st">"CR12"</span>, <span class="st">"CR13"</span>)</span>
+<span id="cb95-6"><a href="#cb95-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb95-7"><a href="#cb95-7" aria-hidden="true" tabindex="-1"></a>future_scope <span class="ot">&lt;-</span> future_raw <span class="sc">%&gt;%</span></span>
+<span id="cb95-8"><a href="#cb95-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">line =</span> <span class="fu">case_when</span>(station_code <span class="sc">%in%</span> jrl_codes <span class="sc">~</span> <span class="st">"JRL"</span>,</span>
+<span id="cb95-9"><a href="#cb95-9" aria-hidden="true" tabindex="-1"></a>                          station_code <span class="sc">%in%</span> crl_codes <span class="sc">~</span> <span class="st">"CRL"</span>,</span>
+<span id="cb95-10"><a href="#cb95-10" aria-hidden="true" tabindex="-1"></a>                          <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Other"</span>),</span>
+<span id="cb95-11"><a href="#cb95-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">in_scope =</span> line <span class="sc">!=</span> <span class="st">"Other"</span>)</span>
+<span id="cb95-12"><a href="#cb95-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb95-13"><a href="#cb95-13" aria-hidden="true" tabindex="-1"></a>future_scope <span class="sc">%&gt;%</span></span>
+<span id="cb95-14"><a href="#cb95-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(in_scope)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  in_scope     n
+  &lt;lgl&gt;    &lt;int&gt;
+1 FALSE       29
+2 TRUE        36</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>36 of the 65 planned stations are in scope: 24 on the Jurong Region Line and 12 on Phase 1 of the Cross Island Line.</li>
+<li>The other 29 stations belong to other planned lines or extensions, and are excluded.</li>
+</ul>
+</div>
+</div>
+<p>Some stations of the two lines are existing stations where the new line connects. These are identified by their station names, which are also in the existing stations built earlier.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>future_scope <span class="ot">&lt;-</span> future_scope <span class="sc">%&gt;%</span></span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">status =</span> <span class="fu">ifelse</span>(station_name <span class="sc">%in%</span> stations_exist<span class="sc">$</span>station_name,</span>
+<span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"Existing interchange"</span>, <span class="st">"New station"</span>))</span>
+<span id="cb97-4"><a href="#cb97-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb97-5"><a href="#cb97-5" aria-hidden="true" tabindex="-1"></a>future_scope <span class="sc">%&gt;%</span></span>
+<span id="cb97-6"><a href="#cb97-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(in_scope) <span class="sc">%&gt;%</span></span>
+<span id="cb97-7"><a href="#cb97-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(line, status)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 3
+  line  status                   n
+  &lt;chr&gt; &lt;chr&gt;                &lt;int&gt;
+1 CRL   Existing interchange     4
+2 CRL   New station              8
+3 JRL   Existing interchange     3
+4 JRL   New station             21</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Phase 1 of the Cross Island Line has 4 existing interchange stations and 8 new stations. The Jurong Region Line has 3 existing interchange stations and 21 new stations.</li>
+<li>The 7 existing interchange stations already appear in the origin-destination data under their current codes, such as <code>NS4/BP1</code> for Choa Chu Kang. The planned code, such as <code>JS1</code>, is only a second code for the same station.</li>
+<li>The 29 new stations are the proposed stations in this study.</li>
+</ul>
+</div>
+</div>
+<p>The existing interchange stations are matched to their station codes in the origin-destination data.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a>future_scope <span class="sc">%&gt;%</span></span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(in_scope, status <span class="sc">==</span> <span class="st">"Existing interchange"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="at">planned_code =</span> station_code, station_name, line) <span class="sc">%&gt;%</span></span>
+<span id="cb99-4"><a href="#cb99-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(stations_exist <span class="sc">%&gt;%</span> <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span> <span class="fu">select</span>(station_code, station_name),</span>
+<span id="cb99-5"><a href="#cb99-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="st">"station_name"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 7 × 4
+  planned_code station_name  line  station_code
+  &lt;chr&gt;        &lt;chr&gt;         &lt;chr&gt; &lt;chr&gt;       
+1 JS1          Choa Chu Kang JRL   NS4/BP1     
+2 JS8          Boon Lay      JRL   EW27        
+3 JE5          Jurong East   JRL   EW24/NS1    
+4 CR5          Pasir Ris     CRL   EW1         
+5 CR8          Hougang       CRL   NE14        
+6 CR11         Ang Mo Kio    CRL   NS16        
+7 CR13         Bright Hill   CRL   TE7         </code></pre>
+</div>
+</div>
+<p>A new station should have no trips in the origin-destination data. Each planned code of a new station, such as <code>JE1</code>, is therefore searched for among the parts of the existing station codes. The number of matches is counted:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb101"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a>future_scope <span class="sc">%&gt;%</span></span>
+<span id="cb101-2"><a href="#cb101-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(in_scope, status <span class="sc">==</span> <span class="st">"New station"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb101-3"><a href="#cb101-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(station_parts, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"station_code"</span> <span class="ot">=</span> <span class="st">"part"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb101-4"><a href="#cb101-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>None of the 29 new station codes appears in the origin-destination data. Their ridership is therefore unobserved, and is predicted by the model.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="locating-the-proposed-stations" class="level4">
+<h4 class="anchored" data-anchor-id="locating-the-proposed-stations">4.4.3 Locating the Proposed Stations</h4>
+<p>The Master Plan 2025 Rail Station Layer holds the planned station footprints. It is imported with <em>st_read()</em>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a>mp_raw <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial/MasterPlan2025RailStationLayer.geojson"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `G_MP25_RAIL_STN' from data source 
+  `C:\yxlinn\ISSS626-GAA\Take-home_Ex\Take-home_Ex03\data\geospatial\MasterPlan2025RailStationLayer.geojson' 
+  using driver `GeoJSON'
+Simple feature collection with 272 features and 8 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 103.6363 ymin: 1.251433 xmax: 104.0051 ymax: 1.450545
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(mp_raw)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 272
+Columns: 9
+$ OBJECTID   &lt;int&gt; 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58,…
+$ GRND_LEVEL &lt;chr&gt; "UNDERGROUND", "ABOVEGROUND", "ABOVEGROUND", "ABOVEGROUND",…
+$ RAIL_TYPE  &lt;chr&gt; "MRT", "MRT", "MRT", "MRT", "MRT", "MRT", "MRT", "LRT", "LR…
+$ NAME       &lt;chr&gt; "SUNGEI BEDOK", "CHOA CHU KANG WEST", "JURONG WEST", "TUKAN…
+$ INC_CRC    &lt;chr&gt; "BAE182C76FD419B5", "53CF38120DD230B4", "FD64DB40EA21CAD9",…
+$ FMEL_UPD_D &lt;chr&gt; "20251229172113", "20251229172113", "20251229172113", "2025…
+$ SHAPE.AREA &lt;dbl&gt; 22448.0061, 3603.4414, 3998.0487, 4098.7317, 3308.7191, 885…
+$ SHAPE.LEN  &lt;dbl&gt; 1460.5884, 363.3905, 362.8783, 366.9285, 334.1141, 585.3932…
+$ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((103.9585 1...., MULTIPOLYGON (…</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>The layer holds 272 polygons, each with 8 attribute fields.</li>
+<li>The coordinates are in longitude and latitude (WGS 84). A transformation to EPSG:3414 is needed before distances can be measured in metres.</li>
+</ul>
+</div>
+</div>
+<p>The coordinate reference system and the validity of the geometries are checked.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb107"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(mp_raw)<span class="sc">$</span>input</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "WGS 84"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb109"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="sc">!</span><span class="fu">st_is_valid</span>(mp_raw))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb111"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(mp_raw<span class="sc">$</span>NAME)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 236</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>The coordinate reference system is WGS 84.</li>
+<li>All 272 geometries are valid.</li>
+<li>The layer has 272 polygons but 236 distinct names. Some stations are therefore made up of more than one polygon.</li>
+</ul>
+</div>
+</div>
+<p>The new stations are matched to the layer by name. Names that carry a space at the start or end cannot be matched, so the spaces are removed first. The names that differ before and after the removal are listed:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb113"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a>mp_raw <span class="sc">%&gt;%</span></span>
+<span id="cb113-2"><a href="#cb113-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb113-3"><a href="#cb113-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">NAME_trimmed =</span> <span class="fu">str_trim</span>(NAME)) <span class="sc">%&gt;%</span></span>
+<span id="cb113-4"><a href="#cb113-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(NAME <span class="sc">!=</span> NAME_trimmed) <span class="sc">%&gt;%</span></span>
+<span id="cb113-5"><a href="#cb113-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(NAME, NAME_trimmed)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                NAME      NAME_trimmed
+1         WOODLANDS          WOODLANDS
+2       TIONG BAHRU        TIONG BAHRU
+3   WOODLANDS NORTH    WOODLANDS NORTH
+4  PANDAN RESERVOIR   PANDAN RESERVOIR
+5            MATTAR             MATTAR
+6             ELIAS              ELIAS
+7 MARINA SOUTH PIER  MARINA SOUTH PIER
+8         MARYMOUNT          MARYMOUNT
+9         WOODLANDS          WOODLANDS</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>9 polygons carry a space at the start or end of the name, such as <code>PANDAN RESERVOIR</code>.</li>
+<li>Pandan Reservoir is a new station. Without the removal of the space, its name does not match, and only 28 of the 29 new stations are found.</li>
+</ul>
+</div>
+</div>
+<p>The layer is transformed to <strong>EPSG:3414</strong>. The polygons with the same name are combined, and the centre of each is taken as the station point:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb115"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a>mp <span class="ot">&lt;-</span> mp_raw <span class="sc">%&gt;%</span></span>
+<span id="cb115-2"><a href="#cb115-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">NAME =</span> <span class="fu">str_trim</span>(NAME)) <span class="sc">%&gt;%</span></span>
+<span id="cb115-3"><a href="#cb115-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span>
+<span id="cb115-4"><a href="#cb115-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb115-5"><a href="#cb115-5" aria-hidden="true" tabindex="-1"></a>mp_points <span class="ot">&lt;-</span> mp <span class="sc">%&gt;%</span></span>
+<span id="cb115-6"><a href="#cb115-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(NAME) <span class="sc">%&gt;%</span></span>
+<span id="cb115-7"><a href="#cb115-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">polygons =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb115-8"><a href="#cb115-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_centroid</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The new stations are matched to these points by name:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb116"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb116-1"><a href="#cb116-1" aria-hidden="true" tabindex="-1"></a>stations_new <span class="ot">&lt;-</span> mp_points <span class="sc">%&gt;%</span></span>
+<span id="cb116-2"><a href="#cb116-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(future_scope <span class="sc">%&gt;%</span></span>
+<span id="cb116-3"><a href="#cb116-3" aria-hidden="true" tabindex="-1"></a>               <span class="fu">filter</span>(in_scope, status <span class="sc">==</span> <span class="st">"New station"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb116-4"><a href="#cb116-4" aria-hidden="true" tabindex="-1"></a>               <span class="fu">mutate</span>(<span class="at">NAME =</span> <span class="fu">toupper</span>(station_name)),</span>
+<span id="cb116-5"><a href="#cb116-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">by =</span> <span class="st">"NAME"</span>)</span>
+<span id="cb116-6"><a href="#cb116-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb116-7"><a href="#cb116-7" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(stations_new)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 29</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb118"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(stations_new<span class="sc">$</span>polygons)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+ 1 
+29 </code></pre>
+</div>
+</div>
+<p>The station points are compared with the coordinates in <code>future_stations.csv</code>. The distance between the two is calculated for each station, in metres:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb120"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb120-1"><a href="#cb120-1" aria-hidden="true" tabindex="-1"></a>csv_points <span class="ot">&lt;-</span> stations_new <span class="sc">%&gt;%</span></span>
+<span id="cb120-2"><a href="#cb120-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb120-3"><a href="#cb120-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"lon"</span>, <span class="st">"lat"</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb120-4"><a href="#cb120-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span>
+<span id="cb120-5"><a href="#cb120-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb120-6"><a href="#cb120-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">as.numeric</span>(<span class="fu">st_distance</span>(stations_new, csv_points, <span class="at">by_element =</span> <span class="cn">TRUE</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+4.189e-06 6.911e-06 1.036e-05 2.092e-05 2.715e-05 9.046e-05 </code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Analysis">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Analysis
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>The largest distance is 0.00009 metres. The 29 matched polygons therefore lie at the positions given in <code>future_stations.csv</code>, which confirms that each name is matched to the correct station.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="combining-existing-and-proposed-stations" class="level4">
+<h4 class="anchored" data-anchor-id="combining-existing-and-proposed-stations">4.4.4 Combining Existing and Proposed Stations</h4>
+<p>The existing stations and the proposed stations are placed in one layer.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb122"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb122-1"><a href="#cb122-1" aria-hidden="true" tabindex="-1"></a>stations_existing <span class="ot">&lt;-</span> stations_exist <span class="sc">%&gt;%</span></span>
+<span id="cb122-2"><a href="#cb122-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(station_code, station_name) <span class="sc">%&gt;%</span></span>
+<span id="cb122-3"><a href="#cb122-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">status =</span> <span class="st">"Existing"</span>)</span>
+<span id="cb122-4"><a href="#cb122-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb122-5"><a href="#cb122-5" aria-hidden="true" tabindex="-1"></a>stations_proposed <span class="ot">&lt;-</span> stations_new <span class="sc">%&gt;%</span></span>
+<span id="cb122-6"><a href="#cb122-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(station_code, station_name, line) <span class="sc">%&gt;%</span></span>
+<span id="cb122-7"><a href="#cb122-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">status =</span> <span class="st">"Proposed"</span>)</span>
+<span id="cb122-8"><a href="#cb122-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb122-9"><a href="#cb122-9" aria-hidden="true" tabindex="-1"></a>stations_all <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(stations_existing, stations_proposed)</span>
+<span id="cb122-10"><a href="#cb122-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb122-11"><a href="#cb122-11" aria-hidden="true" tabindex="-1"></a>stations_all <span class="sc">%&gt;%</span></span>
+<span id="cb122-12"><a href="#cb122-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb122-13"><a href="#cb122-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(status)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  status       n
+  &lt;chr&gt;    &lt;int&gt;
+1 Existing   184
+2 Proposed    29</code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
