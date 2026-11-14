@@ -1999,7 +1999,7 @@ destinations %>%
 
 ### 5.5 Residential Mass and Trips Starting
 
-The correlation of the residential mass with the trips starting was shown in section 4.9.2. The rank correlation is calculated here as a check that does not depend on a few large stations:
+The correlation of the residential mass with the trips starting was shown in section 4.9.2. The rank correlation is calculated here as a check that does not depend on a few large stations.
 
 ```{r}
 origins %>%
@@ -2568,7 +2568,7 @@ station_pred %>%
             total_predicted = round(sum(predicted)))
 ```
 
-The agreement between the two is measured by the ordinary correlation, by the rank correlation and by the ratio of the predicted to the observed trips:
+The agreement between the two is measured by the ordinary correlation, by the rank correlation and by the ratio of the predicted to the observed trips.
 
 ```{r}
 station_pred %>%
@@ -2874,7 +2874,7 @@ pred_all <- si_all %>%
   mutate(ridership = starting + arriving)
 ```
 
-The predictions are summarised by line:
+The predictions are summarised:
 
 ```{r}
 pred_all %>%
@@ -3298,7 +3298,7 @@ compare_existing %>%
 - The proposed stations have no observed ridership. Their residential demand and their attraction are both inferred from relationships fitted on the existing stations, and those relationships may not hold in areas that are still being built.
 - The model explains part of the variation in station ridership, and its errors still follow a spatial pattern across the island. The predicted figures should be read as an indication of the scale of a station's ridership, not as a forecast. The total number of trips is also held constant, which assumes that the new lines draw their riders from the existing stations and attract no additional travel.
 
-## 11 Conclusion
+## 11 Conclusion and Implications
 
 A spatial interaction model of station-level ridership is calibrated on the 33,672 pairs formed by the 184 existing stations. Nine models are compared. The chosen one gives each attraction variable its own exponent, measures the pull of the city centre, and weights distance by an exponential decay of 0.109 for each kilometre. It reproduces the trips ending at a station with a squared correlation of 0.218, and it performs as well on origins held out of the calibration as on those used for it.
 
@@ -3307,6 +3307,8 @@ Applied to the proposed network, the model gives the 29 new stations 140,169 tri
 The new stations draw their riders from the stations around them. The ridership of the existing stations falls from 1,141,986 to 1,001,817 trips, with no station gaining. The losses concentrate in the west along the Jurong Region Line, where Lakeside, Pioneer and Boon Lay each lose about 60%. The market areas show how this happens: 2,112 HDB buildings, holding 16.1% of the island's HDB footprint area, lie closer to a new station than to any existing one.
 
 The predictions and the impact estimates carry different weight. The predicted ridership of the proposed stations holds at a correlation of 0.979 between the two best models, while their estimates of the loss at the existing stations differ by nearly half. The predictions are best used to compare stations with one another and to show where the new lines overlap the network that already exists.
+
+Two implications follow for planning. Capacity should be considered first for Tampines North, Pasir Ris East and Serangoon North, the three busiest of the proposed stations, all at the eastern end of the Cross Island Line. Bus services in the west would also be worth reviewing, since they feed stations whose catchments the Jurong Region Line takes over.
 
 ## 12 References
 

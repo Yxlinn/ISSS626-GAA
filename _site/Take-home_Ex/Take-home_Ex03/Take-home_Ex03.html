@@ -393,7 +393,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#comparison-with-the-competing-destinations-model" id="toc-comparison-with-the-competing-destinations-model" class="nav-link" data-scroll-target="#comparison-with-the-competing-destinations-model">9.3 Comparison with the Competing Destinations Model</a></li>
   </ul></li>
   <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">10 Limitations</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">11 Conclusion</a></li>
+  <li><a href="#conclusion-and-implications" id="toc-conclusion-and-implications" class="nav-link" data-scroll-target="#conclusion-and-implications">11 Conclusion and Implications</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">12 References</a></li>
   </ul>
 </nav>
@@ -3890,7 +3890,7 @@ $ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((103.9321 1...., MULTIPOLY
 </section>
 <section id="residential-mass-and-trips-starting" class="level3">
 <h3 class="anchored" data-anchor-id="residential-mass-and-trips-starting">5.5 Residential Mass and Trips Starting</h3>
-<p>The correlation of the residential mass with the trips starting was shown in section 4.9.2. The rank correlation is calculated here as a check that does not depend on a few large stations:</p>
+<p>The correlation of the residential mass with the trips starting was shown in section 4.9.2. The rank correlation is calculated here as a check that does not depend on a few large stations.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb296"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb296-1"><a href="#cb296-1" aria-hidden="true" tabindex="-1"></a>origins <span class="sc">%&gt;%</span></span>
 <span id="cb296-2"><a href="#cb296-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(status <span class="sc">==</span> <span class="st">"Existing"</span>) <span class="sc">%&gt;%</span></span>
@@ -4818,7 +4818,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 1      184         570993          570993</code></pre>
 </div>
 </div>
-<p>The agreement between the two is measured by the ordinary correlation, by the rank correlation and by the ratio of the predicted to the observed trips:</p>
+<p>The agreement between the two is measured by the ordinary correlation, by the rank correlation and by the ratio of the predicted to the observed trips.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb375"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb375-1"><a href="#cb375-1" aria-hidden="true" tabindex="-1"></a>station_pred <span class="sc">%&gt;%</span></span>
 <span id="cb375-2"><a href="#cb375-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">pearson =</span> <span class="fu">round</span>(<span class="fu">cor</span>(observed, predicted), <span class="dv">3</span>),</span>
@@ -5291,7 +5291,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 <span id="cb407-8"><a href="#cb407-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">starting =</span> trips_from_new) <span class="sc">%&gt;%</span></span>
 <span id="cb407-9"><a href="#cb407-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ridership =</span> starting <span class="sc">+</span> arriving)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The predictions are summarised by line:</p>
+<p>The predictions are summarised:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb408"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb408-1"><a href="#cb408-1" aria-hidden="true" tabindex="-1"></a>pred_all <span class="sc">%&gt;%</span></span>
 <span id="cb408-2"><a href="#cb408-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(status <span class="sc">==</span> <span class="st">"Proposed"</span>) <span class="sc">%&gt;%</span></span>
@@ -6085,12 +6085,13 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 <li>The model explains part of the variation in station ridership, and its errors still follow a spatial pattern across the island. The predicted figures should be read as an indication of the scale of a station’s ridership, not as a forecast. The total number of trips is also held constant, which assumes that the new lines draw their riders from the existing stations and attract no additional travel.</li>
 </ul>
 </section>
-<section id="conclusion" class="level2">
-<h2 class="anchored" data-anchor-id="conclusion">11 Conclusion</h2>
+<section id="conclusion-and-implications" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion-and-implications">11 Conclusion and Implications</h2>
 <p>A spatial interaction model of station-level ridership is calibrated on the 33,672 pairs formed by the 184 existing stations. Nine models are compared. The chosen one gives each attraction variable its own exponent, measures the pull of the city centre, and weights distance by an exponential decay of 0.109 for each kilometre. It reproduces the trips ending at a station with a squared correlation of 0.218, and it performs as well on origins held out of the calibration as on those used for it.</p>
 <p>Applied to the proposed network, the model gives the 29 new stations 140,169 trips per weekday in the morning peak, about 12% of the ridership of the network as it stands. The 21 Jurong Region Line stations account for 88,333 of these and the 8 Cross Island Line stations for 51,835. Station for station the Cross Island Line is the busier of the two, with a median of 6,871 against 4,528. Tampines North, Pasir Ris East and Serangoon North are the three busiest.</p>
 <p>The new stations draw their riders from the stations around them. The ridership of the existing stations falls from 1,141,986 to 1,001,817 trips, with no station gaining. The losses concentrate in the west along the Jurong Region Line, where Lakeside, Pioneer and Boon Lay each lose about 60%. The market areas show how this happens: 2,112 HDB buildings, holding 16.1% of the island’s HDB footprint area, lie closer to a new station than to any existing one.</p>
 <p>The predictions and the impact estimates carry different weight. The predicted ridership of the proposed stations holds at a correlation of 0.979 between the two best models, while their estimates of the loss at the existing stations differ by nearly half. The predictions are best used to compare stations with one another and to show where the new lines overlap the network that already exists.</p>
+<p>Two implications follow for planning. Capacity should be considered first for Tampines North, Pasir Ris East and Serangoon North, the three busiest of the proposed stations, all at the eastern end of the Cross Island Line. Bus services in the west would also be worth reviewing, since they feed stations whose catchments the Jurong Region Line takes over.</p>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">12 References</h2>

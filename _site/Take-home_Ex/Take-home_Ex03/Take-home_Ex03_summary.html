@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-html/tabby.min.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.10.18">
+
+  <meta name="author" content="Lin Yuxuan">
+  <title>ISSS626 Geospatial Analytics – Geospatial Analytics for Urban Sustainability</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/reveal.css">
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+  </style>
+  <link rel="stylesheet" href="../../site_libs/revealjs/dist/theme/quarto-0427d8d92a431aa6a6430e53ec02a470.css">
+  <link href="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="../../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Geospatial Analytics for Urban Sustainability</h1>
+  <p class="subtitle">Station Ridership and Market Area Impact of the Jurong Region and Cross Island Lines</p>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+Lin Yuxuan
+</div>
+</div>
+</div>
+
+</section>
+<section id="content-page" class="slide level2 center">
+<h2>Content Page</h2>
+<ul>
+<li>Overview</li>
+<li>Research Questions</li>
+<li>Study Area &amp; Data</li>
+<li>Analytical Approach</li>
+<li>Model Performance</li>
+<li>Key Finding 1: The New Stations Are Ordinary in Size</li>
+<li>Key Finding 2: Market Areas Shift in Three Places</li>
+<li>Key Finding 3: Every Existing Station Loses Riders</li>
+<li>Limitations</li>
+<li>Conclusion &amp; Implications</li>
+</ul>
+</section>
+<section id="overview" class="slide level2">
+<h2>1. Overview</h2>
+<ul>
+<li>The MRT has been the backbone of public transport in Singapore since 1987, carrying <strong>3.49 million trips a day</strong> in 2025</li>
+<li>The <strong>Land Transport Master Plan 2040</strong> targets a 360 km rail network and 8 in 10 households within a 10-minute walk of a station, both by 2030</li>
+<li>Stations are sometimes <strong>built ahead of demand</strong>, and some open years after their station boxes are completed</li>
+<li>Two lines are being delivered: the <strong>Jurong Region Line (24 stations)</strong> and <strong>Cross Island Line Phase 1 (12 stations)</strong></li>
+<li>Knowing <strong>which new stations will be busy</strong>, and <strong>which existing stations lose riders</strong>, supports these decisions before the lines open</li>
+</ul>
+<aside class="notes">
+<p>Rail is the backbone of public transport in Singapore. The MRT has been running since 1987, and in 2025 it carried an average of 3.49 million trips a day.</p>
+<p>The network is still growing. The Land Transport Master Plan 2040 sets two targets for 2030: a rail network of 360 kilometres, and eight in ten households within a ten-minute walk of a train station.</p>
+<p>Stations are sometimes built ahead of the demand for them, to avoid disruptive construction later. Hume station on the Downtown Line is an example. Its station box was built during the second phase of the line, but the station itself only opened in February 2025.</p>
+<p>Two further lines are being delivered now. The Jurong Region Line has 24 stations, with Stage 1 expected around mid-2028. Cross Island Line Phase 1 has 12 stations and is targeted to open in 2030.</p>
+<p>That raises a planning question. Before these lines open, it is useful to know which of the new stations will be busy, and which existing stations will lose riders to them. This exercise answers that question with a spatial interaction model.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="research-questions" class="slide level2">
+<h2>2. Research Questions</h2>
+<ol type="1">
+<li>Which attraction variables, and which distance decay, explain station-level ridership on the existing network?</li>
+<li>Does the calibrated model outperform reference models, namely equal market shares and a Huff model with fixed parameters?</li>
+<li>What ridership is predicted for each proposed station, and how does it compare with existing stations on the same lines?</li>
+<li>Which existing stations lose market share and ridership to the new stations, and where are the losses concentrated?</li>
+</ol>
+<aside class="notes">
+<p>The exercise is guided by four research questions, which follow the three objectives set out in the brief.</p>
+<p>The first two concern the model itself. Which attraction variables, and which shape of distance decay, explain how many trips end at a station. And whether a model calibrated on observed flows does better than two reference models: one that gives every destination an equal share, and a Huff model with the exponents fixed rather than estimated.</p>
+<p>The third question is the prediction. How many trips each of the proposed stations is expected to carry, and how that compares with the stations already on the network.</p>
+<p>The fourth is the impact. Which existing stations lose market share and ridership once the new stations open, and where those losses are concentrated.</p>
+<p>Underlying all four is the idea of a market area. Ridership at a station depends on the people who live within reach, the activities the area offers, and the competing stations nearby. A new station changes that competitive position for every station around it.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="study-area-data" class="slide level2">
+<h2>3. Study Area &amp; Data</h2>
+<div class="columns">
+<div class="column" style="width:45%;">
+<p><strong>Study area</strong></p>
+<ul>
+<li><strong>213 stations</strong>: 184 existing, 29 new</li>
+</ul>
+<p><strong>Study period</strong></p>
+<ul>
+<li>Weekday morning peak, 7 and 8 am</li>
+<li>July to September 2026</li>
+<li><strong>570,993 trips</strong> per weekday</li>
+</ul>
+<p><strong>Data</strong></p>
+<ul>
+<li>LTA DataMall, Master Plan 2025</li>
+<li>HDB footprints, bus stops, OpenStreetMap facilities</li>
+<li><strong>800 m</strong> catchment per station</li>
+</ul>
+</div><div class="column" style="width:55%;">
+<p><img data-src="images/map-net.png"></p>
+<p>Blue stations send riders out, red stations receive them</p>
+</div></div>
+<aside class="notes">
+<p>The study area is Singapore’s MRT and LRT network, covering 213 stations: the 184 operating today and the 29 new stations of the two proposed lines.</p>
+<p>The brief names 36 stations across the two lines, 24 on the Jurong Region Line and 12 on Cross Island Line Phase 1. Seven of those are interchanges with stations that already exist, such as Jurong East and Pasir Ris. Those seven are counted once, as existing stations, which leaves 29 genuinely new stations to predict.</p>
+<p>The study period is the weekday morning peak, taken as the hours beginning at 7 and 8 am, over July to September 2026. The three months are pooled and divided by the 65 weekdays they contain, giving an average of 570,993 trips per weekday. Those trips run between 33,672 pairs of existing stations, and those pairs are what the model is calibrated on.</p>
+<p>Six datasets are used. The origin-destination flows, the existing station locations and the bus stops come from LTA DataMall. The planned stations come from the Master Plan 2025 rail station layer. HDB building footprints measure how many residents live near each station, with 13,436 buildings in total. OpenStreetMap supplies 937 education, retail and health facilities. Each is counted within 800 metres of a station, the half-mile circle used as a walking catchment in transit research.</p>
+<p>The map shows the pattern the model has to reproduce. Each circle is the difference between the trips ending and the trips starting at a station. The blue stations in the north and north-east send more riders out than they receive, and these are the housing towns. The red stations in the south centre receive far more than they send. The largest of them is Raffles Place, which takes 29,622 trips on an average weekday.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="analytical-approach" class="slide level2">
+<h2>4. Analytical Approach</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>The trips starting at a station are divided among all other stations by <strong>attraction</strong> and <strong>distance</strong>, using the <strong>Huff</strong> and <strong>Multiplicative Competitive Interaction (MCI)</strong> models</li>
+<li><strong>Nine models</strong> compared on 33,672 pairs</li>
+<li>Chosen: <strong>bus stops, education, retail, health</strong> and the <strong>distance to the city centre</strong>, with an exponential decay of <strong>0.109 per km</strong></li>
+<li>New stations have no riders to observe, so <strong>13,436 HDB buildings are shared among competing stations</strong></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><img data-src="images/plot-origin.png"></p>
+<p>Estimated residential demand against observed trips starting</p>
+</div></div>
+<aside class="notes">
+<p>The method is a probabilistic spatial interaction model. For every station where trips start, the model divides those trips among all the other stations. The share going to a particular destination depends on how attractive that destination is and how far away it is.</p>
+<p>Two forms are used. The Huff model combines a single measure of attraction with a distance decay. The Multiplicative Competitive Interaction model extends this by giving each attraction variable its own exponent, estimated from observed flows.</p>
+<p>Nine models were compared, starting from one that gives every destination an equal share. The chosen model uses four attraction variables counted within the catchment, together with the distance to the city centre, which stands in for jobs, since nothing in the data counts them. A decay of 0.109 for each kilometre means a destination loses about a tenth of its pull per extra kilometre.</p>
+<p>A proposed station has no observed trips, so its demand has to be estimated. Each HDB building is shared among the stations around it by a Huff model: a building close to one station gives most of its area to that station, and a building between two stations splits between them. The rate of decay is calibrated against the observed trips starting at the existing stations, and the plot shows the result, with each point an existing station.</p>
+<p>The assignment is then run twice, once over the 184 existing stations and once over all 213. The difference gives the riders each new station takes from the stations around it.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="model-performance" class="slide level2">
+<h2>5. Model Performance</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>The chosen model explains <strong>22%</strong> of the variation in arrivals, against 4% for equal shares and under 1% for a calibrated Huff model</li>
+<li>It <strong>holds up out of sample</strong>: five-fold validation by origin gives the same 22%</li>
+<li>Estimated residential demand correlates <strong>0.744</strong> with observed trips starting, against 0.39 for a simple catchment count</li>
+<li>But predictions are <strong>pulled towards the middle</strong>: the quietest quarter of stations is over-predicted about nine times, the busiest under-predicted by half</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><img data-src="images/plot-fit.png"></p>
+<p>Predicted against observed arrivals, 184 existing stations</p>
+</div></div>
+<aside class="notes">
+<p>The chosen model explains 22% of the variation in the trips ending at a station. That is a large improvement on the reference models: equal shares explains 4%, and a Huff model with calibrated exponents but a single attraction variable explains under 1%. The two largest gains came from giving each attraction variable its own exponent, and from adding the distance to the city centre.</p>
+<p>The model also generalises. The origins were split into five groups, and each group in turn was predicted by a model fitted on the other four. The out-of-sample result is the same as the in-sample one, which means the parameters are not fitted to noise.</p>
+<p>On the origin side, sharing the HDB buildings among competing stations matches the observed trips starting with a correlation of 0.744. Simply counting HDB area inside an 800 metre catchment gives 0.39, because that count ignores competition between nearby stations and counts the same building for every station within reach.</p>
+<p>The caveat is visible in the plot. The cloud of points is flatter than the dashed line. Stations with few observed arrivals sit above it, where the model predicts too many, and busy stations sit below it, where it predicts too few. This is why the predicted figures should be read as the scale of a station’s ridership rather than a forecast, and why the quietest of the proposed stations are likely to be over-predicted.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="key-finding-1-the-new-stations-are-ordinary-in-size" class="slide level2">
+<h2>6. Key Finding 1: The New Stations Are Ordinary in Size</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li><strong>140,169 trips per weekday</strong>, about <strong>12%</strong> of the network’s ridership today</li>
+<li><strong>Jurong Region Line</strong>: 21 stations, 88,333 trips. <strong>Cross Island Line</strong>: 8 stations, 51,835 trips</li>
+<li>Busiest: <strong>Tampines North (11,936 trips)</strong>. Quietest: <strong>Aviation Park (656)</strong></li>
+<li>Median new station <strong>4,654 trips</strong>, against <strong>4,803</strong> at the existing stations</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><img data-src="images/map-proposed.png"></p>
+<p>Predicted ridership of the 29 proposed stations</p>
+</div></div>
+<aside class="notes">
+<p>Applied to the proposed network, the model gives the 29 new stations 140,169 trips per weekday in the morning peak, about 12% of the ridership of the network as it stands.</p>
+<p>The Jurong Region Line accounts for 88,333 of those trips across its 21 new stations, and Cross Island Line Phase 1 for 51,835 across its 8. The Cross Island Line has fewer stations but each one is busier: its median station is predicted 6,871 trips against 4,528 on the Jurong Region Line.</p>
+<p>The four busiest stations of the 29 are all on the Cross Island Line, and all lie in built-up housing areas: Tampines North, Pasir Ris East, Serangoon North and Teck Ghee.</p>
+<p>The quietest are in the west and the far east. Several Jurong Region Line stations in industrial areas, such as Jurong Pier and Tukang, are predicted to receive more trips than they send, because they sit among workplaces rather than housing.</p>
+<p>The headline is the last point. In ridership terms these are ordinary stations, not major ones.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="key-finding-2-market-areas-shift-in-three-places" class="slide level2">
+<h2>7. Key Finding 2: Market Areas Shift in Three Places</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li><strong>2,112 HDB buildings</strong>, holding <strong>16.1%</strong> of the island’s HDB footprint area, move closer to a new station</li>
+<li>Three groups: <strong>Tengah and Jurong</strong>, the <strong>centre</strong>, and <strong>Tampines and Pasir Ris</strong></li>
+<li><strong>Pasir Ris</strong> loses 330 buildings. <strong>Tampines North</strong> gains 275</li>
+<li>Elsewhere little changes: the median building sends <strong>1%</strong> of its area to a new station</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><img data-src="images/map-market.png"></p>
+<p>Red buildings move to a new station</p>
+</div></div>
+<aside class="notes">
+<p>This slide explains why the next one looks as it does. Each HDB building is shared among the stations by the Huff model, and the map colours every building by the share of its area going to one of the 29 new stations. Grey means almost none, red means most of it.</p>
+<p>2,112 buildings end up closer to a new station than to any existing one. They hold 16.1% of the island’s HDB footprint area, so roughly a sixth of public housing changes hands in market area terms.</p>
+<p>The affected housing forms three groups: the west around Tengah and Jurong, the centre along the middle of the Cross Island Line, and the east around Tampines and Pasir Ris.</p>
+<p>Pasir Ris loses the most buildings, 330 of them, mostly to Pasir Ris East and Tampines North. Tampines North gains the most, at 275, followed by Pasir Ris East at 265 and Serangoon North at 233. Those are the same three stations with the highest predicted ridership on the previous slide, which shows their predictions rest on the residential area they take over.</p>
+<p>The rest of the island is largely untouched, so the effect is concentrated rather than general.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="key-finding-3-every-existing-station-loses-riders" class="slide level2">
+<h2>8. Key Finding 3: Every Existing Station Loses Riders</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>Ridership at the existing stations falls from <strong>1,141,986</strong> to <strong>1,001,817 trips per weekday</strong></li>
+<li>The median station loses <strong>7.9%</strong>, and <strong>no station gains</strong></li>
+<li><strong>51 stations</strong> lose more than a tenth of their ridership, and <strong>16</strong> lose more than a quarter</li>
+<li>Deepest in the west, along the Jurong Region Line: <strong>Lakeside −61%</strong>, Pioneer −60%, Boon Lay −60%</li>
+<li>Least affected in the north: Admiralty, Khatib and Sembawang, each under 3%</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><img data-src="images/map-impact.png"></p>
+<p>Change in ridership at existing stations. Crosses mark the proposed stations</p>
+</div></div>
+<aside class="notes">
+<p>The new stations draw their riders from the stations around them. Across the 184 existing stations, ridership falls from 1,141,986 trips per weekday to 1,001,817.</p>
+<p>The median station loses 7.9%, and no station gains. That follows from the design: the total number of trips is held constant, so the new stations redistribute trips rather than attract new ones.</p>
+<p>The losses are not spread evenly. On the map, the darkest points lie along the western corridor, where the crosses marking the proposed stations are closest together. Lakeside, Pioneer and Boon Lay sit on the East West Line, and the Jurong Region Line runs beside them through the same housing.</p>
+<p>A second group lies at the eastern end of the Cross Island Line, where Pasir Ris loses 39%. The least affected stations are in the north, furthest from both new lines.</p>
+<p>One figure to treat with care is Changi Airport, at −51%. Its ridership before the new stations is only about 1,950 trips, and its catchment holds almost no HDB housing, which is where the demand estimate is weakest.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="limitations" class="slide level2">
+<h2>9. Limitations</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li><strong>No data on jobs</strong>, which draw most morning trips. The distance to the city centre is a rough substitute</li>
+<li>Residents measured by <strong>HDB footprints only</strong>, and distances measured in <strong>straight lines</strong></li>
+<li>Predictions are <strong>pulled towards the middle</strong>, errors <strong>cluster in space</strong>, and total trips are <strong>held constant</strong></li>
+<li>A <strong>competing destinations</strong> model fits better: it agrees on the new stations (<strong>0.979</strong>) but gives a different median loss (<strong>−4.3%</strong> against <strong>−7.9%</strong>)</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><img data-src="images/plot-models.png"></p>
+<p>Predicted ridership under the two models</p>
+</div></div>
+<aside class="notes">
+<p>Four limitations matter most.</p>
+<p>First, nothing in the data counts jobs, which are what draw most trips in the morning peak. The distance to the city centre is a rough substitute. This is the single largest source of error: the model predicts about 9,100 trips ending at Raffles Place against 29,622 observed.</p>
+<p>Second, the measures are coarse. Residents are counted through HDB building footprints, so private housing is left out and places of work have no measure at all, which is why the three Tuas stations are badly under-estimated. Distance is measured in straight lines, with no rail network, transfers or fares.</p>
+<p>Third, the model has two known biases. Predictions are pulled towards the middle of the range, and the residuals still follow a spatial pattern, with a Moran’s I of 0.263, which means something systematic is missing. The total number of trips is also held constant, which assumes the new lines attract no additional travel.</p>
+<p>Fourth, and this is the value-added test in the report, a competing destinations model that also accounts for how crowded a station’s surroundings are fits considerably better. It is not used for the predictions, because its measure of crowding changes when stations are added, which the calibration cannot test. The plot shows the two models agreeing closely on the ridership of the new stations and disagreeing on the impact. The ridership predictions are therefore the firmer result.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="conclusion-implications" class="slide level2">
+<h2>10. Conclusion &amp; Implications</h2>
+<p><strong>Conclusions</strong></p>
+<ul>
+<li>The 29 new stations are predicted <strong>140,169 trips per weekday</strong>, and the median one is an ordinary station in size</li>
+<li>Their riders come largely from <strong>catchments the network already serves</strong>: a sixth of HDB footprint area changes market area</li>
+<li><strong>Every existing station loses ridership</strong>, with the deepest losses in the west</li>
+</ul>
+<p><strong>Implications</strong></p>
+<ul>
+<li>Capacity should be considered first for <strong>Tampines North, Pasir Ris East and Serangoon North</strong>, the three busiest of the new stations</li>
+<li><strong>Bus services in the west</strong> warrant review, where the Jurong Region Line draws on catchments the existing line serves</li>
+<li>The <strong>ridership predictions are the firmer finding</strong>; the impact figures are indicative</li>
+</ul>
+<aside class="notes">
+<p>Three conclusions follow from the analysis.</p>
+<p>The 29 new stations are predicted 140,169 trips per weekday in the morning peak, and the median new station is close to the median existing station in size. These are ordinary stations rather than major ones.</p>
+<p>Their riders come largely from catchments the network already serves. A sixth of the island’s HDB footprint area moves closer to a new station than to any existing one, and that is what produces the losses.</p>
+<p>Every existing station loses ridership, with a median loss of 7.9% and the deepest losses along the western corridor.</p>
+<p>Two implications follow for planning. Capacity should be considered first for the three busiest of the new stations, all at the eastern end of the Cross Island Line. Bus services in the west would also be worth reviewing, since they carry residents to Lakeside, Pioneer and Boon Lay, and many of those residents will live closer to a Jurong Region Line station once the new line opens.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+
+
+</section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="../../site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="../../site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="../../site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="../../site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="../../site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="../../site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="../../site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="../../site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="../../site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="../../site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': true,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'fade',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>
