@@ -17,11 +17,11 @@ editor: visual
 
 ### 1.1 Study Context
 
-Urban rail transit supports sustainable urban development by providing high-capacity mobility and encouraging transit-oriented development around stations. It also connects residents to jobs, services and education. In Singapore, the Mass Rapid Transit (MRT) system has been the backbone of public transport since 1987. It carried an average of 3.49 million rides a day in 2025 (Land Transport Authority, n.d.). The Land Transport Master Plan 2040 sets a rail network of 360 km and a target of eight in ten households within a 10-minute walk of a train station, both by 2030 (Land Transport Authority, 2019).
+Urban rail transit supports sustainable urban development by providing high-capacity mobility and encouraging transit-oriented development around stations. It also connects residents to jobs, services and education. In Singapore, the Mass Rapid Transit (MRT) system has been the backbone of public transport since 1987. It carried an average of 3.49 million rides a day in 2025 ([Chelvan, 2026](https://www.straitstimes.com/singapore/transport/more-people-used-mrt-in-2025-as-lrt-ridership-falls-bus-numbers-still-below-pre-covid-levels)). The Land Transport Master Plan 2040 sets a rail network of 360 km and a target of eight in ten households within a 10-minute walk of a train station, both by 2030 ([Land Transport Authority, 2019](https://www.lta.gov.sg/content/dam/ltagov/who_we_are/our_work/land_transport_master_plan_2040/pdf/LTA%20LTMP%202040%20eReport.pdf)).
 
-Stations are sometimes built ahead of demand to limit future construction disruption. Some then open years after their station boxes are completed. Hume station is one example: its box was built as part of the second phase of the Downtown Line, and it opened on 28 February 2025 (Land Transport Authority, 2025). Catchment-area analysis and station-level ridership prediction support such decisions.
+Stations are sometimes built ahead of demand to limit future construction disruption. Some then open years after their station boxes are completed. Hume station is one example: its box was built as part of the second phase of the Downtown Line, and it opened on 28 February 2025 ([Land Transport Authority, 2025](https://www.lta.gov.sg/content/ltagov/en/newsroom/2025/1/news-releases/hume_station_to_open.html)). Catchment-area analysis and station-level ridership prediction support such decisions.
 
-Two further lines are being delivered. The Jurong Region Line (JRL) has 24 stations, and Phase 1 of the Cross Island Line (CRL) has 12 stations. JRL Stage 1 is expected around mid-2028 instead of end-2027, and the dates for Stages 2 and 3 are yet to be announced. CRL Phase 1 is targeted to open in 2030 (Land Transport Authority, 2026). The analysis treats all 36 stations as operating at the same time, and opening dates are not modelled.
+Two further lines are being delivered. The Jurong Region Line (JRL) has 24 stations, and Phase 1 of the Cross Island Line (CRL) has 12 stations. JRL Stage 1 is expected around mid-2028 instead of end-2027, and the dates for Stages 2 and 3 are yet to be announced. CRL Phase 1 is targeted to open in 2030 ([Land Transport Authority, 2026b](https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/3/news-releases/next-phase-of-rail-development.html)). The analysis treats all 36 stations as operating at the same time, and opening dates are not modelled.
 
 ### 1.2 Purpose and Objectives
 
@@ -58,6 +58,7 @@ The analysis uses the datasets in the table below. All datasets were retrieved i
 | HDB Existing Building | GeoJSON | Footprints of HDB blocks, with block number, street code and postal code. | HDB, via [data.gov.sg](https://data.gov.sg) |
 | Bus Stop Location | Shapefile | Locations of bus stops, September 2026. | [LTA DataMall](https://datamall.lta.gov.sg) |
 | Points of Interest | Shapefile | Points and polygons of points of interest. Stored as the layers `gis_osm_pois_free_1` (points) and `gis_osm_pois_a_free_1` (polygons). | OpenStreetMap, via [Geofabrik](https://download.geofabrik.de) (Malaysia, Singapore and Brunei extract) |
+| Master Plan 2019 Planning Area Boundary (No Sea) | GeoJSON | Boundaries of the planning areas of Singapore in the Master Plan 2019, without the sea. Used as the base of the maps. | [data.gov.sg](https://data.gov.sg) |
 
 ### 2.2 Study Scope
 
@@ -65,7 +66,7 @@ The study covers the existing MRT and LRT network and the proposed stations of t
 
 Each station in scope is either new or an existing interchange. A new station has no ridership in the origin-destination data. An existing interchange is already in the network under its current line code and gains a new line.
 
-Other entries in `future_stations` are out of scope. These include `JS2A`, which is targeted to open in the mid-2030s (Land Transport Authority, 2026), as well as CRL stations outside Phase 1 and stations on other lines.
+Other entries in `future_stations` are out of scope. These include `JS2A`, which is targeted to open in the mid-2030s ([Land Transport Authority, 2026b](https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/3/news-releases/next-phase-of-rail-development.html)), as well as CRL stations outside Phase 1 and stations on other lines.
 
 ### 2.3 Study Window
 
@@ -85,14 +86,16 @@ The following R packages are used:
 |---|---|---|
 | **tidyverse** | Collection of packages for data import, manipulation and visualisation | Importing the origin-destination data, wrangling it into the interaction data frames, and producing charts |
 | **sf** | Imports, manages and processes vector-based geospatial data | Importing the station, building and point-of-interest data, transforming coordinate reference systems, and building station catchments |
+| **sfdep** | Spatial weights and measures of spatial autocorrelation | Testing the residuals of the model for a spatial pattern with Moran’s I |
 | **tmap** | Thematic map creation using a layered grammar of graphics | Mapping ridership, market areas and the impact of the new stations |
+| **ggrepel** | Placing text labels without overlap | Labelling on maps |
 | **igraph** | Builds and analyses networks as graphs | Building the rail network and computing distances along it |
 | **MCI** | Calibrates the Huff and Multiplicative Competitive Interaction models | Estimating the model parameters and the market shares of the stations |
 
 The packages are loaded with the following code chunk:
 
 ```{r}
-pacman::p_load(tidyverse, sf, tmap, igraph, MCI)
+pacman::p_load(tidyverse, sf, sfdep, tmap, ggrepel, igraph, MCI)
 ```
 
 ### 3.2 Reproducibility
@@ -109,7 +112,7 @@ set.seed(123)
 
 #### 4.1.1 Importing the Monthly Data
 
-The monthly origin-destination data for July, August and September 2026 are imported with *read_csv()* of the **readr** package.
+The monthly origin-destination data for July, August and September 2026 are imported with `read_csv()` of the **readr** package.
 
 ```{r}
 od_202607 <- read_csv("data/aspatial/202607/origin_destination_train_202607.csv")
@@ -209,7 +212,7 @@ od_labels %>%
 
 ##### 4.1.2.1 Bayfront and Marina Bay
 
-The Circle Line codes of Bayfront and Marina Bay changed when Circle Line Stage 6 opened on 12 July 2026 ([Land Transport Guru](https://landtransportguru.net/circle-line-stage-6-start-service-12jul26/)). The presence of the new codes in each month is checked:
+The Circle Line codes of Bayfront and Marina Bay changed when Circle Line Stage 6 opened on 12 July 2026 ([Land Transport Guru, 2026a](https://landtransportguru.net/circle-line-stage-6-start-service-12jul26/)). The presence of the new codes in each month is checked:
 
 ```{r}
 new_codes <- c("CC34/DT16", "NS27/CC33/TE20")
@@ -228,7 +231,7 @@ new_codes %in% stations_202609
 
 ##### 4.1.2.2 Stevens
 
-Stevens is a single interchange station served by the Downtown Line (`DT10`) and the Thomson-East Coast Line (`TE11`) ([Land Transport Guru](https://landtransportguru.net/stevens-station/)). The origin-destination data list the two as separate codes.. The trips recorded between them are counted.
+Stevens is a single interchange station served by the Downtown Line (`DT10`) and the Thomson-East Coast Line (`TE11`) ([Land Transport Guru, 2026b](https://landtransportguru.net/stevens-station/)). The origin-destination data list the two as separate codes.. The trips recorded between them are counted.
 
 ```{r}
 od_raw %>%
@@ -491,15 +494,18 @@ summary(od_destination$ratio)
 The stations with a ratio below 0.8 or above 1.25 are listed with their names:
 
 ```{r}
-od_destination %>%
+unstable_stations <- od_destination %>%
   filter(ratio < 0.8 | ratio > 1.25) %>%
   left_join(stations_ref %>% select(station_code, station_name),
             by = c("DESTINATION_PT_CODE" = "station_code")) %>%
+  rename(station_code = DESTINATION_PT_CODE)
+
+unstable_stations %>%
   mutate(`2026-07` = round(`2026-07`, 1),
          `2026-08` = round(`2026-08`, 1),
          `2026-09` = round(`2026-09`, 1),
          ratio = round(ratio, 2)) %>%
-  select(DESTINATION_PT_CODE, station_name, `2026-07`, `2026-08`, `2026-09`, ratio) %>%
+  select(station_code, station_name, `2026-07`, `2026-08`, `2026-09`, ratio) %>%
   arrange(ratio) %>%
   print(n = 20)
 ```
@@ -855,7 +861,11 @@ summary(as.numeric(st_distance(stations_new, csv_points, by_element = TRUE)))
 - The largest distance is 0.00009 metres. The 29 matched polygons therefore lie at the positions given in `future_stations.csv`, which confirms that each name is matched to the correct station.
 :::
 
-#### 4.4.4 Combining Existing and Proposed Stations
+### 4.5 Station Layer and Catchments
+
+The existing and proposed stations are placed in one layer, and an 800 metre catchment is defined for each station.
+
+#### 4.5.1 Combining Existing and Proposed Stations
 
 The existing stations and the proposed stations are placed in one layer.
 
@@ -879,3 +889,2443 @@ stations_all %>%
 - The combined layer holds 213 stations: 184 existing and 29 proposed.
 - The 7 existing interchange stations where the new lines connect stay in the layer once, under their existing codes. The proposed stations are the 29 new stations only.
 :::
+
+#### 4.5.2 Defining the Station Catchments
+
+The catchment of a station is the area from which passengers are assumed to walk to the station. A radius of 800 metres is used. This is the half-mile circle, the conventional catchment distance in transit research (Guerra et al., 2012). The larger distance includes more of the residents and facilities that can reach a station.
+
+A circle of this radius is drawn around every station in the combined layer.
+
+```{r}
+catchment_800 <- stations_all %>%
+  st_buffer(dist = 800)
+
+nrow(catchment_800)
+
+round(as.numeric(st_area(st_union(catchment_800))) / 1000000, 1)
+```
+
+::: {.callout-note title="Analysis"}
+- Each of the 213 stations has an 800 metre catchment.
+- Together, the catchments cover 261.9 square kilometres.
+:::
+
+### 4.6 HDB Residential Footprints
+
+The number of residents near each station is not available as counts. The footprints of HDB buildings are used instead as a measure of residential mass: the number of buildings and their footprint area within each station catchment.
+
+#### 4.6.1 Importing the Footprints
+
+The footprints are stored in `HDBExistingBuilding.geojson`. The file is imported with `st_read()` of **sf** package.
+
+```{r}
+hdb_raw <- st_read(dsn = "data/geospatial/HDBExistingBuilding.geojson")
+
+glimpse(hdb_raw)
+```
+
+#### 4.6.2 Checking the Layer
+
+Missing values and duplicated buildings are checked. A building is identified by its block number and street code.
+
+```{r}
+hdb_raw %>%
+  st_drop_geometry() %>%
+  is.na() %>%
+  colSums()
+
+hdb_raw %>%
+  st_drop_geometry() %>%
+  select(BLK_NO, ST_COD) %>%
+  duplicated() %>%
+  sum()
+```
+
+The coordinate reference system is checked:
+
+```{r}
+st_crs(hdb_raw)$input
+```
+
+::: {.callout-note title="Analysis"}
+- No column has missing values, and no building repeats a block number and street code.
+- The coordinates are in longitude and latitude (WGS 84). The layer is transformed to EPSG:3414, so that areas and distances are in metres.
+:::
+
+#### 4.6.3 Preparing the Footprints
+
+The layer is transformed to **EPSG:3414**. The validity of the geometries is checked after the transformation, in metres.
+
+```{r}
+hdb <- st_transform(hdb_raw, crs = 3414)
+
+sum(!st_is_valid(hdb))
+
+hdb %>%
+  filter(!st_is_valid(hdb)) %>%
+  st_drop_geometry() %>%
+  select(BLK_NO, ST_COD)
+```
+
+An invalid polygon can fail in area and overlay calculations. The invalid polygons are repaired. The total footprint area is calculated before and after the repair.
+
+```{r}
+as.numeric(sum(st_area(hdb)))
+
+hdb <- st_make_valid(hdb)
+
+sum(!st_is_valid(hdb))
+
+as.numeric(sum(st_area(hdb)))
+```
+
+::: {.callout-note title="Analysis"}
+- Four buildings have invalid geometries: blocks 548B, 404, 288 and 430B.
+- All four are repaired, and no invalid geometry remains.
+- The total footprint area is 17,493,270 square metres before and after the repair. The repair does not change the area.
+:::
+
+The footprint area of each building is added. The sizes of the footprints are then grouped, to see how much area the very small and the very large footprints hold.
+
+```{r}
+hdb <- hdb %>%
+  mutate(area_m2 = as.numeric(st_area(geometry)))
+
+summary(hdb$area_m2)
+
+hdb %>%
+  st_drop_geometry() %>%
+  mutate(size = case_when(area_m2 < 50 ~ "Below 50 m2",
+                          area_m2 > 20000 ~ "Above 20,000 m2",
+                          TRUE ~ "Between 50 and 20,000 m2")) %>%
+  group_by(size) %>%
+  summarise(buildings = n(),
+            area_m2 = sum(area_m2)) %>%
+  mutate(share = round(100 * area_m2 / sum(area_m2), 2))
+```
+
+::: {.callout-note title="Analysis"}
+- The median footprint is 1,089.8 square metres. The mean is 1,302.0, which is higher because a few footprints are very large. The largest is 67,587.7 square metres.
+- 21 footprints are below 50 square metres. Together they hold 619 square metres, which rounds to 0.00% of the total area.
+- 13 footprints are above 20,000 square metres. Together they hold 421,411 square metres, or 2.41% of the total area.
+- All footprints are kept. Removing them would take out 2.41% of the area, and nothing in the layer shows that they are errors.
+:::
+
+Each building is reduced to its centre. A building is assigned to a station catchment by its centre.
+
+```{r}
+hdb_points <- hdb %>%
+  st_centroid() %>%
+  select(BLK_NO, ST_COD, area_m2)
+
+nrow(hdb_points)
+```
+
+::: {.callout-note title="Analysis"}
+- Each of the 13,436 buildings is now one point. A building is assigned to a station catchment by this point, and its footprint area is carried with it.
+:::
+
+### 4.7 Attraction Variables
+
+#### 4.7.1 Bus Stops
+
+The bus stops show how well a station is served by the buses that bring passengers to it. A station with more bus stops nearby is easier to reach from the surrounding areas. The number of bus stops within each station catchment is therefore used as a candidate attraction variable.
+
+##### 4.7.1.1 Importing the Bus Stops
+
+The bus stops are stored as a shapefile. It is imported with `st_read()` of **sf** package.
+
+```{r}
+bus_raw <- st_read(dsn = "data/geospatial/BusStopLocation_Sep2026", layer = "BusStop")
+
+glimpse(bus_raw)
+```
+
+##### 4.7.1.2 Checking the Layer
+
+Missing values, duplicated bus stop numbers and the status of the bus stops are checked.
+
+```{r}
+bus_raw %>%
+  st_drop_geometry() %>%
+  is.na() %>%
+  colSums()
+
+bus_raw %>%
+  st_drop_geometry() %>%
+  select(BUS_STOP_N) %>%
+  duplicated() %>%
+  sum()
+
+bus_raw %>%
+  st_drop_geometry() %>%
+  count(STATUS)
+```
+
+The coordinate reference system is checked:
+
+```{r}
+st_crs(bus_raw)$input
+```
+
+::: {.callout-note title="Analysis"}
+- `PKG_REF`, `EXCEPTION_` and `REMARKS` are empty in all 5,205 rows. `BUS_ROOF_N` is missing in 2 rows and `LOC_DESC` in 1 row. None of these fields is used to count bus stops.
+- No bus stop number appears twice.
+- All 5,205 bus stops have the status `OP`. No closed bus stop needs to be removed.
+- The layer is in SVY21.
+:::
+
+##### 4.7.1.3 Preparing the Bus Stops
+
+The layer is transformed to **EPSG:3414**. Bus stops at the same location are counted, and the bus stop number and description are kept.
+
+```{r}
+bus <- st_transform(bus_raw, crs = 3414)
+
+bus %>%
+  st_coordinates() %>%
+  duplicated() %>%
+  sum()
+
+bus_points <- bus %>%
+  select(BUS_STOP_N, LOC_DESC)
+
+nrow(bus_points)
+```
+
+::: {.callout-note title="Analysis"}
+- No two bus stops share a location.
+- The transformation gives the layer the EPSG code 3414, so that it matches the other layers.
+:::
+
+#### 4.7.2 OpenStreetMap Points of Interest
+
+OpenStreetMap (OSM) holds the locations of facilities that draw trips to a station. Three groups of facilities are used as attraction variables, one for each main purpose of a morning peak trip.
+
+- **education:** `school`, `college` and `university`
+- **retail:** `mall`, `department_store` and `marketplace`
+- **health:** `hospital`
+
+Supermarkets and clinics are not used. They mainly serve nearby residents, who are already measured by the HDB footprints.
+
+##### 4.7.2.1 Importing the Layers
+
+OSM stores a facility either as a point or as an area. The two layers are imported with `st_read()` of **sf** package.
+
+```{r}
+pois_raw <- st_read(dsn = "data/geospatial/osm", layer = "gis_osm_pois_free_1")
+
+poisa_raw <- st_read(dsn = "data/geospatial/osm", layer = "gis_osm_pois_a_free_1")
+
+glimpse(pois_raw)
+
+glimpse(poisa_raw)
+```
+
+##### 4.7.2.2 Checking the Layers
+
+Missing values and the coordinate reference system are checked.
+
+```{r}
+pois_raw %>%
+  st_drop_geometry() %>%
+  is.na() %>%
+  colSums()
+
+poisa_raw %>%
+  st_drop_geometry() %>%
+  is.na() %>%
+  colSums()
+
+st_crs(pois_raw)$input
+
+st_crs(poisa_raw)$input
+```
+
+::: {.callout-note title="Analysis"}
+- `osm_id`, `code` and `fclass` have no missing values in either layer.
+- Only `name` has missing values: 22,267 points and 35,397 areas have no name. A facility without a name is kept, because only its class and location are needed to count it.
+:::
+
+##### 4.7.2.3 Selecting the Attraction Facilities
+
+The facility classes of each group are listed. The facilities of these classes are kept in both layers, and the layers are transformed to **EPSG:3414**.
+
+```{r}
+education_classes <- c("school", "college", "university")
+retail_classes <- c("mall", "department_store", "marketplace")
+health_classes <- c("hospital")
+
+pois_sel <- pois_raw %>%
+  filter(fclass %in% c(education_classes, retail_classes, health_classes)) %>%
+  st_transform(crs = 3414)
+
+poisa_sel <- poisa_raw %>%
+  filter(fclass %in% c(education_classes, retail_classes, health_classes)) %>%
+  st_transform(crs = 3414)
+
+nrow(pois_sel)
+
+nrow(poisa_sel)
+```
+
+::: {.callout-note title="Analysis"}
+- The selected classes leave 2,536 points and 10,461 areas.
+:::
+
+A facility outside the 800 metre catchments cannot fall in any catchment. These facilities are removed, and the validity of the remaining areas is checked.
+
+```{r}
+study_area <- st_union(catchment_800)
+
+pois_sel <- pois_sel %>%
+  st_filter(study_area)
+
+poisa_sel <- poisa_sel %>%
+  st_filter(study_area)
+
+nrow(pois_sel)
+
+nrow(poisa_sel)
+
+sum(!st_is_valid(poisa_sel))
+```
+
+::: {.callout-note title="Analysis"}
+- 184 points and 753 areas lie within the 800 metre catchments.
+- None of the 753 areas has an invalid geometry.
+:::
+
+A facility can be recorded twice: as a point and as the area that contains it. A point inside an area of the same class and with the same name is the same facility. A point without a name is not matched, because its name cannot be compared.
+
+```{r}
+pois_double <- pois_sel %>%
+  st_join(poisa_sel %>% select(fclass_area = fclass, name_area = name),
+          join = st_within) %>%
+  st_drop_geometry() %>%
+  filter(fclass == fclass_area, name == name_area, name != "") %>%
+  distinct(osm_id)
+
+nrow(pois_double)
+```
+
+::: {.callout-note title="Analysis"}
+- No point lies inside an area of the same class and with the same name. No facility is recorded twice, and no point is removed.
+:::
+
+The centre of each area is taken as its location, and the two layers are combined. An OSM object can carry more than one class, so repeated object numbers are counted.
+
+```{r}
+poisa_points <- poisa_sel %>%
+  st_centroid()
+
+osm_attractions <- bind_rows(pois_sel %>% select(osm_id, name, fclass),
+                             poisa_points %>% select(osm_id, name, fclass)) %>%
+  mutate(group = case_when(fclass %in% education_classes ~ "education",
+                           fclass %in% retail_classes ~ "retail",
+                           fclass %in% health_classes ~ "health"))
+
+nrow(osm_attractions)
+
+sum(duplicated(osm_attractions$osm_id))
+```
+
+The facilities of each group and class are counted:
+
+```{r}
+osm_attractions %>%
+  st_drop_geometry() %>%
+  count(group, fclass)
+```
+
+::: {.callout-note title="Analysis"}
+- The combined layer holds 937 facilities. All of them are inside at least one 800 metre catchment.
+- No object number appears twice. Each facility is counted once.
+- Schools are the largest class with 452 facilities, followed by malls (237), marketplaces and hospitals (59 each), colleges (53), department stores (48), and universities (29).
+:::
+
+### 4.8 Variables for Each Station Catchment
+
+The HDB footprints, bus stops and facilities are counted inside the 800 metre catchment of each station. A building, bus stop or facility that lies in the catchments of two stations is counted for both.
+
+#### 4.8.1 Counting the HDB Footprints
+
+The centres of the HDB buildings are joined to the catchments. The number of buildings and their total footprint area are calculated for each station.
+
+```{r}
+hdb_by_station <- catchment_800 %>%
+  select(station_code) %>%
+  st_join(hdb_points, join = st_intersects) %>%
+  st_drop_geometry() %>%
+  group_by(station_code) %>%
+  summarise(hdb_n = sum(!is.na(area_m2)),
+            hdb_area = sum(area_m2, na.rm = TRUE))
+
+nrow(hdb_by_station)
+```
+
+#### 4.8.2 Counting the Bus Stops
+
+The bus stops are counted in the same way:
+
+```{r}
+bus_by_station <- catchment_800 %>%
+  select(station_code) %>%
+  st_join(bus_points, join = st_intersects) %>%
+  st_drop_geometry() %>%
+  group_by(station_code) %>%
+  summarise(bus_stops = sum(!is.na(BUS_STOP_N)))
+
+nrow(bus_by_station)
+```
+
+#### 4.8.3 Counting the Facilities
+
+The facilities of each group are counted:
+
+```{r}
+osm_by_station <- catchment_800 %>%
+  select(station_code) %>%
+  st_join(osm_attractions, join = st_intersects) %>%
+  st_drop_geometry() %>%
+  group_by(station_code) %>%
+  summarise(education = sum(group == "education", na.rm = TRUE),
+            retail = sum(group == "retail", na.rm = TRUE),
+            health = sum(group == "health", na.rm = TRUE))
+
+nrow(osm_by_station)
+```
+
+#### 4.8.4 Combining the Station Variables
+
+The counts are joined to the station layer, and missing values are checked.
+
+```{r}
+station_vars <- stations_all %>%
+  left_join(hdb_by_station, by = "station_code") %>%
+  left_join(bus_by_station, by = "station_code") %>%
+  left_join(osm_by_station, by = "station_code")
+
+glimpse(station_vars)
+```
+
+```{r}
+station_vars %>%
+  st_drop_geometry() %>%
+  is.na() %>%
+  colSums()
+```
+
+::: {.callout-note title="Analysis"}
+- Only `line` has missing values: 184 stations. These are the existing stations, because only the proposed stations were assigned to the Jurong Region Line or the Cross Island Line.
+:::
+
+The distribution of each variable is shown.
+
+```{r}
+station_vars %>%
+  st_drop_geometry() %>%
+  select(hdb_n, hdb_area, bus_stops, education, retail, health) %>%
+  summary()
+```
+
+The number of stations with a count of zero is calculated for each variable.
+
+```{r}
+station_vars %>%
+  st_drop_geometry() %>%
+  summarise(hdb_n = sum(hdb_n == 0),
+            hdb_area = sum(hdb_area == 0),
+            bus_stops = sum(bus_stops == 0),
+            education = sum(education == 0),
+            retail = sum(retail == 0),
+            health = sum(health == 0))
+```
+
+::: {.callout-note title="Analysis"}
+- 41 stations have no HDB building within 800 metres. Their residential mass is zero.
+- 24 stations have no education facility, 46 have no retail facility, and 157 have no hospital. Every station has at least one bus stop.
+:::
+
+The stations without any HDB building are listed.
+
+```{r}
+station_vars %>%
+  st_drop_geometry() %>%
+  filter(hdb_n == 0) %>%
+  select(station_code, station_name, status) %>%
+  print(n = 41)
+```
+
+::: {.callout-note title="Analysis"}
+- The 41 stations are 34 existing stations and 7 proposed stations.
+- The existing stations include the five stations from Joo Koon to Tuas Link at the western end of the East West Line, the stations around Marina Bay (Bayfront, Marina Bay, Marina South Pier and Gardens by the Bay), several stations along Orchard Road (Orchard, Orchard Boulevard, Somerset and Newton) and Changi Airport and Expo. Many of these stations are in areas of business, industry, parks or the airport, where housing is not expected.
+- Some other stations on the list, such as Stevens, Napier, Tanjong Katong and Siglap, may have private housing nearby. The HDB layer does not cover private housing.
+- The seven proposed stations are Aviation Park and Loyang on the Cross Island Line, and Jurong Hill, Jurong Pier, Nanyang Crescent, Nanyang Gateway and Tukang on the Jurong Region Line.
+- Residential mass is zero for these 41 stations, although people use many of them. The model has to rely on the attraction variables for them.
+:::
+
+The existing and the proposed stations are compared.
+
+```{r}
+station_vars %>%
+  st_drop_geometry() %>%
+  group_by(status) %>%
+  summarise(stations = n(),
+            no_hdb = sum(hdb_n == 0),
+            hdb_area = median(hdb_area),
+            bus_stops = median(bus_stops),
+            education = median(education),
+            retail = median(retail),
+            health = median(health))
+```
+
+::: {.callout-note title="Analysis"}
+- 34 of the 184 existing stations and 7 of the 29 proposed stations have no HDB building within 800 metres.
+- The median HDB footprint area is similar for the existing and the proposed stations: 102,541 and 103,111 square metres. The median numbers of bus stops are 31 and 29.
+- The proposed stations have fewer education and retail facilities at the median: 2 against 5, and 1 against 2.
+:::
+
+The correlation between the variables is calculated.
+
+```{r}
+station_vars %>%
+  st_drop_geometry() %>%
+  select(hdb_n, hdb_area, bus_stops, education, retail, health) %>%
+  cor() %>%
+  round(2)
+```
+
+::: {.callout-note title="Analysis"}
+- `hdb_n` and `hdb_area` have a correlation of 0.98. They carry almost the same information, and only one of them is used as the local market potential. The choice is made in the calibration.
+- `bus_stops` has a moderate correlation with the HDB variables (0.60 and 0.61) and with `education` (0.52). `education` and `retail` have a correlation of 0.53.
+- `health` has a correlation of at most 0.17 with every other variable.
+:::
+
+### 4.9 Spatial Interaction Data
+
+The spatial interaction models need three data frames. The origins data frame holds the stations where trips start, with their local market potential. The destinations data frame holds the stations where trips end, with their attraction variables and observed ridership. The interaction data frame holds one row for each pair of an origin and a destination, with the distance between them.
+
+#### 4.9.1 Observed Ridership of the Existing Stations
+
+The pooled origin-destination data hold the average number of morning peak trips per weekday for each pair of stations. The structure of the data is checked:
+
+```{r}
+glimpse(od_pooled)
+```
+
+::: {.callout-note title="Analysis"}
+- The pooled data hold 29,287 rows. Each row is one pair of an origin station and a destination station.
+- `trips` is the total over the weekdays pooled in section 4.2, and `trips_per_weekday` is `trips` divided by the number of those weekdays.
+:::
+
+The ridership of a station is measured in two ways: the trips that start at the station and the trips that end at the station. Both are added up for each station.
+
+```{r}
+trips_from <- od_pooled %>%
+  group_by(ORIGIN_PT_CODE) %>%
+  summarise(trips_from = sum(trips_per_weekday)) %>%
+  rename(station_code = ORIGIN_PT_CODE)
+
+trips_to <- od_pooled %>%
+  group_by(DESTINATION_PT_CODE) %>%
+  summarise(trips_to = sum(trips_per_weekday)) %>%
+  rename(station_code = DESTINATION_PT_CODE)
+
+ridership <- trips_from %>%
+  left_join(trips_to, by = "station_code")
+
+nrow(ridership)
+```
+
+The station codes of the ridership table are compared with the codes of the existing stations in both directions.
+
+```{r}
+ridership %>%
+  anti_join(stations_existing %>% st_drop_geometry(), by = "station_code") %>%
+  nrow()
+
+stations_existing %>%
+  st_drop_geometry() %>%
+  anti_join(ridership, by = "station_code") %>%
+  nrow()
+```
+
+::: {.callout-note title="Analysis"}
+- The ridership table holds 184 stations, the same as the existing stations.
+- No code in either table lacks a match in the other, so the observed trips can be joined to all existing stations.
+:::
+
+The distribution of the two measures and their totals are shown:
+
+```{r}
+ridership %>%
+  select(trips_from, trips_to) %>%
+  summary()
+```
+
+```{r}
+ridership %>%
+  summarise(total_from = sum(trips_from),
+            total_to = sum(trips_to))
+```
+
+::: {.callout-note title="Analysis"}
+- The median station has 1,449 trips starting per weekday and 1,838 trips ending. Both means are 3,103.
+- The highest values are far above the medians: 14,988 trips starting and 29,622 trips ending. A few stations therefore carry much more ridership than the rest.
+- The highest number of trips ending is almost twice the highest number of trips starting.
+- Every existing station has some trips in both directions. The smallest values are 6 trips starting and 18 trips ending.
+- The totals for trips starting and trips ending are the same, 570,993 trips per weekday. Each trip starts at one station and ends at another.
+:::
+
+The five stations with the most trips starting and the five with the most trips ending are listed below.
+
+```{r}
+ridership %>%
+  left_join(stations_existing %>% st_drop_geometry() %>% select(station_code, station_name),
+            by = "station_code") %>%
+  arrange(desc(trips_from)) %>%
+  select(station_code, station_name, trips_from) %>%
+  mutate(trips_from = round(trips_from)) %>%
+  head(5)
+```
+
+```{r}
+ridership %>%
+  left_join(stations_existing %>% st_drop_geometry() %>% select(station_code, station_name),
+            by = "station_code") %>%
+  arrange(desc(trips_to)) %>%
+  select(station_code, station_name, trips_to) %>%
+  mutate(trips_to = round(trips_to)) %>%
+  head(5)
+```
+
+::: {.callout-note title="Analysis"}
+- Most trips start at Yishun, Woodlands, Admiralty, Bukit Panjang and Tampines.
+- Most trips end at Raffles Place, Tanjong Pagar, Jurong East, Novena and Outram Park.
+- No station is in both lists. This pattern is consistent with trips from housing areas to areas of work and business in the morning.
+:::
+
+#### 4.9.2 Origins Data Frame
+
+The origins data frame holds all 213 stations. The local market potential of a station is the footprint area of the HDB buildings within its catchment. The observed number of trips starting at the station is added for the existing stations.
+
+```{r}
+origins <- station_vars %>%
+  st_drop_geometry() %>%
+  select(station_code, station_name, status, hdb_n, hdb_area) %>%
+  mutate(potential = hdb_area) %>%
+  left_join(ridership %>% select(station_code, trips_from), by = "station_code")
+
+glimpse(origins)
+```
+
+The choice of the footprint area is checked against the number of buildings. The correlation of each with the observed trips starting at the existing stations is calculated.
+
+```{r}
+origins %>%
+  filter(status == "Existing") %>%
+  select(trips_from, hdb_n, hdb_area) %>%
+  cor() %>%
+  round(2)
+```
+
+::: {.callout-note title="Analysis"}
+- The correlation of the trips starting at the existing stations is 0.41 with the number of HDB buildings and 0.39 with their footprint area. The two measures give almost the same result.
+- The footprint area is used as the local market potential. It also reflects the size of the buildings.
+- The correlations are positive but modest. The HDB footprints explain only part of the trips starting at a station.
+:::
+
+#### 4.9.3 Destinations Data Frame
+
+The destinations data frame holds all 213 stations. It has the attraction variables of each station and, for the existing stations, the observed number of trips ending at the station.
+
+```{r}
+destinations <- station_vars %>%
+  st_drop_geometry() %>%
+  select(station_code, station_name, status, bus_stops, education, retail, health) %>%
+  left_join(ridership %>% select(station_code, trips_to), by = "station_code")
+
+glimpse(destinations)
+```
+
+The correlation of each attraction variable with the observed trips ending at the existing stations is calculated.
+
+```{r}
+destinations %>%
+  filter(status == "Existing") %>%
+  select(trips_to, bus_stops, education, retail, health) %>%
+  cor() %>%
+  round(2)
+```
+
+::: {.callout-note title="Analysis"}
+- Across the existing stations, `trips_to` is weakly related to `bus_stops` (0.10) and is not related to `education` (−0.01). It is somewhat related to `retail` (0.26) and `health` (0.27).
+- The attraction variables are also related to each other: `education` correlates with `bus_stops` (0.51) and with `retail` (0.52). Their separate effects will be harder to estimate in the model.
+:::
+
+#### 4.9.4 Interaction Data Frame of the Existing Stations
+
+The distance between two stations is the straight-line distance between the station points, in metres. The coordinates of each station are extracted.
+
+```{r}
+station_xy <- stations_all %>%
+  mutate(x = st_coordinates(geometry)[, 1],
+         y = st_coordinates(geometry)[, 2]) %>%
+  st_drop_geometry() %>%
+  select(station_code, x, y)
+```
+
+Every existing station is paired with every other existing station. A station is not paired with itself, because the distance would be zero.
+
+```{r}
+pairs_existing <- expand_grid(origin = stations_existing$station_code,
+                              destination = stations_existing$station_code) %>%
+  filter(origin != destination)
+
+nrow(pairs_existing)
+```
+
+The distance, the observed trips, the attraction variables and the local market potential are added to each pair. A pair with no recorded trips has zero trips. The share is the proportion of the trips starting at the origin that end at the destination.
+
+```{r}
+si_existing <- pairs_existing %>%
+  left_join(station_xy %>% rename(x_origin = x, y_origin = y),
+            by = c("origin" = "station_code")) %>%
+  left_join(station_xy %>% rename(x_destination = x, y_destination = y),
+            by = c("destination" = "station_code")) %>%
+  mutate(distance = sqrt((x_origin - x_destination)^2 + (y_origin - y_destination)^2)) %>%
+  left_join(od_pooled %>%
+              select(origin = ORIGIN_PT_CODE,
+                     destination = DESTINATION_PT_CODE,
+                     trips = trips_per_weekday),
+            by = c("origin", "destination")) %>%
+  mutate(trips = replace_na(trips, 0)) %>%
+  left_join(destinations %>%
+              select(destination = station_code, bus_stops, education, retail, health),
+            by = "destination") %>%
+  left_join(origins %>%
+              select(origin = station_code, potential, trips_from),
+            by = "origin") %>%
+  mutate(share = trips / trips_from) %>%
+  select(origin, destination, distance, bus_stops, education, retail, health,
+         potential, trips_from, trips, share)
+
+glimpse(si_existing)
+```
+
+The distances and the number of pairs without trips are summarised. The shares of each origin are added up, and the smallest and largest totals are shown.
+
+```{r}
+summary(si_existing$distance)
+
+sum(si_existing$trips == 0)
+
+si_existing %>%
+  group_by(origin) %>%
+  summarise(total_share = sum(share)) %>%
+  summarise(smallest = round(min(total_share), 6),
+            largest = round(max(total_share), 6))
+```
+
+::: {.callout-note title="Analysis"}
+- The 184 existing stations form 33,672 pairs.
+- 4,385 pairs have no trips. The pairs without trips are kept with a share of zero.
+- The shares of every origin add up to 1: the smallest and the largest totals are both 1.
+:::
+
+#### 4.9.5 Interaction Data Frame of the Existing and Proposed Stations
+
+All 213 stations are paired in the same way. A pair of two existing stations has observed trips. A pair with a proposed station has no observed trips, and its value is missing.
+
+```{r}
+pairs_all <- expand_grid(origin = stations_all$station_code,
+                         destination = stations_all$station_code) %>%
+  filter(origin != destination)
+
+nrow(pairs_all)
+
+si_all <- pairs_all %>%
+  left_join(origins %>% select(origin = station_code, status_origin = status,
+                               potential, trips_from),
+            by = "origin") %>%
+  left_join(destinations %>% select(destination = station_code, status_destination = status,
+                                    bus_stops, education, retail, health),
+            by = "destination") %>%
+  left_join(station_xy %>% rename(x_origin = x, y_origin = y),
+            by = c("origin" = "station_code")) %>%
+  left_join(station_xy %>% rename(x_destination = x, y_destination = y),
+            by = c("destination" = "station_code")) %>%
+  mutate(distance = sqrt((x_origin - x_destination)^2 + (y_origin - y_destination)^2)) %>%
+  left_join(od_pooled %>%
+              select(origin = ORIGIN_PT_CODE,
+                     destination = DESTINATION_PT_CODE,
+                     trips = trips_per_weekday),
+            by = c("origin", "destination")) %>%
+  mutate(trips = case_when(status_origin == "Existing" &
+                             status_destination == "Existing" ~ replace_na(trips, 0),
+                           TRUE ~ NA_real_),
+         share = trips / trips_from) %>%
+  select(origin, destination, status_origin, status_destination, distance,
+         bus_stops, education, retail, health, potential, trips_from, trips, share)
+
+si_all %>%
+  count(status_origin, status_destination)
+```
+
+```{r}
+si_all %>%
+  summarise(pairs = n(),
+            trips_missing = sum(is.na(trips)),
+            trips_available = sum(!is.na(trips)))
+```
+
+::: {.callout-note title="Analysis"}
+- The 213 stations form 45,156 pairs. The pair types are 33,672 with an existing origin and an existing destination, 5,336 with an existing origin and a proposed destination, 5,336 with a proposed origin and an existing destination, and 812 with a proposed origin and a proposed destination.
+- `trips` is set only for pairs of two existing stations. The 11,484 pairs that involve a proposed station have missing `trips` and `share`, because no trips are observed for them.
+:::
+
+### 4.10 Singapore Boundary
+
+The planning area boundary of Singapore is used as the base of the maps. The file is imported using `st_read` of **sf** package.
+
+```{r}
+sg_raw <- st_read("data/geospatial/MasterPlan2019PlanningAreaBoundaryNoSea.geojson")
+```
+
+The structure and the coordinate system of the layer are checked.
+
+```{r}
+glimpse(sg_raw)
+st_crs(sg_raw)$input
+```
+
+The planning areas are converted to SVY21 (EPSG:3414) and merged into one polygon for the whole island.
+
+```{r}
+sg_boundary <- sg_raw %>%
+  st_transform(crs = 3414) %>%
+  st_make_valid() %>%
+  st_union() %>%
+  st_sf()
+```
+
+The number of stations inside the boundary is counted.
+
+```{r}
+sum(lengths(st_intersects(stations_all, sg_boundary)) > 0)
+```
+
+## 5 Exploratory Data Analysis (EDA)
+
+The morning peak flows of the existing stations are explored before the model is calibrated. The distance to the city centre is introduced here, because it is used as a further attraction variable in the model.
+
+### 5.1 Stations with the Most Trips Starting and Ending
+
+The totals and the largest stations of each measure were listed in section 4.9.1. The two measures are mapped here to show where the trips start and end. The trips starting and ending at each existing station are joined to the station points:
+
+```{r}
+ridership_map <- stations_existing %>%
+  left_join(ridership %>% select(station_code, 
+                                 trips_from, 
+                                 trips_to),
+            by = "station_code")
+```
+
+The two measures are mapped one above the other with **ggplot2**, and the five largest stations of each measure are labelled with **ggrepel**.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 9
+
+flow_long <- ridership_map %>%
+  pivot_longer(c(trips_from, trips_to), names_to = "direction", values_to = "trips") %>%
+  mutate(direction = factor(direction,
+                            levels = c("trips_from", "trips_to"),
+                            labels = c("Trips starting at the station",
+                                       "Trips ending at the station"))) %>%
+  arrange(direction, desc(trips))
+
+top_labels <- flow_long %>%
+  group_by(direction) %>%
+  slice_max(trips, n = 5) %>%
+  ungroup()
+
+ggplot() +
+  geom_sf(data = sg_boundary, fill = "grey95", colour = "grey60", linewidth = 0.2) +
+  geom_sf(data = flow_long, aes(size = trips),
+          shape = 21, fill = "#e74c3c", colour = "#7f1d1d", stroke = 0.3, alpha = 0.6) +
+  geom_text_repel(data = top_labels,
+                  aes(label = station_name, geometry = geometry),
+                  stat = "sf_coordinates", size = 3, fontface = "bold",
+                  min.segment.length = 0, box.padding = 0.5, max.overlaps = Inf) +
+  scale_size_area(max_size = 12, breaks = c(5000, 10000, 20000, 30000),
+                  name = "Trips per weekday") +
+  facet_wrap(~ direction, ncol = 1) +
+  theme_void() +
+  theme(strip.text = element_text(face = "bold", size = 11))
+```
+
+::: {.callout-note title="Analysis"}
+- The largest circles for the trips starting are in the north (Woodlands, Admiralty, Yishun), in the north-west (Bukit Panjang) and in the east (Tampines). The circles in the south and the centre of the island are small.
+- The largest circles for the trips ending are in the south centre, around Raffles Place and Tanjong Pagar. Jurong East and Novena also stand out.
+:::
+
+The difference between the trips ending and the trips starting is mapped for each station. Blue stations send out more trips than they receive, and red stations receive more than they send out.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+
+net_map <- ridership_map %>%
+  mutate(net = trips_to - trips_from) %>%
+  arrange(abs(net))
+
+ggplot() +
+  geom_sf(data = sg_boundary, fill = "grey95", colour = "grey60", linewidth = 0.2) +
+  geom_sf(data = net_map, aes(size = abs(net), fill = net),
+          shape = 21, colour = "grey30", stroke = 0.2, alpha = 0.85) +
+  scale_fill_gradient2(low = "#2c7bb6", mid = "white", high = "#c0392b", midpoint = 0,
+                       name = "Trips ending minus\ntrips starting") +
+  scale_size_area(max_size = 10, name = "Absolute difference") +
+  theme_void()
+```
+
+The share of the trips in the ten largest stations is calculated for each measure, together with the number of stations that appear in both groups of ten.
+
+```{r}
+ridership_map %>%
+  st_drop_geometry() %>%
+  summarise(top10_from_share = round(sum(sort(trips_from, decreasing = TRUE)[1:10]) / 
+                                       sum(trips_from), 3),
+            top10_to_share = round(sum(sort(trips_to, decreasing = TRUE)[1:10]) / 
+                                     sum(trips_to), 3),
+            in_both_top10 = length(intersect(station_code[order(-trips_from)][1:10],
+                                             station_code[order(-trips_to)][1:10])))
+```
+
+::: {.callout-note title="Analysis"}
+- In the map of the difference, the stations in the north and the north-east are blue, which means that more trips start there than end there. The red circles, where more trips end than start, are concentrated in the south centre, with a few in the west and the centre. The largest red circle is in the south centre, where the map of trips ending has its largest circles.
+- The ten largest stations out of 184 account for 0.238 of the trips starting and 0.254 of the trips ending. No station is in both groups of ten.
+:::
+
+### 5.2 Largest Flows between Pairs of Stations
+
+The 40 largest flows between pairs of stations are prepared with the coordinates and the names of both stations.
+
+```{r}
+names_lookup <- stations_existing %>%
+  st_drop_geometry() %>%
+  select(station_code, station_name)
+
+top_flows <- si_existing %>%
+  slice_max(trips, n = 40) %>%
+  left_join(station_xy %>% rename(x_o = x, y_o = y), by = c("origin" = "station_code")) %>%
+  left_join(station_xy %>% rename(x_d = x, y_d = y), by = c("destination" = "station_code")) %>%
+  left_join(names_lookup %>% rename(origin = station_code, origin_name = station_name),
+            by = "origin") %>%
+  left_join(names_lookup %>% rename(destination = station_code, destination_name = station_name),
+            by = "destination")
+```
+
+The flows are drawn as straight lines between the stations, with an arrow pointing to the destination and the width showing the trips. Each destination is labelled once.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6
+
+dest_labels <- top_flows %>%
+  distinct(destination_name, x_d, y_d)
+
+ggplot() +
+  geom_sf(data = sg_boundary, fill = "grey95", colour = "grey60", linewidth = 0.2) +
+  geom_sf(data = stations_existing, size = 0.4, colour = "grey60") +
+  geom_segment(data = top_flows,
+               aes(x = x_o, y = y_o, xend = x_d, yend = y_d, linewidth = trips),
+               colour = "#c0392b", alpha = 0.55,
+               arrow = arrow(length = unit(2, "mm"), type = "closed")) +
+  geom_text_repel(data = dest_labels,
+                  aes(x = x_d, y = y_d, label = destination_name),
+                  size = 3, fontface = "bold", min.segment.length = 0,
+                  box.padding = 0.5, max.overlaps = Inf) +
+  scale_linewidth(range = c(0.4, 2.5), name = "Trips per weekday") +
+  theme_void()
+```
+
+The ten largest flows are listed:
+
+```{r}
+top_flows %>%
+  slice_head(n = 10) %>%
+  transmute(origin_name, destination_name, trips = round(trips), distance_m = round(distance))
+```
+
+::: {.callout-note title="Analysis"}
+- The 40 largest flows end at 13 stations: Joo Koon, Jurong East, Clementi and Bukit Panjang in the west, Ang Mo Kio, Newton and Novena in the centre, Bugis, Raffles Place, Telok Ayer and Downtown in the south, and Tampines and Expo in the east.
+- The ten largest flows range from 958 to 1,358 trips per weekday. The largest is Newton to Novena.
+- The distances of the ten flows range from 1,047 m to 14,976 m. Bukit Panjang to Downtown is the longest.
+:::
+
+### 5.3 Decline of the Share of Trips with Distance
+
+The share of the trips of an origin that end at a destination is compared with the distance between the two stations. The average trip distance and the share of trips within three distances are calculated first:
+
+```{r}
+si_existing %>%
+  summarise(mean_trip_distance_m = round(weighted.mean(distance, trips)),
+            within_2km = round(sum(trips[distance < 2000]) / sum(trips), 3),
+            within_5km = round(sum(trips[distance < 5000]) / sum(trips), 3),
+            within_10km = round(sum(trips[distance < 10000]) / sum(trips), 3))
+```
+
+The average share of a pair is calculated in bands of 1 km, and bands with fewer than 30 pairs are dropped.
+
+```{r}
+band_share <- si_existing %>%
+  mutate(band_km = floor(distance / 1000)) %>%
+  group_by(band_km) %>%
+  summarise(mean_share = mean(share), pairs = n(), .groups = "drop") %>%
+  filter(pairs >= 30)
+
+ggplot(band_share, aes(x = band_km + 0.5, y = mean_share)) +
+  geom_line(colour = "#c0392b") +
+  geom_point(colour = "#c0392b") +
+  scale_y_log10() +
+  labs(x = "Distance between stations (km)", y = "Average share of a pair (log scale)") +
+  theme_minimal()
+```
+
+::: {.callout-note title="Analysis"}
+- The average share of a pair falls as the distance grows. A station less than 3 km away receives about 0.010 to 0.022 of the trips starting at an origin station on average, and a station near 30 km away receives less than 0.001. Most of the fall happens over the first few kilometres.
+:::
+
+The **MCI** package compares four shapes of distance decay on the band averages with `huff.decay()`. The band averages are prepared first.
+
+```{r}
+decay_data <- band_share %>%
+  transmute(distance = (band_km + 0.5) * 1000, mean_share) %>%
+  as.data.frame()
+```
+
+Only the table of `huff.decay()` is used, because its plot draws the linear line as a flat line.
+
+```{r}
+huff.decay(decay_data, "distance", "mean_share", plotFunc = FALSE)
+```
+
+The slope of the linear shape is displayed as 0 because of rounding, as the distance is in metres.
+
+The linear, power and exponential shapes are fitted on the same bands and drawn together with the observed averages.
+
+```{r}
+fit_linear <- lm(mean_share ~ distance, data = decay_data)
+fit_power <- lm(log(mean_share) ~ log(distance), data = decay_data)
+fit_exp <- lm(log(mean_share) ~ distance, data = decay_data)
+
+decay_curves <- decay_data %>%
+  mutate(Linear = fitted(fit_linear),
+         Power = exp(fitted(fit_power)),
+         Exponential = exp(fitted(fit_exp))) %>%
+  pivot_longer(c(Linear, Power, Exponential), names_to = "shape", values_to = "fitted")
+
+ggplot() +
+  geom_point(data = decay_data, aes(x = distance / 1000, y = mean_share)) +
+  geom_line(data = decay_curves, aes(x = distance / 1000, y = fitted, colour = shape)) +
+  scale_colour_manual(values = c(Linear = "#e69f00", Power = "#009e73", Exponential = "#c0392b")) +
+  coord_cartesian(ylim = c(0, 0.025)) +
+  labs(x = "Distance between stations (km)", y = "Average share of a pair", colour = "Shape") +
+  theme_minimal()
+```
+
+::: {.callout-note title="Analysis"}
+- Among the shapes compared by `huff.decay()`, the exponential shape fits the band averages best (R-squared 0.9459), followed by the power shape (0.8782).
+- In the plot, the exponential curve follows the averages closely. The power curve rises steeply at short distances and runs below the averages between about 5 and 15 km. The linear line falls below zero beyond about 27 km.
+:::
+
+### 5.4 Attraction Variables and Trips Ending
+
+The correlations of the attraction variables with the trips ending were shown in section 4.9.3. Scatter plots and rank correlations are added here, together with the distance to the city centre as a further variable. The distance is measured to Raffles Place (`EW14/NS26`) and stands in for the concentration of jobs, for which no data is available.
+
+```{r}
+raffles <- station_xy %>% filter(station_code == "EW14/NS26")
+nrow(raffles)
+
+cbd_distance <- station_xy %>%
+  mutate(cbd_km = sqrt((x - raffles$x)^2 + (y - raffles$y)^2) / 1000) %>%
+  select(station_code, cbd_km)
+
+destinations <- destinations %>%
+  mutate(cbd_km = cbd_distance$cbd_km[match(station_code, cbd_distance$station_code)])
+```
+
+The trips ending at the existing stations are plotted against each variable, both on a log scale.
+
+```{r}
+destinations %>%
+  filter(status == "Existing") %>%
+  pivot_longer(c(bus_stops, education, retail, health, cbd_km),
+               names_to = "variable", values_to = "value") %>%
+  mutate(variable = recode(variable,
+                           bus_stops = "Bus stops (count + 1)",
+                           education = "Education objects (count + 1)",
+                           retail = "Retail objects (count + 1)",
+                           health = "Health objects (count + 1)",
+                           cbd_km = "Distance to the city centre (km + 1)")) %>%
+  ggplot(aes(x = value + 1, y = trips_to)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE, colour = "#c0392b") +
+  scale_x_log10() +
+  scale_y_log10() +
+  facet_wrap(~ variable, scales = "free_x") +
+  labs(x = "Value (log scale)", y = "Trips ending per weekday (log scale)") +
+  theme_minimal()
+```
+
+The rank correlation of each variable with the trips ending is calculated:
+
+```{r}
+destinations %>%
+  filter(status == "Existing") %>%
+  summarise(across(c(bus_stops, education, retail, health, cbd_km),
+                   ~ round(cor(.x, trips_to, method = "spearman"), 3)))
+```
+
+::: {.callout-note title="Analysis"}
+- The rank correlation with the trips ending is positive for `retail` (0.287), `health` (0.191), and `bus_stops` (0.124), and close to zero for `education` (−0.028).
+- The correlation with the distance to the city centre is negative (−0.256): the stations closer to the city centre receive more trips.
+- In the plots, the fitted lines rise for `retail`, `health` and (slightly) `bus_stops`, fall for the distance to the city centre, and are almost flat for `education`.
+- The points are widely spread around every line, so no variable explains the trips ending on its own. `health` and `education` have many stations with no objects in the catchment.
+:::
+
+### 5.5 Residential Mass and Trips Starting
+
+The correlation of the residential mass with the trips starting was shown in section 4.9.2. The rank correlation is calculated here as a check that does not depend on a few large stations:
+
+```{r}
+origins %>%
+  filter(status == "Existing") %>%
+  summarise(spearman = round(cor(potential, trips_from, method = "spearman"), 2))
+```
+
+The residential mass of the catchment (`potential`, the HDB footprint area) is plotted against the trips starting at each existing station.
+
+```{r}
+origins %>%
+  filter(status == "Existing") %>%
+  ggplot(aes(x = potential / 1000, y = trips_from)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE, colour = "#c0392b") +
+  labs(x = "HDB footprint area in the catchment (thousand square metres)",
+       y = "Trips starting per weekday") +
+  theme_minimal()
+```
+
+::: {.callout-note title="Analysis"}
+- The rank correlation between the residential mass and the trips starting is 0.35, close to the Pearson correlation of 0.39 shown in section 4.9.2.
+- In the plot, the fitted line rises from about 1,500 trips at an area of zero to about 7,000 trips at 450,000 square metres.
+- The spread around the line is wide. Some stations with no HDB area in the catchment still have more than 5,000 trips starting.
+:::
+
+## 6 Model Calibration
+
+Nine models are compared. Each one gives every pair of stations a share of the trips starting at the origin. The models are built up in order: equal shares, the Huff model with fixed exponents, the Huff model with calibrated exponents, the multiplicative competitive interaction model with four attraction variables, the same model with the distance to the city centre, the same model with an exponential distance decay, and finally a term for competing destinations.
+
+### 6.1 Measuring the Fit
+
+The predicted trips of a pair are the trips starting at the origin multiplied by the share. Five measures compare predicted and observed trips: the squared correlation and the root mean square error over the pairs, the squared correlation and the weighted absolute percentage error (WAPE) of the trips ending at each station, and the negative log-likelihood of the observed trips, which is lower for a better fit.
+
+```{r}
+fit_measures <- function(data, pred_share, label) {
+  pred <- data %>% mutate(pred_trips = trips_from * pred_share)
+  by_dest <- pred %>%
+    group_by(destination) %>%
+    summarise(obs = sum(trips), pred = sum(pred_trips), .groups = "drop")
+  tibble(model = label,
+         pair_r2 = round(cor(pred$trips, pred$pred_trips)^2, 3),
+         pair_rmse = round(sqrt(mean((pred$trips - pred$pred_trips)^2)), 2),
+         station_r2 = round(cor(by_dest$obs, by_dest$pred)^2, 3),
+         station_wape = round(sum(abs(by_dest$obs - by_dest$pred)) / sum(by_dest$obs), 3),
+         neg_loglik = round(-sum(data$trips * log(pred_share))))
+}
+```
+
+The share of a pair is the utility of the destination divided by the sum of the utilities of its origin. Two helpers add up and take the largest of the values of each origin.
+
+```{r}
+group_sum <- function(x, group) as.numeric(rowsum(x, group)[group, 1])
+
+group_max <- function(x, group) as.numeric(tapply(x, group, max)[group])
+```
+
+The shares are calculated as logarithms. The largest utility of an origin is subtracted from every utility of that origin before the exponential is taken. The subtraction does not change the shares, because the same amount is removed from the utility of a destination and from the sum it is divided by. It prevents the exponential of a large utility from returning a value too large for R to store, which would stop the calibration.
+
+```{r}
+log_shares <- function(utility, origin) {
+  centred <- utility - group_max(utility, origin)
+  centred - log(group_sum(exp(centred), origin))
+}
+```
+
+The variables used by the models are prepared. A count of zero is replaced by one before the logarithm. The attraction of a station for the Huff model is the sum of its four counts plus one.
+
+```{r}
+si_existing <- si_existing %>%
+  mutate(cbd_km = destinations$cbd_km[match(destination, destinations$station_code)],
+         attraction = bus_stops + education + retail + health + 1,
+         ln_attr = log(attraction),
+         ln_bus = log(bus_stops + 1),
+         ln_edu = log(education + 1),
+         ln_retail = log(retail + 1),
+         ln_health = log(health + 1),
+         ln_cbd = log(cbd_km + 0.5),
+         ln_dist = log(distance),
+         dist_km = distance / 1000)
+
+sum(is.na(si_existing$cbd_km))
+```
+
+::: {.callout-note title="Analysis"}
+No pair is missing the distance to the city centre.
+:::
+
+### 6.2 Equal Shares and the Fixed Huff Model
+
+The first benchmark gives every destination the same share. The second applies the Huff model with fixed exponents, before any calibration: the attraction is weighted by 1 and the distance by −2. These are the default values of `huff.shares()` in the **MCI** package (Wieland, 2017).
+
+```{r}
+si_existing <- si_existing %>%
+  mutate(p_equal = 1 / 183,
+         u_fixed = attraction * distance^(-2),
+         p_huff_fixed = u_fixed / group_sum(u_fixed, origin))
+```
+
+::: {.callout-warning title="Package limitation"}
+`huff.shares()` of the **MCI** package could not be used. It stops with an error because it expects every station to be paired with itself as well. The pairs of a station with itself are excluded here, since their distance is zero. The formula of the Huff model is therefore applied directly.
+:::
+
+The shares of each origin are checked to add up to 1:
+
+```{r}
+si_existing %>%
+  group_by(origin) %>%
+  summarise(total = sum(p_huff_fixed)) %>%
+  summarise(smallest = round(min(total), 6), largest = round(max(total), 6))
+```
+
+The two benchmarks are compared:
+
+```{r}
+bind_rows(
+  fit_measures(si_existing, si_existing$p_equal, "Equal shares"),
+  fit_measures(si_existing, si_existing$p_huff_fixed, "Huff, fixed (1, 2)"))
+```
+
+::: {.callout-note title="Analysis"}
+- The shares of every origin add up to 1, which confirms that the direct formula reproduces what `huff.shares()` would have calculated.
+- The fixed Huff model fits worse than equal shares on every measure. Its squared correlation over the pairs falls from 0.124 to 0.044, its root mean square error doubles from 53.2 to 104, and its negative log-likelihood rises from 2,974,579 to 3,340,452.
+- The distance exponent of 2 is the reason. Section 5.3 estimates an exponent of 0.8368 for the power shape on the same data, which is a far slower decline. An exponent of 2 sends almost every trip to the nearest stations.
+- Neither benchmark explains which stations receive the trips. The squared correlation of the trips ending is 0.044 for equal shares and 0 for the fixed Huff model, and both leave a weighted absolute percentage error above 0.83.
+:::
+
+### 6.3 Huff Model with Calibrated Exponents
+
+The exponents are estimated by maximum likelihood: they are chosen so that the observed trips are most probable under the shares of the model. The distance is weighted either by a power function (`decay = "power"`, the form of the Huff model) or by an exponential function (`decay = "exp"`, with the distance in kilometres). The decay parameter is written as a positive number, so a larger value means a faster decay.
+
+```{r}
+nll_si <- function(par, data, vars, decay = "power") {
+  k <- length(vars)
+  distance_term <- if (decay == "power") data$ln_dist else data$dist_km
+  utility <- as.numeric(as.matrix(data[, vars]) %*% par[1:k]) - par[k + 1] * distance_term
+  -sum(data$trips * log_shares(utility, data$origin))
+}
+
+predict_si <- function(par, data, vars, decay = "power") {
+  k <- length(vars)
+  distance_term <- if (decay == "power") data$ln_dist else data$dist_km
+  utility <- as.numeric(as.matrix(data[, vars]) %*% par[1:k]) - par[k + 1] * distance_term
+  exp(log_shares(utility, data$origin))
+}
+
+fit_si <- function(data, vars, decay = "power") {
+  start_decay <- if (decay == "power") 1 else 0.1
+  optim(par = c(rep(0.1, length(vars)), start_decay), fn = nll_si,
+        data = data, vars = vars, decay = decay,
+        method = "BFGS", control = list(maxit = 1000))
+}
+```
+
+The Huff model with the single attraction variable is calibrated with both distance functions. A convergence code of 0 means that the search for the best exponents ended successfully.
+
+```{r}
+huff_cal <- fit_si(si_existing, "ln_attr", decay = "power")
+huff_cal_exp <- fit_si(si_existing, "ln_attr", decay = "exp")
+
+tibble(decay_shape = c("Power", "Exponential"),
+       attraction_exponent = round(c(huff_cal$par[1], huff_cal_exp$par[1]), 3),
+       decay_parameter = round(c(huff_cal$par[2], huff_cal_exp$par[2]), 3),
+       convergence = c(huff_cal$convergence, huff_cal_exp$convergence))
+```
+
+The fit of both versions is measured:
+
+```{r}
+si_existing <- si_existing %>%
+  mutate(p_huff_cal = predict_si(huff_cal$par, si_existing, "ln_attr", "power"),
+         p_huff_cal_exp = predict_si(huff_cal_exp$par, si_existing, "ln_attr", "exp"))
+
+bind_rows(
+  fit_measures(si_existing, si_existing$p_huff_cal, "Huff, calibrated (power)"),
+  fit_measures(si_existing, si_existing$p_huff_cal_exp, "Huff, calibrated (exponential)"))
+```
+
+::: {.callout-note title="Analysis"}
+- Both versions converge. The power version gives an attraction exponent of 0.458 and a distance exponent of 0.586. The exponential version gives an attraction exponent of 0.469 and a decay of 0.091 for each kilometre.
+- Calibrating the exponents improves the fit over both benchmarks of section 6.2. The squared correlation over the pairs rises from 0.124 for equal shares to 0.161 for the power version and 0.175 for the exponential version, and the negative log-likelihood falls from 2,974,579 to 2,908,426 and 2,901,709.
+- The exponential version fits the pairs slightly better than the power version, with a lower root mean square error (51.6 against 52.1) and a lower negative log-likelihood. The power version has the smaller error on the trips ending (0.831 against 0.835).
+:::
+
+The distance exponent of the power version is also tested over a range. For each value, the attraction exponent that fits best is found.
+
+```{r}
+lambda_grid <- seq(0.25, 2, by = 0.25)
+lambda_profile <- tibble()
+
+for (lambda in lambda_grid) {
+  best <- optimize(function(gamma) nll_si(c(gamma, lambda), si_existing, "ln_attr"),
+                   interval = c(0, 2))
+  lambda_profile <- bind_rows(lambda_profile,
+                              tibble(distance_exponent = lambda,
+                                     attraction_exponent = round(best$minimum, 3),
+                                     neg_loglik = round(best$objective)))
+}
+
+lambda_profile
+```
+
+The negative log-likelihood is plotted against the distance exponent:
+
+```{r}
+ggplot(lambda_profile, aes(distance_exponent, neg_loglik)) +
+  geom_line(colour = "#c0392b") +
+  geom_point(colour = "#c0392b") +
+  labs(x = "Distance exponent", y = "Negative log-likelihood (lower is better)") +
+  theme_minimal()
+```
+
+::: {.callout-note title="Analysis"}
+- The attraction exponent is below 1 in both versions. A station with twice the attraction of another therefore does not receive twice the share.
+- The profile of the distance exponent confirms that 2 is a poor choice. The negative log-likelihood is lowest between 0.5 and 0.75 (2,909,688 at 0.5) and rises steeply above 1, reaching 3,318,845 at 2. The attraction exponent that fits best also falls as the distance exponent rises.
+- Neither version explains which stations receive the trips. The squared correlation of the trips ending stays at 0.005 and the weighted absolute percentage error above 0.83. A single attraction variable is not enough, which section 6.4 addresses.
+:::
+
+### 6.4 Multiplicative Competitive Interaction Model
+
+#### 6.4.1 Regression on Log-Centred Shares
+
+The multiplicative competitive interaction model gives each attraction variable its own exponent. It is fitted by a regression through the origin on log-centred values: the logarithm of each share and of each variable has the mean of its origin removed. The logarithm needs positive shares, so the 4,385 pairs without trips are left out of this fit.
+
+```{r}
+si_pos <- si_existing %>%
+  filter(trips > 0) %>%
+  mutate(ln_share = log(share))
+
+nrow(si_pos)
+```
+
+::: {.callout-warning title="Package limitation"}
+`mci.fit()` of the **MCI** package could not be used either. It stops with the same error as `huff.shares()`, because it expects every station to be paired with itself as well. The regression behind the function is therefore written out directly.
+:::
+
+The log values have the mean of their origin removed:
+
+```{r}
+mci_input <- si_pos %>%
+  group_by(origin) %>%
+  mutate(across(c(ln_share, ln_dist, ln_bus, ln_edu, ln_retail, ln_health),
+                ~ .x - mean(.x), .names = "{.col}_c")) %>%
+  ungroup()
+```
+
+The regression is fitted without an intercept:
+
+```{r}
+mci_manual <- lm(ln_share_c ~ 0 + ln_dist_c + ln_bus_c + ln_edu_c + ln_retail_c + ln_health_c,
+                 data = mci_input)
+summary(mci_manual)
+```
+
+The coefficients are used to predict the shares of all pairs:
+
+```{r}
+predict_mci <- function(beta, data) {
+  utility <- beta[1] * data$ln_dist + beta[2] * data$ln_bus + beta[3] * data$ln_edu +
+             beta[4] * data$ln_retail + beta[5] * data$ln_health
+  exp(log_shares(utility, data$origin))
+}
+
+si_existing <- si_existing %>%
+  mutate(p_mci = predict_mci(coef(mci_manual), si_existing))
+
+fit_measures(si_existing, si_existing$p_mci, "MCI, four attractions (regression)")
+```
+
+::: {.callout-note title="Analysis"}
+- The regression uses the 29,287 pairs with trips. Every coefficient is significant at the 0.1% level.
+- The distance coefficient is −0.533, which corresponds to a power decay with an exponent of 0.533. It is close to the 0.586 of the single attraction model in section 6.3.
+- Three of the four attraction variables have a positive coefficient: retail 0.506, health 0.468 and bus stops 0.284. The coefficient of education is negative at −0.490. 
+- The negative coefficient of education does not mean that schools reduce the number of arrivals. Section 5.4 shows almost no relationship between the education count and the trips ending, with a rank correlation of −0.028. Section 4.9.3 shows the education count correlating with the bus stop count (0.51) and the retail count (0.52). The coefficient is the effect of education once those correlated variables are accounted for.
+- The squared correlation of the regression is 0.098, so the five variables account for a small part of the variation in the log-centred shares.
+- Predicted against observed trips, this model improves on every model of sections 6.2 and 6.3. The squared correlation over the pairs rises to 0.225 and the squared correlation of the trips ending to 0.133, which is the first model to explain any part of which stations receive the trips.
+:::
+
+#### 6.4.2 Fit by Maximum Likelihood
+
+The same four attractions are estimated by maximum likelihood, which uses all pairs including those without trips.
+
+```{r}
+vars4 <- c("ln_bus", "ln_edu", "ln_retail", "ln_health")
+mci_ml <- fit_si(si_existing, vars4)
+
+round(c(setNames(mci_ml$par[1:4], vars4), distance = mci_ml$par[5]), 3)
+mci_ml$convergence
+
+si_existing <- si_existing %>%
+  mutate(p_mci_ml = predict_si(mci_ml$par, si_existing, vars4))
+
+fit_measures(si_existing, si_existing$p_mci_ml, "MCI, four attractions (ML)")
+```
+
+::: {.callout-note title="Analysis"}
+- The fit converges. The exponents are 0.429 for bus stops, −0.447 for education, 0.447 for retail and 0.348 for health, with a distance exponent of 0.625.
+- The signs agree with the regression of section 6.4.1, and the negative coefficient of education appears again. The two methods differ most on bus stops (0.429 against 0.284) and retail (0.447 against 0.506).
+- Estimating by maximum likelihood gives the lower negative log-likelihood of the two, 2,852,132 against 2,857,283, which is the measure it optimises. The regression is marginally better on the two squared correlations, 0.225 against 0.221 over the pairs and 0.133 against 0.125 for the trips ending.
+- The two methods therefore agree closely. The maximum likelihood version is carried forward, because it uses all 33,672 pairs instead of only those with trips.
+:::
+
+#### 6.4.3 Adding the Distance to the City Centre
+
+The distance to the city centre from section 5.4 is added as a fifth attraction variable.
+
+```{r}
+vars5 <- c(vars4, "ln_cbd")
+mci_cbd <- fit_si(si_existing, vars5)
+
+round(c(setNames(mci_cbd$par[1:5], vars5), distance = mci_cbd$par[6]), 3)
+mci_cbd$convergence
+
+si_existing <- si_existing %>%
+  mutate(p_mci_cbd = predict_si(mci_cbd$par, si_existing, vars5))
+
+fit_measures(si_existing, si_existing$p_mci_cbd, "MCI + city centre (power decay)")
+```
+
+::: {.callout-note title="Analysis"}
+- Adding the distance to the city centre gives the largest single improvement so far. The squared correlation of the trips ending rises from 0.125 to 0.215, and the weighted absolute percentage error falls from 0.777 to 0.761.
+- The coefficient of the distance to the city centre is −0.445. A station further from the city centre receives a smaller share, with the four attraction variables held constant.
+- The other coefficients change as well. Retail falls from 0.447 to 0.164 and bus stops rises from 0.429 to 0.653. Part of what retail measured in section 6.4.2 was the closeness of a station to the city centre.
+- The negative coefficient of education remains, at −0.419.
+:::
+
+#### 6.4.4 Exponential Distance Decay
+
+Section 5.3 shows that the exponential shape follows the share of a pair better than the power shape. The model with the city centre is calibrated again with an exponential decay.
+
+```{r}
+mci_exp <- fit_si(si_existing, vars5, decay = "exp")
+
+round(c(setNames(mci_exp$par[1:5], vars5), decay_per_km = mci_exp$par[6]), 3)
+mci_exp$convergence
+
+si_existing <- si_existing %>%
+  mutate(p_mci_exp = predict_si(mci_exp$par, si_existing, vars5, "exp"))
+
+fit_measures(si_existing, si_existing$p_mci_exp, "MCI + city centre (exponential decay)")
+```
+
+::: {.callout-note title="Analysis"}
+- The exponential decay fits better than the power decay on three of the five measures. The squared correlation over the pairs rises from 0.245 to 0.270, the root mean square error falls from 49.4 to 48.6, and the negative log-likelihood falls from 2,825,895 to 2,817,923. The error on the trips ending is the same at 0.761.
+- The decay is 0.109 for each kilometre of distance. The two decay parameters are not directly comparable, because one applies to the logarithm of the distance and the other to the distance itself. The comparison rests on the fit measures.
+- The attraction exponents barely change, at 0.694 for bus stops, −0.438 for education, 0.161 for retail, 0.375 for health and −0.459 for the distance to the city centre. The result does not depend on the shape of the decay.
+- This is the best fit of the models so far, and it agrees with the comparison of decay shapes in section 5.3, where the exponential shape fitted the band averages best.
+:::
+
+### 6.5 Competing Destinations
+
+A destination surrounded by many other attractive stations competes for the same trips. This is the theory of competing destinations (Fotheringham, 1983). The access of a station to the others is the sum of their attraction divided by the distance. It is calculated for each station from its pairs as an origin, and its logarithm is added as a further variable to the exponential model.
+
+```{r}
+comp_access <- si_existing %>%
+  group_by(origin) %>%
+  summarise(access = sum(attraction / distance), .groups = "drop")
+
+si_existing <- si_existing %>%
+  mutate(ln_comp = log(comp_access$access[match(destination, comp_access$origin)]))
+
+sum(is.na(si_existing$ln_comp))
+```
+
+The model is fitted:
+
+```{r}
+vars6 <- c(vars5, "ln_comp")
+mci_comp <- fit_si(si_existing, vars6, decay = "exp")
+
+round(c(setNames(mci_comp$par[1:6], vars6), decay_per_km = mci_comp$par[7]), 3)
+mci_comp$convergence
+
+si_existing <- si_existing %>%
+  mutate(p_mci_comp = predict_si(mci_comp$par, si_existing, vars6, "exp"))
+
+fit_measures(si_existing, si_existing$p_mci_comp, "+ competing destinations (exponential decay)")
+```
+
+```{r}
+si_existing %>%
+  distinct(destination, ln_comp, ln_cbd) %>%
+  summarise(stations = n(),
+            pearson = round(cor(ln_comp, ln_cbd), 2))
+```
+
+::: {.callout-note title="Analysis"}
+- The competing destinations term gives the largest improvement. The squared correlation over the pairs rises from 0.270 to 0.415, the squared correlation of the trips ending from 0.218 to 0.537, and the weighted absolute percentage error falls from 0.761 to 0.588.
+- Its coefficient is −3.204. A station with good access to many other attractive stations receives a smaller share, because it loses trips to its neighbours.
+- The other coefficients change sharply. The coefficient of the distance to the city centre grows from −0.459 to −1.360, and the coefficient of education moves from −0.438 to −0.032. The access term and the distance to the city centre both measure how central a station is, and their correlation is −0.68. The model splits the effect of centrality between the two, which makes each coefficient hard to read on its own.
+:::
+
+### 6.6 Spatial Pattern of the Residuals
+
+The exponential model without the competing term is checked for a spatial pattern in its errors. The residual of a station is the observed minus the predicted trips ending, divided by the square root of the predicted trips.
+
+```{r}
+resid_table <- si_existing %>%
+  mutate(pred_trips = trips_from * p_mci_exp) %>%
+  group_by(destination) %>%
+  summarise(obs = sum(trips), pred = sum(pred_trips), .groups = "drop") %>%
+  mutate(resid = (obs - pred) / sqrt(pred))
+
+station_resid <- stations_existing %>%
+  mutate(resid = resid_table$resid[match(station_code, resid_table$destination)])
+
+sum(is.na(station_resid$resid))
+```
+
+The residuals are mapped:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 5
+
+resid_labels <- bind_rows(station_resid %>% slice_max(resid, n = 5),
+                          station_resid %>% slice_min(resid, n = 5))
+
+ggplot() +
+  geom_sf(data = sg_boundary, fill = "grey95", colour = "grey60", linewidth = 0.2) +
+  geom_sf(data = station_resid, aes(colour = resid), size = 2.5) +
+  geom_text_repel(data = resid_labels,
+                  aes(label = station_name, geometry = geometry),
+                  stat = "sf_coordinates", size = 3, fontface = "bold",
+                  min.segment.length = 0, box.padding = 0.5, max.overlaps = Inf) +
+  scale_colour_gradient2(low = "#2c7bb6", mid = "grey85", high = "#c0392b", midpoint = 0,
+                         name = "Residual") +
+  theme_void()
+```
+
+```{r}
+bind_rows(resid_table %>% slice_max(resid, n = 5),
+          resid_table %>% slice_min(resid, n = 5)) %>%
+  left_join(names_lookup, by = c("destination" = "station_code")) %>%
+  transmute(station_name, observed = round(obs), predicted = round(pred),
+            residual = round(resid, 1))
+```
+
+Moran's I of the residuals is calculated with **sfdep**, with the six nearest stations as neighbours:
+
+```{r}
+nb <- st_knn(station_resid$geometry, k = 6)
+wt <- st_weights(nb, style = "W")
+
+global_moran_test(station_resid$resid, nb, wt)
+global_moran_perm(station_resid$resid, nb, wt, nsim = 499)
+```
+
+::: {.callout-note title="Analysis"}
+- The residuals are not spread at random across the island. Moran's I is 0.263 against an expectation of −0.005, with a p-value of 3.182e-12. The permutation test ranks the observed value 500th of 500, which gives the same conclusion.
+- The model misses most at the stations with the most arrivals. It predicts 9,101 trips ending at Raffles Place against 29,622 observed, 5,473 at Tanjong Pagar against 17,063, and 5,813 at Jurong East against 16,731.
+- The largest errors in the other direction are at small stations near the city centre. The model predicts 7,812 trips ending at Prince Edward Road against 532 observed, and 9,414 at Maxwell against 2,271.
+- Both groups lie in the south centre of the island. The distance to the city centre raises the predicted arrivals of every station near the centre, and the model cannot separate a major employment centre from a small station a few hundred metres away. The attraction variables count facilities in a catchment, and no variable in the data counts jobs.
+:::
+
+### 6.7 Sensitivity to the Unstable Stations
+
+The model is fitted again without the 16 stations flagged as unstable in section 4.2.6.
+
+```{r}
+si_stable <- si_existing %>%
+  filter(!origin %in% unstable_stations$station_code,
+         !destination %in% unstable_stations$station_code)
+
+nrow(si_stable)
+
+mci_stable <- fit_si(si_stable, vars5, decay = "exp")
+
+sensitivity <- rbind(all_stations = mci_exp$par, without_unstable = mci_stable$par)
+colnames(sensitivity) <- c(vars5, "decay_per_km")
+round(sensitivity, 3)
+```
+
+::: {.callout-note title="Analysis"}
+- Removing the 16 unstable stations leaves 168 stations and 28,056 pairs.
+- The parameters barely move. The decay goes from 0.109 to 0.108 for each kilometre, and every coefficient keeps its sign. The largest changes are the bus stop exponent, from 0.694 to 0.793, and the education exponent, from −0.438 to −0.507.
+- The model therefore does not rest on the 16 stations, and they are kept in the calibration.
+:::
+
+### 6.8 The Chosen Model
+
+The nine models are compared in one table:
+
+```{r}
+results <- bind_rows(
+  fit_measures(si_existing, si_existing$p_equal, "Equal shares"),
+  fit_measures(si_existing, si_existing$p_huff_fixed, "Huff, fixed (1, 2)"),
+  fit_measures(si_existing, si_existing$p_huff_cal, "Huff, calibrated (power)"),
+  fit_measures(si_existing, si_existing$p_huff_cal_exp, "Huff, calibrated (exponential)"),
+  fit_measures(si_existing, si_existing$p_mci, "MCI, four attractions (regression)"),
+  fit_measures(si_existing, si_existing$p_mci_ml, "MCI, four attractions (ML)"),
+  fit_measures(si_existing, si_existing$p_mci_cbd, "MCI + city centre (power decay)"),
+  fit_measures(si_existing, si_existing$p_mci_exp, "MCI + city centre (exponential decay)"),
+  fit_measures(si_existing, si_existing$p_mci_comp, "+ competing destinations (exponential decay)"))
+
+results
+```
+
+::: {.callout-note title="Analysis"}
+- The fit improves at every step of the ladder except the fixed Huff model, which is the worst of the nine. The squared correlation over the pairs rises from 0.124 for equal shares to 0.270 for the exponential model with the city centre, and the squared correlation of the trips ending from 0.044 to 0.218.
+- The two largest gains come from giving each attraction variable its own exponent and from adding the distance to the city centre. The first raises the squared correlation of the trips ending from 0.005 to 0.125, and the second from 0.125 to 0.215.
+- The exponential decay is better than the power decay in both places it is tested, with the single attraction variable (0.175 against 0.161) and with the five variables (0.270 against 0.245).
+- The competing destinations model is the best of the nine on every measure.
+:::
+
+The parameters of the chosen model, the exponential model with the city centre, are collected.
+
+```{r}
+final_par <- setNames(mci_exp$par, c(vars5, "decay_per_km"))
+round(final_par, 3)
+```
+
+Five-fold validation is done by origin. Every pair of an origin falls in the same fold. The model is fitted on four fifths of the origins and used to predict the shares of the remaining fifth.
+
+```{r}
+origin_folds <- tibble(origin = unique(si_existing$origin)) %>%
+  mutate(fold = sample(rep(1:5, length.out = n())))
+
+si_existing <- si_existing %>%
+  mutate(fold = origin_folds$fold[match(origin, origin_folds$origin)],
+         p_cv = NA_real_)
+
+for (f in 1:5) {
+  train <- si_existing %>% filter(fold != f)
+  test_rows <- si_existing$fold == f
+  fit <- fit_si(train, vars5, decay = "exp")
+  si_existing$p_cv[test_rows] <- predict_si(fit$par, si_existing[test_rows, ], vars5, "exp")
+}
+
+sum(is.na(si_existing$p_cv))
+```
+
+The fit of the chosen model is compared on the data it was fitted on and on the held-out origins.
+
+```{r}
+bind_rows(
+  fit_measures(si_existing, si_existing$p_mci_exp, "In sample"),
+  fit_measures(si_existing, si_existing$p_cv, "Five-fold by origin"))
+```
+
+::: {.callout-note title="Analysis"}
+- The chosen model predicts the held-out origins as well as the origins it was fitted on. The squared correlation over the pairs is 0.269 against 0.270 in sample, and the root mean square error, the squared correlation of the trips ending and the weighted absolute percentage error are identical to three decimal places.
+- The five parameters are therefore not fitted to the particular origins in the data, and the model can be applied to stations whose trips are not observed.
+- The level of accuracy remains modest. The model accounts for 0.218 of the variation in the trips ending, leaves a weighted absolute percentage error of 0.761, and leaves a spatial pattern in its errors, as section 6.6 shows. The predicted ridership of the proposed stations is an indication of the order of magnitude rather than a forecast.
+:::
+
+## 7 Ridership of Existing Stations
+
+The model distributes the trips starting at an origin among the possible destinations. The trips starting at an existing station are taken from the data and are reproduced exactly. The quantity the model predicts is the number of trips ending at each station, which is the sum over all origins of the trips starting there multiplied by the share of the pair.
+
+### 7.1 Predicted and Observed Arrivals
+
+The predicted trips ending at each station are added up and compared with the observed trips:
+
+```{r}
+station_pred <- si_existing %>%
+  mutate(pred_trips = trips_from * p_mci_exp) %>%
+  group_by(destination) %>%
+  summarise(observed = sum(trips), predicted = sum(pred_trips), .groups = "drop") %>%
+  left_join(names_lookup, by = c("destination" = "station_code")) %>%
+  mutate(ratio = predicted / observed)
+
+station_pred %>%
+  summarise(stations = n(),
+            total_observed = round(sum(observed)),
+            total_predicted = round(sum(predicted)))
+```
+
+The agreement between the two is measured by the ordinary correlation, by the rank correlation and by the ratio of the predicted to the observed trips:
+
+```{r}
+station_pred %>%
+  summarise(pearson = round(cor(observed, predicted), 3),
+            spearman = round(cor(observed, predicted, method = "spearman"), 3),
+            median_ratio = round(median(ratio), 2),
+            between_half_and_double = sum(ratio > 0.5 & ratio < 2))
+```
+
+The two measures are plotted against each other. A station on the dashed line is predicted exactly:
+
+```{r}
+scatter_labels <- station_pred %>% slice_max(observed, n = 5)
+
+ggplot(station_pred, aes(observed, predicted)) +
+  geom_abline(slope = 1, intercept = 0, colour = "grey50", linetype = "dashed") +
+  geom_point(alpha = 0.6, colour = "#c0392b") +
+  geom_text_repel(data = scatter_labels, aes(label = station_name),
+                  size = 3, fontface = "bold", min.segment.length = 0,
+                  box.padding = 0.5, max.overlaps = Inf) +
+  scale_x_log10() +
+  scale_y_log10() +
+  labs(x = "Observed trips ending per weekday (log scale)",
+       y = "Predicted trips ending per weekday (log scale)") +
+  theme_minimal()
+```
+
+::: {.callout-note title="Analysis"}
+- The points do not follow the dashed line. Stations with few observed arrivals lie above it, where the model predicts more trips than were observed. Stations with many observed arrivals lie below it, where the model predicts fewer.
+- The predicted values also cover a much narrower range than the observed ones. The observed arrivals run from under 100 to nearly 30,000, while almost every prediction falls between 1,000 and 10,000.
+:::
+
+The ten stations with the most observed arrivals are listed with their predictions.
+
+```{r}
+station_pred %>%
+  slice_max(observed, n = 10) %>%
+  transmute(station_name, observed = round(observed), predicted = round(predicted),
+            ratio = round(ratio, 2))
+```
+
+::: {.callout-note title="Analysis"}
+- Every one of the 10 stations with the most observed arrivals is under-predicted. The ratios range from 0.22 at Newton to 0.72 at Bugis.
+:::
+
+The two measures are mapped side by side:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 9
+
+pred_map <- stations_existing %>%
+  left_join(station_pred %>% select(destination, observed, predicted),
+            by = c("station_code" = "destination")) %>%
+  pivot_longer(c(observed, predicted), names_to = "measure", values_to = "trips") %>%
+  mutate(measure = factor(measure,
+                          levels = c("observed", "predicted"),
+                          labels = c("Observed trips ending", "Predicted trips ending"))) %>%
+  arrange(measure, desc(trips))
+
+ggplot() +
+  geom_sf(data = sg_boundary, fill = "grey95", colour = "grey60", linewidth = 0.2) +
+  geom_sf(data = pred_map, aes(size = trips),
+          shape = 21, fill = "#e74c3c", colour = "#7f1d1d", stroke = 0.3, alpha = 0.6) +
+  scale_size_area(max_size = 12, breaks = c(5000, 10000, 20000, 30000),
+                  name = "Trips per weekday") +
+  facet_wrap(~ measure, ncol = 1) +
+  theme_void() +
+  theme(strip.text = element_text(face = "bold", size = 11))
+```
+
+::: {.callout-note title="Analysis"}
+- The two maps show the same pattern. In the observed panel, a few very large circles stand out in the south centre and most of the other circles are small. In the predicted panel, the circles are much closer in size, and no station stands out.
+:::
+
+### 7.2 Accuracy by Size of Station
+
+The stations are divided into four groups of equal size by their observed arrivals. The middle station of each group is compared.
+
+```{r}
+station_pred %>%
+  mutate(group = ntile(observed, 4)) %>%
+  group_by(group) %>%
+  summarise(stations = n(),
+            median_observed = round(median(observed)),
+            median_predicted = round(median(predicted)),
+            median_ratio = round(median(ratio), 2),
+            .groups = "drop")
+```
+
+The five stations whose arrivals are most over-predicted are listed:
+
+```{r}
+station_pred %>%
+  slice_max(ratio, n = 5) %>%
+  transmute(station_name, observed = round(observed), predicted = round(predicted),
+            ratio = round(ratio, 1))
+```
+
+::: {.callout-note title="Analysis"}
+- The model pulls every station towards the middle of the range. The quietest quarter of stations has a middle value of 246 observed arrivals against 2,037 predicted, a ratio of 9.3. The busiest quarter has 7,109 observed against 3,485 predicted, a ratio of 0.52.
+- Only the third quarter is predicted well, with a ratio of 0.90.
+- The largest errors are at small stations. The model predicts 3,000 trips ending at Keppel against 18 observed, and 1,239 at Teck Lee against 28.
+- The attraction variables count facilities within 800 m of a station. A quiet station in a built-up area has a catchment much like that of a busy one, and nothing in the data separates the two. The predicted ridership of a proposed station is therefore an indication of the order of magnitude. A station that will in fact be quiet is likely to be over-predicted.
+:::
+
+## 8 Ridership of the Proposed Stations
+
+The model distributes the trips starting at an origin. A proposed station has no observed trips, and hence its trips starting are estimated before the model can be applied.
+
+### 8.1 Residential Demand of Each Station
+
+Each HDB building is shared among the stations by a Huff model. A building gives most of its area to the station nearest to it, and a building between two stations splits its area between them. The distance from every building to every station is calculated first.
+
+```{r}
+hdb_dist <- st_distance(hdb_points, stations_all)
+hdb_dist_km <- matrix(as.numeric(hdb_dist), nrow = nrow(hdb_points)) / 1000
+
+dim(hdb_dist_km)
+```
+
+The demand of a station is the HDB area assigned to it, scaled so that the total matches the observed trips. The weight of a station falls with the distance to the building.
+
+```{r}
+assign_demand <- function(beta, dist_km, area, total) {
+  weight <- exp(-beta * dist_km)
+  prob <- weight / rowSums(weight)
+  share <- colSums(area * prob)
+  total * share / sum(share)
+}
+```
+
+The decay is calibrated on the existing stations, by choosing the value that comes closest to the observed trips starting.
+
+```{r}
+existing_cols <- which(stations_all$status == "Existing")
+observed_from <- ridership$trips_from[match(stations_all$station_code[existing_cols],
+                                            ridership$station_code)]
+total_trips <- sum(observed_from)
+
+sse_beta <- function(beta) {
+  sum((assign_demand(beta, hdb_dist_km[, existing_cols], hdb_points$area_m2, total_trips) -
+       observed_from)^2)
+}
+
+beta_fit <- optimize(sse_beta, interval = c(0.2, 5))
+round(beta_fit$minimum, 3)
+```
+
+::: {.callout-note title="Analysis"}
+- The calibrated decay is 1.469 for each kilometre. A building 500 m from a station gives it about twice the weight it gives a station 1 km away.
+:::
+
+The estimated demand is compared with the observed trips starting:
+
+```{r}
+origin_check <- tibble(
+  station_code = stations_all$station_code[existing_cols],
+  observed = observed_from,
+  estimated = assign_demand(beta_fit$minimum, hdb_dist_km[, existing_cols],
+                            hdb_points$area_m2, total_trips)) %>%
+  mutate(ratio = estimated / observed)
+
+origin_check %>%
+  summarise(pearson = round(cor(observed, estimated), 3),
+            spearman = round(cor(observed, estimated, method = "spearman"), 3),
+            median_ratio = round(median(ratio), 2),
+            between_half_and_double = sum(ratio > 0.5 & ratio < 2))
+```
+
+```{r}
+ggplot(origin_check, aes(observed, estimated)) +
+  geom_abline(slope = 1, intercept = 0, colour = "grey50", linetype = "dashed") +
+  geom_point(alpha = 0.6, colour = "#2c7bb6") +
+  scale_x_log10() +
+  scale_y_log10() +
+  labs(x = "Observed trips starting per weekday (log scale)",
+       y = "Estimated residential demand (log scale)") +
+  theme_minimal()
+```
+
+The five stations whose demand is most under-estimated are listed:
+
+```{r}
+origin_check %>%
+  left_join(names_lookup, by = "station_code") %>%
+  slice_min(ratio, n = 5) %>%
+  transmute(station_name, observed = round(observed), estimated = round(estimated),
+            ratio = round(ratio, 2))
+```
+
+The same assignment is applied to all 213 stations:
+
+```{r}
+origin_all <- stations_all %>%
+  st_drop_geometry() %>%
+  select(station_code, station_name, status) %>%
+  mutate(demand = assign_demand(beta_fit$minimum, hdb_dist_km,
+                                hdb_points$area_m2, total_trips))
+
+origin_all %>%
+  group_by(status) %>%
+  summarise(stations = n(),
+            total_demand = round(sum(demand)),
+            median_demand = round(median(demand)),
+            .groups = "drop")
+```
+
+::: {.callout-note title="Analysis"}
+- The estimated demand matches the observed trips starting far better than the HDB area in the 800m catchment, which section 4.9.2 compares. The correlation rises from 0.39 to 0.744. The median ratio of the estimated to the observed demand is 1.02, and 95 of the 184 stations fall between half and double the observed value.
+- The estimate is poor where the residents do not live in HDB flats. The three stations on the Tuas section serve industrial areas with no HDB housing nearby, and the estimate for Tuas Link is 3 trips against 1,465 observed.
+- The estimate is also poor at interchanges that residents reach by another line rather than on foot. Newton is estimated at 450 against 9,304 observed, and Stevens at 224 against 2,116.
+- Across the 213 stations, the 29 proposed stations are given 89,933 trips, with a median demand of 3,108 against 2,195 for the existing stations. The proposed stations sit in areas with more HDB housing than the average existing station.
+:::
+
+### 8.2 Trips Starting after the New Lines Open
+
+A new station draws its residents from the stations around it. The residential demand of section 8.1 is therefore estimated twice: once over the 184 existing stations and once over all 213. The ratio of the two gives the change in the residential demand of each existing station.
+
+```{r}
+demand_before <- assign_demand(beta_fit$minimum, hdb_dist_km[, existing_cols],
+                               hdb_points$area_m2, total_trips)
+
+demand_change <- tibble(
+  station_code = stations_all$station_code[existing_cols],
+  demand_before = demand_before,
+  demand_after = origin_all$demand[existing_cols]) %>%
+  mutate(factor = demand_after / demand_before)
+
+summary(demand_change$factor)
+```
+
+::: {.callout-note title="Analysis"}
+- No existing station gains residential demand, since the largest ratio is 1.0000. A new station can only take assigned area from the stations around it.
+- Half of the existing stations lose less than 1.5 per cent of their demand, with a median ratio of 0.9853. The most affected station keeps only a quarter of its demand, with a ratio of 0.2494.
+:::
+
+The trips starting at an existing station are the observed trips multiplied by this ratio, so the observed level is kept and only the change comes from the model. A proposed station takes its assigned demand. The total is then rescaled to the observed total, which holds the new lines to redistributing trips rather than generating them:
+
+```{r}
+trips_start <- origin_all %>%
+  mutate(observed_from = ridership$trips_from[match(station_code, ridership$station_code)],
+         factor = demand_change$factor[match(station_code, demand_change$station_code)],
+         trips_from_new = if_else(status == "Existing", observed_from * factor, demand)) %>%
+  mutate(trips_from_new = trips_from_new * total_trips / sum(trips_from_new))
+
+trips_start %>%
+  group_by(status) %>%
+  summarise(stations = n(),
+            total = round(sum(trips_from_new)),
+            median = round(median(trips_from_new)),
+            .groups = "drop")
+```
+
+::: {.callout-note title="Analysis"}
+- 88,558 of the 570,993 trips start at the 29 proposed stations, which is about 16 per cent of the morning peak. The trips starting at the existing stations fall from 570,993 to 482,435.
+:::
+
+### 8.3 Predicted Ridership of the Proposed Stations
+
+The chosen model of section 6.8 is applied to all 45,156 pairs of the 213 stations. The variables are prepared in the same way as for the existing stations:
+
+```{r}
+si_all <- si_all %>%
+  mutate(cbd_km = destinations$cbd_km[match(destination, destinations$station_code)],
+         ln_bus = log(bus_stops + 1),
+         ln_edu = log(education + 1),
+         ln_retail = log(retail + 1),
+         ln_health = log(health + 1),
+         ln_cbd = log(cbd_km + 0.5),
+         ln_dist = log(distance),
+         dist_km = distance / 1000,
+         trips_from_new = trips_start$trips_from_new[match(origin, trips_start$station_code)])
+
+sum(is.na(si_all$ln_cbd))
+sum(is.na(si_all$trips_from_new))
+```
+
+The shares of every pair are predicted and turned into trips.
+
+```{r}
+si_all <- si_all %>%
+  mutate(p_pred = predict_si(mci_exp$par, si_all, vars5, "exp"),
+         pred_trips = trips_from_new * p_pred)
+
+si_all %>%
+  group_by(origin) %>%
+  summarise(total = sum(p_pred)) %>%
+  summarise(smallest = round(min(total), 6), largest = round(max(total), 6))
+```
+
+The ridership of a station is the trips starting there plus the trips ending there:
+
+```{r}
+pred_all <- si_all %>%
+  group_by(destination) %>%
+  summarise(arriving = sum(pred_trips), .groups = "drop") %>%
+  left_join(trips_start %>% select(station_code, station_name, status, trips_from_new),
+            by = c("destination" = "station_code")) %>%
+  left_join(stations_proposed %>% st_drop_geometry() %>% select(station_code, line),
+            by = c("destination" = "station_code")) %>%
+  rename(starting = trips_from_new) %>%
+  mutate(ridership = starting + arriving)
+```
+
+The predictions are summarised by line:
+
+```{r}
+pred_all %>%
+  filter(status == "Proposed") %>%
+  group_by(line) %>%
+  summarise(stations = n(),
+            total_starting = round(sum(starting)),
+            total_arriving = round(sum(arriving)),
+            total_ridership = round(sum(ridership)),
+            median_ridership = round(median(ridership)),
+            .groups = "drop")
+```
+
+::: {.callout-note title="Analysis"}
+- The 8 Cross Island Line stations are predicted 51,835 trips per weekday in total, of which 36,166 start at them and 15,670 end at them. The 21 Jurong Region Line stations are predicted 88,333 trips, of which 52,392 start and 35,941 end.
+- The Cross Island Line stations are busier station for station, with a median of 6,871 against 4,528.
+:::
+
+All 29 proposed stations are listed:
+
+```{r}
+pred_all %>%
+  filter(status == "Proposed") %>%
+  arrange(desc(ridership)) %>%
+  transmute(station_name, line,
+            starting = round(starting),
+            arriving = round(arriving),
+            ridership = round(starting) + round(arriving)) %>%
+  print(n = 29)
+```
+
+::: {.callout-note title="Analysis"}
+- The four busiest proposed stations are all on the Cross Island Line: Tampines North at 11,936, Pasir Ris East at 9,527, Serangoon North at 7,938 and Teck Ghee at 7,761. All four lie in built-up housing areas.
+- The five quietest are Aviation Park at 655, Peng Kang Hill at 935, Nanyang Crescent at 1,123, Jurong Pier at 1,398 and Nanyang Gateway at 1,663. The predicted ridership of the proposed stations therefore spans a factor of about 18.
+- A few stations are predicted to receive more trips than they send. Jurong Town Hall is predicted 4,222 arriving against 1,803 starting, Tukang 1,725 against 999, and Jurong Pier 1,154 against 244. These stations lie in business and industrial areas with little HDB housing nearby.
+:::
+
+The proposed stations are compared with the existing ones.
+
+```{r}
+pred_all %>%
+  group_by(status) %>%
+  summarise(stations = n(),
+            median_ridership = round(median(ridership)),
+            .groups = "drop")
+```
+
+::: {.callout-note title="Analysis"}
+- The median ridership of the proposed stations, 4,654, is close to that of the existing stations, 4,803. The 29 new stations are predicted to be ordinary stations rather than major ones.
+:::
+
+The predictions are mapped, with the existing stations shown as small grey points.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6
+
+proposed_map <- stations_proposed %>%
+  left_join(pred_all %>% select(destination, ridership),
+            by = c("station_code" = "destination"))
+
+ggplot() +
+  geom_sf(data = sg_boundary, fill = "grey95", colour = "grey60", linewidth = 0.2) +
+  geom_sf(data = stations_existing, size = 0.5, colour = "grey60") +
+  geom_sf(data = proposed_map, aes(size = ridership, fill = line),
+          shape = 21, colour = "grey20", stroke = 0.3, alpha = 0.8) +
+  geom_text_repel(data = proposed_map %>% slice_max(ridership, n = 6),
+                  aes(label = station_name, geometry = geometry),
+                  stat = "sf_coordinates", size = 3, fontface = "bold",
+                  min.segment.length = 0, box.padding = 0.5, max.overlaps = Inf) +
+  scale_size_area(max_size = 10, name = "Predicted ridership") +
+  theme_void()
+```
+
+::: {.callout-note title="Analysis"}
+- The Jurong Region Line stations form a loop in the west, and the Cross Island Line stations run in a line across the east.
+- The largest circles are in the east, around Tampines North and Pasir Ris East. The Jurong Region Line has no station of that size, and its largest are Tengah Park and Tengah Plantation in the centre of the loop.
+:::
+
+## 9 Impact on the Existing Stations
+
+The predictions of section 8 are compared with the predictions for the network as it stands today. Both sides come from the same model, so the difference between them is the effect of the 29 new stations.
+
+### 9.1 Change in the Ridership of Each Station
+
+The arrivals predicted for the 184 existing stations in section 7 are compared with the arrivals predicted for the same stations in the 213 station network.
+
+```{r}
+impact <- station_pred %>%
+  transmute(station_code = destination, station_name, arriving_before = predicted) %>%
+  left_join(pred_all %>% select(destination, starting_after = starting,
+                                arriving_after = arriving),
+            by = c("station_code" = "destination")) %>%
+  mutate(starting_before = ridership$trips_from[match(station_code, ridership$station_code)],
+         ridership_before = starting_before + arriving_before,
+         ridership_after = starting_after + arriving_after,
+         change = (ridership_after - ridership_before) / ridership_before)
+
+impact %>%
+  summarise(stations = n(),
+            arriving_before = round(sum(arriving_before)),
+            arriving_after = round(sum(arriving_after)),
+            ridership_before = round(sum(ridership_before)),
+            ridership_after = round(sum(ridership_after)),
+            median_change = round(median(change), 3)) %>%
+  print(width = Inf)
+```
+
+::: {.callout-note title="Analysis"}
+- The arrivals at the 184 existing stations fall from 570,993 to 519,382, and their total ridership from 1,141,986 to 1,001,817. The median station loses 7.9 per cent of its ridership.
+:::
+
+The number of stations affected by more than a tenth and more than a quarter is counted.
+
+```{r}
+impact %>%
+  summarise(losing_more_than_10_percent = sum(change < -0.10),
+            losing_more_than_25_percent = sum(change < -0.25),
+            gaining = sum(change > 0))
+```
+
+::: {.callout-note title="Analysis"}
+- No existing station gains ridership. The new stations take trips from the stations around them, and the total is held constant.
+- 51 of the 184 stations lose more than a tenth of their ridership, and 16 lose more than a quarter.
+:::
+
+The ten most affected stations are listed:
+
+```{r}
+impact %>%
+  slice_min(change, n = 10) %>%
+  transmute(station_name, ridership_before = round(ridership_before),
+            ridership_after = round(ridership_after), change = round(change, 3))
+```
+
+::: {.callout-note title="Analysis"}
+- The most affected stations are in the west, where the Jurong Region Line runs. Lakeside loses 61.3% of its ridership, Pioneer 59.9% and Boon Lay 59.8%, and each falls from above 12,500 trips to about 5,100.
+- Pasir Ris loses 38.9%. It is one of the seven interchanges that the Cross Island Line joins, and Pasir Ris East is predicted to take part of its catchment.
+- The figure for Changi Airport should be read with care. Its ridership before the new stations is only 1,950 trips, and its catchment holds almost no HDB housing, which section 8.1 shows the demand estimate handles poorly.
+:::
+
+The three least affected stations are listed:
+
+```{r}
+impact %>%
+  slice_max(change, n = 3) %>%
+  transmute(station_name, ridership_before = round(ridership_before),
+            ridership_after = round(ridership_after), change = round(change, 3))
+```
+
+::: {.callout-note title="Analysis"}
+- The least affected stations are in the north, furthest from both new lines. Admiralty, Khatib and Sembawang each lose under 3 per cent of their ridership.
+:::
+
+The change is mapped. The proposed stations are drawn as crosses:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6
+
+impact_map <- stations_existing %>%
+  left_join(impact %>% select(station_code, change), by = "station_code")
+
+ggplot() +
+  geom_sf(data = sg_boundary, fill = "grey95", colour = "grey60", linewidth = 0.2) +
+  geom_sf(data = impact_map, aes(colour = change), size = 2.5) +
+  geom_sf(data = stations_proposed, shape = 4, size = 1.8, colour = "grey25") +
+  scale_colour_gradient(low = "#c0392b", high = "grey80",
+                        name = "Change in ridership") +
+  theme_void()
+```
+
+::: {.callout-note title="Analysis"}
+- The darkest points lie along the western corridor, where the crosses marking the proposed stations are closest together. A second group of affected stations runs along the eastern end of the Cross Island Line.
+- The stations in the north and in the centre of the island are barely affected, and most of the points there are pale.
+:::
+
+### 9.2 Market Areas of the Stations
+
+The residential demand of section 8.1 gives every HDB building a share for each station. The share going to the 29 proposed stations shows which parts of the island the new lines serve.
+
+```{r}
+weight_all <- exp(-beta_fit$minimum * hdb_dist_km)
+prob_all <- weight_all / rowSums(weight_all)
+proposed_cols <- which(stations_all$status == "Proposed")
+
+hdb_market <- hdb_points %>%
+  mutate(new_share = rowSums(prob_all[, proposed_cols]),
+         nearest_before = stations_all$station_code[existing_cols][
+           max.col(-hdb_dist_km[, existing_cols])],
+         nearest_after = stations_all$station_code[max.col(-hdb_dist_km)])
+
+hdb_market %>%
+  st_drop_geometry() %>%
+  summarise(buildings = n(),
+            median_new_share = round(median(new_share), 3),
+            over_half = sum(new_share > 0.5),
+            over_quarter = sum(new_share > 0.25))
+```
+
+::: {.callout-note title="Analysis"}
+- Most HDB buildings are barely affected. The median building sends 1 per cent of its area to the proposed stations.
+- The effect is concentrated instead: 1,913 of the 13,436 buildings send more than half of their area to a proposed station, and 3,379 send more than a quarter.
+:::
+
+The buildings whose nearest station becomes one of the proposed stations are counted, together with their share of the total HDB area.
+
+```{r}
+hdb_market %>%
+  st_drop_geometry() %>%
+  summarise(switching = sum(nearest_after %in% stations_all$station_code[proposed_cols]),
+            area_share = round(sum(area_m2[nearest_after %in%
+                                 stations_all$station_code[proposed_cols]]) /
+                               sum(area_m2), 3))
+```
+
+::: {.callout-note title="Analysis"}
+- 2,112 buildings are closer to a proposed station than to any existing one, and they hold 16.1 per cent of the total HDB floor area of the island.
+:::
+
+The share of each building going to a proposed station is mapped:
+
+```{r}
+#| fig-width: 10
+#| fig-height: 6
+
+ggplot() +
+  geom_sf(data = sg_boundary, fill = "grey97", colour = "grey60", linewidth = 0.2) +
+  geom_sf(data = hdb_market %>% arrange(new_share), aes(colour = new_share), size = 0.4) +
+  geom_sf(data = stations_proposed, shape = 4, size = 1.8, colour = "grey25") +
+  scale_colour_gradient(low = "grey85", high = "#c0392b",
+                        name = "Share going to a\nproposed station") +
+  theme_void()
+```
+
+::: {.callout-note title="Analysis"}
+- The affected buildings form three groups. The largest is in the west around Tengah and Jurong, the second lies in the centre along the middle of the Cross Island Line, and the third is in the east around Tampines and Pasir Ris.
+- Most of the island is pale, including the whole of the north and the south centre. The new lines reach housing that the existing network already passes in those areas.
+:::
+
+The existing stations that lose the most buildings are listed:
+
+```{r}
+hdb_market %>%
+  st_drop_geometry() %>%
+  filter(nearest_after %in% stations_all$station_code[proposed_cols]) %>%
+  count(nearest_before, sort = TRUE) %>%
+  slice_head(n = 8) %>%
+  left_join(names_lookup, by = c("nearest_before" = "station_code")) %>%
+  transmute(station_name, buildings = n)
+```
+
+::: {.callout-note title="Analysis"}
+- Pasir Ris loses the most buildings, at 330. Six of the other seven are in the west, where the Jurong Region Line runs: Pioneer, Lakeside, Chinese Garden, Boon Lay, South View and Jurong East.
+:::
+
+The proposed stations that gain the most buildings are listed:
+
+```{r}
+hdb_market %>%
+  st_drop_geometry() %>%
+  filter(nearest_after %in% stations_all$station_code[proposed_cols]) %>%
+  count(nearest_after, sort = TRUE) %>%
+  slice_head(n = 8) %>%
+  left_join(stations_proposed %>% st_drop_geometry() %>%
+              select(station_code, station_name),
+            by = c("nearest_after" = "station_code")) %>%
+  transmute(station_name, buildings = n)
+```
+
+::: {.callout-note title="Analysis"}
+- Tampines North gains the most buildings, at 275, followed by Pasir Ris East at 265 and Serangoon North at 233. These are the same three stations with the highest predicted ridership in section 8.3, which shows that their predictions rest on the residential area they take over.
+:::
+
+### 9.3 Comparison with the Competing Destinations Model
+
+Section 6.8 sets the competing destinations model aside for the predictions, because its access variable changes when stations are added. This section reports what it predicts, so the effect of that choice can be seen. The access of each station is recalculated over the 213 stations.
+
+```{r}
+si_all <- si_all %>%
+  mutate(attraction = bus_stops + education + retail + health + 1)
+
+comp_access_all <- si_all %>%
+  group_by(origin) %>%
+  summarise(access = sum(attraction / distance), .groups = "drop")
+
+si_all <- si_all %>%
+  mutate(ln_comp = log(comp_access_all$access[match(destination, comp_access_all$origin)]))
+
+sum(is.na(si_all$ln_comp))
+```
+
+The arrivals are predicted with the competing destinations model, both for the 213 station network and for the network as it stands:
+
+```{r}
+si_all <- si_all %>%
+  mutate(p_comp = predict_si(mci_comp$par, si_all, vars6, "exp"),
+         comp_trips = trips_from_new * p_comp)
+
+comp_after <- si_all %>%
+  group_by(destination) %>%
+  summarise(arriving_comp = sum(comp_trips), .groups = "drop")
+
+comp_before <- si_existing %>%
+  mutate(pred_trips = trips_from * p_mci_comp) %>%
+  group_by(destination) %>%
+  summarise(arriving_comp_before = sum(pred_trips), .groups = "drop")
+```
+
+The predictions for the 29 proposed stations are compared under the two models.
+
+```{r}
+compare_proposed <- pred_all %>%
+  filter(status == "Proposed") %>%
+  select(destination, station_name, line, starting, chosen = ridership) %>%
+  left_join(comp_after, by = "destination") %>%
+  mutate(competing = starting + arriving_comp,
+         ratio = competing / chosen)
+
+compare_proposed %>%
+  summarise(stations = n(),
+            total_chosen = round(sum(chosen)),
+            total_competing = round(sum(competing)),
+            pearson = round(cor(chosen, competing), 3),
+            spearman = round(cor(chosen, competing, method = "spearman"), 3)) %>%
+  print(width = Inf)
+```
+
+::: {.callout-note title="Analysis"}
+- The two models agree closely on the proposed stations. The correlation between the two sets of predictions is 0.979 and the rank correlation is 0.975.
+- The competing destinations model predicts 133,573 trips in total against 140,169, which is about 5 per cent lower.
+:::
+
+```{r}
+ggplot(compare_proposed, aes(chosen, competing)) +
+  geom_abline(slope = 1, intercept = 0, colour = "grey50", linetype = "dashed") +
+  geom_point(aes(colour = line), size = 2) +
+  labs(x = "Predicted ridership, chosen model",
+       y = "Predicted ridership, competing destinations model",
+       colour = "Line") +
+  theme_minimal()
+```
+
+::: {.callout-note title="Analysis"}
+- Almost every station lies close to the dashed line, so the choice between the two models changes little for most of the proposed stations.
+- The stations furthest from the line are the two Cross Island Line stations at the top right and the points at the bottom left, where the competing destinations model predicts more.
+:::
+
+The four stations with the largest difference in each direction are listed below.
+
+```{r}
+bind_rows(compare_proposed %>% slice_max(ratio, n = 4),
+          compare_proposed %>% slice_min(ratio, n = 4)) %>%
+  transmute(station_name, line, chosen = round(chosen), competing = round(competing),
+            ratio = round(ratio, 2))
+```
+
+::: {.callout-note title="Analysis"}
+- The competing destinations model predicts more at the isolated stations. Aviation Park rises from 655 to 1,493, Nanyang Crescent from 1,123 to 1,582 and Peng Kang Hill from 935 to 1,277. These stations have few other stations near them, so they face little competition under that model.
+- It predicts less at the stations that sit among other new stations. Tukang falls from 2,724 to 2,064, Defu from 4,654 to 3,566, and Enterprise from 3,635 to 2,990.
+:::
+
+The effect on the existing stations is compared under the two models.
+
+```{r}
+compare_existing <- impact %>%
+  select(station_code, station_name, change) %>%
+  left_join(comp_before, by = c("station_code" = "destination")) %>%
+  left_join(comp_after, by = c("station_code" = "destination")) %>%
+  mutate(starting_before = ridership$trips_from[match(station_code, ridership$station_code)],
+         starting_after = pred_all$starting[match(station_code, pred_all$destination)],
+         before_comp = starting_before + arriving_comp_before,
+         after_comp = starting_after + arriving_comp,
+         change_comp = (after_comp - before_comp) / before_comp)
+
+compare_existing %>%
+  summarise(median_chosen = round(median(change), 3),
+            median_competing = round(median(change_comp), 3),
+            losing_over_25_chosen = sum(change < -0.25),
+            losing_over_25_competing = sum(change_comp < -0.25),
+            gaining_competing = sum(change_comp > 0)) %>%
+  print(width = Inf)
+```
+
+::: {.callout-note title="Analysis"}
+- The two models disagree about the effect on the existing stations. The median station loses 4.3 per cent of its ridership under the competing destinations model against 7.9 per cent under the chosen model.
+- The losses are also more concentrated. 21 stations lose more than a quarter of their ridership against 16, and 38 stations gain ridership, where none gains under the chosen model.
+:::
+
+The six stations most affected under the competing destinations model are listed:
+
+```{r}
+compare_existing %>%
+  slice_min(change_comp, n = 6) %>%
+  transmute(station_name, chosen = round(change, 3), competing = round(change_comp, 3))
+```
+
+::: {.callout-note title="Analysis"}
+- Both models name the same stations in the west as the most affected, but the competing destinations model makes the losses deeper. Boon Lay falls by 68.5 per cent against 59.8 per cent, and Jurong East by 60.3 per cent against 37.5 per cent.
+:::
+
+The four stations that gain the most under that model are listed:
+
+```{r}
+compare_existing %>%
+  slice_max(change_comp, n = 4) %>%
+  transmute(station_name, chosen = round(change, 3), competing = round(change_comp, 3))
+```
+
+::: {.callout-note title="Analysis"}
+- The four stations that gain the most are all close to the city centre, and each gains between 5.5 and 7.1 per cent. The 29 new stations all lie away from the centre, so the access measure rises most at the stations on the edge of the network and the central stations become relatively more attractive.
+- The two models therefore give the same answer to the second objective and different answers to the third. The predicted ridership of the proposed stations barely depends on which of the two is used, while the predicted effect on the existing stations does.
+:::
+
+## 10 Limitations
+
+- The ridership data records how many trips run between each pair of stations. It holds no information about the travellers or their reasons for travelling. The study covers the weekday morning peak of three months only, and the findings do not extend to other parts of the day or to weekends.
+- Nothing in the data counts jobs, which are what draws most trips in the morning peak. The attraction of a station is measured instead by the facilities around it and by its distance from the city centre. Both are rough substitutes.
+- The residents around a station are measured by HDB building footprints. Private housing is left out, and the floor area of a building is unknown. Areas where people work rather than live are not represented at all.
+- Distance is measured in straight lines between stations. The rail network, the travel time, and the need to change lines play no part in the model.
+- The proposed stations have no observed ridership. Their residential demand and their attraction are both inferred from relationships fitted on the existing stations, and those relationships may not hold in areas that are still being built.
+- The model explains part of the variation in station ridership, and its errors still follow a spatial pattern across the island. The predicted figures should be read as an indication of the scale of a station's ridership, not as a forecast. The total number of trips is also held constant, which assumes that the new lines draw their riders from the existing stations and attract no additional travel.
+
+## 11 Conclusion
+
+A spatial interaction model of station-level ridership is calibrated on the 33,672 pairs formed by the 184 existing stations. Nine models are compared. The chosen one gives each attraction variable its own exponent, measures the pull of the city centre, and weights distance by an exponential decay of 0.109 for each kilometre. It reproduces the trips ending at a station with a squared correlation of 0.218, and it performs as well on origins held out of the calibration as on those used for it.
+
+Applied to the proposed network, the model gives the 29 new stations 140,169 trips per weekday in the morning peak, about 12% of the ridership of the network as it stands. The 21 Jurong Region Line stations account for 88,333 of these and the 8 Cross Island Line stations for 51,835. Station for station the Cross Island Line is the busier of the two, with a median of 6,871 against 4,528. Tampines North, Pasir Ris East and Serangoon North are the three busiest.
+
+The new stations draw their riders from the stations around them. The ridership of the existing stations falls from 1,141,986 to 1,001,817 trips, with no station gaining. The losses concentrate in the west along the Jurong Region Line, where Lakeside, Pioneer and Boon Lay each lose about 60%. The market areas show how this happens: 2,112 HDB buildings, holding 16.1% of the island's HDB footprint area, lie closer to a new station than to any existing one.
+
+The predictions and the impact estimates carry different weight. The predicted ridership of the proposed stations holds at a correlation of 0.979 between the two best models, while their estimates of the loss at the existing stations differ by nearly half. The predictions are best used to compare stations with one another and to show where the new lines overlap the network that already exists.
+
+## 12 References
+
+Chelvan, V. P. (2026, January 30). More rides on MRT in 2025 as LRT use fell; bus ride numbers still below pre-Covid-19 levels. *The Straits Times*. https://www.straitstimes.com/singapore/transport/more-people-used-mrt-in-2025-as-lrt-ridership-falls-bus-numbers-still-below-pre-covid-levels
+
+Fotheringham, A. S. (1983). A new set of spatial-interaction models: The theory of competing destinations. *Environment and Planning A, 15*(1), 15–36. https://doi.org/10.1177/0308518X8301500103
+
+Guerra, E., Cervero, R., & Tischler, D. (2012). Half-mile circle: Does it best represent transit station catchments? *Transportation Research Record, 2276*, 101–109. https://doi.org/10.3141/2276-12
+
+Land Transport Authority. (2025, January 24). *Hume Station to open on 28 February 2025*. https://www.lta.gov.sg/content/ltagov/en/newsroom/2025/1/news-releases/hume_station_to_open.html
+
+Land Transport Authority. (2026a, May 14). *Circle Line Stage 6 to open for public preview on 4 July 2026*. https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/5/news-releases/circle-line-stage-6-to-open-for-public-preview-on-4-july-2026.html
+
+Land Transport Authority. (2026b, March 4). *Factsheet: The next phase of rail development*. https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/3/news-releases/next-phase-of-rail-development.html
+
+Land Transport Guru. (2026a, May 30). *Circle Line Stage 6 to commence service on 12 Jul 2026*. https://landtransportguru.net/circle-line-stage-6-start-service-12jul26/
+
+Land Transport Guru. (2026b, September 5). *Stevens MRT Station*. https://landtransportguru.net/stevens-station/
+
+Ministry of Manpower. (2025, June 16). *Public holidays for 2026*. https://www.mom.gov.sg/newsroom/press-releases/2025/0616-public-holidays-for-2026
+
+Wieland, T. (2017). Market area analysis for retail and service locations with MCI. *The R Journal, 9*(1), 298–323. https://journal.r-project.org/archive/2017/RJ-2017-020/RJ-2017-020.pdf

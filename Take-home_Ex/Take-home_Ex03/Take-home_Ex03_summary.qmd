@@ -1,0 +1,13 @@
+---
+title: "Geospatial Analytics for Urban Sustainability"
+subtitle: "Topic: Analysing Political Violence in Myanmar"
+author: "Lin Yuxuan"
+format:
+  revealjs:
+    theme: simple
+    slide-number: true
+    progress: true
+    transition: fade
+    smaller: true
+---
+
