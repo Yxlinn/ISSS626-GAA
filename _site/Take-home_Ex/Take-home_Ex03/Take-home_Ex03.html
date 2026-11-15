@@ -422,7 +422,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">November 14, 2026</p>
+      <p class="date-modified">November 15, 2026</p>
     </div>
   </div>
     
@@ -835,7 +835,7 @@ $ comment      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N
 </section>
 <section id="stevens" class="level5">
 <h5 class="anchored" data-anchor-id="stevens">4.1.2.2 Stevens</h5>
-<p>Stevens is a single interchange station served by the Downtown Line (<code>DT10</code>) and the Thomson-East Coast Line (<code>TE11</code>) (<a href="https://landtransportguru.net/stevens-station/">Land Transport Guru, 2026b</a>). The origin-destination data list the two as separate codes.. The trips recorded between them are counted.</p>
+<p>Stevens is a single interchange station served by the Downtown Line (<code>DT10</code>) and the Thomson-East Coast Line (<code>TE11</code>) (<a href="https://landtransportguru.net/stevens-station/">Land Transport Guru, 2026b</a>). The origin-destination data list the two as separate codes. The trips recorded between them are counted.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>od_raw <span class="sc">%&gt;%</span></span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>((ORIGIN_PT_CODE <span class="sc">==</span> <span class="st">"DT10"</span> <span class="sc">&amp;</span> DESTINATION_PT_CODE <span class="sc">==</span> <span class="st">"TE11"</span>) <span class="sc">|</span></span>
@@ -1306,8 +1306,8 @@ $ comment      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N
 <ul>
 <li>Most stations are stable. The median ratio is 0.98, and the middle half of the stations lie between 0.923 and 1.005.</li>
 <li>16 stations fall outside the range of 0.8 to 1.25. Nine have a ratio below 0.8, and seven have a ratio above 1.25. TE27 is shown as 0.8 because the ratio is rounded.</li>
-<li>Keppel (<code>CC30</code>), Cantonment (<code>CC31</code>) and Prince Edward Road (<code>CC32</code>) opened on 12 July 2026 (Land Transport Authority, 2026). July therefore includes weekdays before they opened. Their ratios are 1.74, 1.37 and 2.07 respectively.</li>
-<li>Hume (<code>DT4</code>) opened on 28 February 2025 (Land Transport Authority, 2025). Its ridership is still small (101 to 164 trips per weekday) and rises each month.</li>
+<li>Keppel (<code>CC30</code>), Cantonment (<code>CC31</code>) and Prince Edward Road (<code>CC32</code>) opened on 12 July 2026 (<a href="https://www.lta.gov.sg/content/ltagov/en/newsroom/2026/5/news-releases/circle-line-stage-6-to-open-for-public-preview-on-4-july-2026.html">Land Transport Authority, 2026a</a>). July therefore includes weekdays before they opened. Their ratios are 1.74, 1.37 and 2.07 respectively.</li>
+<li>Hume (<code>DT4</code>) opened on 28 February 2025 (<a href="https://www.lta.gov.sg/content/ltagov/en/newsroom/2025/1/news-releases/hume_station_to_open.html">Land Transport Authority, 2025</a>). Its ridership is still small (101 to 164 trips per weekday) and rises each month.</li>
 <li>The falls at Dover (0.32), Teck Whye (0.44), Woodlands North (0.51) and Yio Chu Kang (0.66) are the largest. The rise at Punggol Coast (1.59) is the largest among the stations that were already open. The data do not show the causes of these changes.</li>
 <li>These 16 stations stay in the pooled data and are flagged. In the Model Calibration section, the model is fitted twice, with and without them, to check whether they affect the result.</li>
 </ul>
@@ -1772,7 +1772,7 @@ $ comment      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, "missing_from_mas
 </section>
 <section id="locating-the-proposed-stations" class="level4">
 <h4 class="anchored" data-anchor-id="locating-the-proposed-stations">4.4.3 Locating the Proposed Stations</h4>
-<p>The Master Plan 2025 Rail Station Layer holds the planned station footprints. It is imported with <em>st_read()</em>:</p>
+<p>The Master Plan 2025 Rail Station Layer holds the planned station footprints. It is imported using <code>st_read()</code> of the <strong>sf</strong> package.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a>mp_raw <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial/MasterPlan2025RailStationLayer.geojson"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1852,7 +1852,7 @@ $ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((103.9585 1...., MULTIPOLY
 </ul>
 </div>
 </div>
-<p>The new stations are matched to the layer by name. Names that carry a space at the start or end cannot be matched, so the spaces are removed first. The names that differ before and after the removal are listed:</p>
+<p>The new stations are matched to the layer by name. A name that carries a space at the start or end cannot be matched, and the spaces are removed first.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb113"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a>mp_raw <span class="sc">%&gt;%</span></span>
 <span id="cb113-2"><a href="#cb113-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
@@ -2033,7 +2033,7 @@ $ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((103.9585 1...., MULTIPOLY
 <p>The number of residents near each station is not available as counts. The footprints of HDB buildings are used instead as a measure of residential mass: the number of buildings and their footprint area within each station catchment.</p>
 <section id="importing-the-footprints" class="level4">
 <h4 class="anchored" data-anchor-id="importing-the-footprints">4.6.1 Importing the Footprints</h4>
-<p>The footprints are stored in <code>HDBExistingBuilding.geojson</code>. The file is imported with <code>st_read()</code> of <strong>sf</strong> package.</p>
+<p>The footprints are stored in <code>HDBExistingBuilding.geojson</code>. The file is imported using <code>st_read()</code> of the <strong>sf</strong> package.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb128"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb128-1"><a href="#cb128-1" aria-hidden="true" tabindex="-1"></a>hdb_raw <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial/HDBExistingBuilding.geojson"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -2247,7 +2247,7 @@ SHAPE.AREA  SHAPE.LEN
 <p>The bus stops show how well a station is served by the buses that bring passengers to it. A station with more bus stops nearby is easier to reach from the surrounding areas. The number of bus stops within each station catchment is therefore used as a candidate attraction variable.</p>
 <section id="importing-the-bus-stops" class="level5">
 <h5 class="anchored" data-anchor-id="importing-the-bus-stops">4.7.1.1 Importing the Bus Stops</h5>
-<p>The bus stops are stored as a shapefile. It is imported with <code>st_read()</code> of <strong>sf</strong> package.</p>
+<p>The bus stops are stored as a shapefile. It is imported using <code>st_read()</code> of the <strong>sf</strong> package.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb154"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1" aria-hidden="true" tabindex="-1"></a>bus_raw <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial/BusStopLocation_Sep2026"</span>, <span class="at">layer =</span> <span class="st">"BusStop"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -3883,7 +3883,7 @@ $ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((103.9321 1...., MULTIPOLY
 <li>The rank correlation with the trips ending is positive for <code>retail</code> (0.287), <code>health</code> (0.191), and <code>bus_stops</code> (0.124), and close to zero for <code>education</code> (−0.028).</li>
 <li>The correlation with the distance to the city centre is negative (−0.256): the stations closer to the city centre receive more trips.</li>
 <li>In the plots, the fitted lines rise for <code>retail</code>, <code>health</code> and (slightly) <code>bus_stops</code>, fall for the distance to the city centre, and are almost flat for <code>education</code>.</li>
-<li>The points are widely spread around every line, so no variable explains the trips ending on its own. <code>health</code> and <code>education</code> have many stations with no objects in the catchment.</li>
+<li>As the points are widely spread around every line, no variable explains the trips ending on its own. <code>health</code> and <code>education</code> have many stations with no objects in the catchment.</li>
 </ul>
 </div>
 </div>
@@ -4074,7 +4074,7 @@ $ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((103.9321 1...., MULTIPOLY
 </section>
 <section id="huff-model-with-calibrated-exponents" class="level3">
 <h3 class="anchored" data-anchor-id="huff-model-with-calibrated-exponents">6.3 Huff Model with Calibrated Exponents</h3>
-<p>The exponents are estimated by maximum likelihood: they are chosen so that the observed trips are most probable under the shares of the model. The distance is weighted either by a power function (<code>decay = "power"</code>, the form of the Huff model) or by an exponential function (<code>decay = "exp"</code>, with the distance in kilometres). The decay parameter is written as a positive number, so a larger value means a faster decay.</p>
+<p>The exponents are estimated by maximum likelihood: they are chosen so that the observed trips are most probable under the shares of the model. The distance is weighted either by a power function (<code>decay = "power"</code>, the form of the Huff model) or by an exponential function (<code>decay = "exp"</code>, with the distance in kilometres). The decay parameter is written as a positive number, with a larger value meaning a faster decay.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb309"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb309-1"><a href="#cb309-1" aria-hidden="true" tabindex="-1"></a>nll_si <span class="ot">&lt;-</span> <span class="cf">function</span>(par, data, vars, <span class="at">decay =</span> <span class="st">"power"</span>) {</span>
 <span id="cb309-2"><a href="#cb309-2" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">&lt;-</span> <span class="fu">length</span>(vars)</span>
@@ -4214,7 +4214,7 @@ $ geometry   &lt;MULTIPOLYGON [°]&gt; MULTIPOLYGON (((103.9321 1...., MULTIPOLY
 <h3 class="anchored" data-anchor-id="multiplicative-competitive-interaction-model">6.4 Multiplicative Competitive Interaction Model</h3>
 <section id="regression-on-log-centred-shares" class="level4">
 <h4 class="anchored" data-anchor-id="regression-on-log-centred-shares">6.4.1 Regression on Log-Centred Shares</h4>
-<p>The multiplicative competitive interaction model gives each attraction variable its own exponent. It is fitted by a regression through the origin on log-centred values: the logarithm of each share and of each variable has the mean of its origin removed. The logarithm needs positive shares, so the 4,385 pairs without trips are left out of this fit.</p>
+<p>The multiplicative competitive interaction model gives each attraction variable its own exponent. It is fitted by a regression without an intercept, on log-centred values. Log-centring takes the logarithm of each share and of each variable, then subtracts the mean of its origin station. The logarithm of a zero share is undefined, and the 4,385 pairs without trips are therefore left out of this fit.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb317"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb317-1"><a href="#cb317-1" aria-hidden="true" tabindex="-1"></a>si_pos <span class="ot">&lt;-</span> si_existing <span class="sc">%&gt;%</span></span>
 <span id="cb317-2"><a href="#cb317-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(trips <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
@@ -4310,7 +4310,7 @@ F-statistic: 634.7 on 5 and 29282 DF,  p-value: &lt; 2.2e-16</code></pre>
 <li>The distance coefficient is −0.533, which corresponds to a power decay with an exponent of 0.533. It is close to the 0.586 of the single attraction model in section 6.3.</li>
 <li>Three of the four attraction variables have a positive coefficient: retail 0.506, health 0.468 and bus stops 0.284. The coefficient of education is negative at −0.490.</li>
 <li>The negative coefficient of education does not mean that schools reduce the number of arrivals. Section 5.4 shows almost no relationship between the education count and the trips ending, with a rank correlation of −0.028. Section 4.9.3 shows the education count correlating with the bus stop count (0.51) and the retail count (0.52). The coefficient is the effect of education once those correlated variables are accounted for.</li>
-<li>The squared correlation of the regression is 0.098, so the five variables account for a small part of the variation in the log-centred shares.</li>
+<li>The squared correlation of the regression is 0.098, which means the five variables account for a small part of the variation in the log-centred shares.</li>
 <li>Predicted against observed trips, this model improves on every model of sections 6.2 and 6.3. The squared correlation over the pairs rises to 0.225 and the squared correlation of the trips ending to 0.133, which is the first model to explain any part of which stations receive the trips.</li>
 </ul>
 </div>
@@ -4954,7 +4954,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 </section>
 <section id="accuracy-by-size-of-station" class="level3">
 <h3 class="anchored" data-anchor-id="accuracy-by-size-of-station">7.2 Accuracy by Size of Station</h3>
-<p>The stations are divided into four groups of equal size by their observed arrivals. The middle station of each group is compared.</p>
+<p>The stations are divided into four groups of equal size by their observed arrivals. The median of each group is compared.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb381"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb381-1"><a href="#cb381-1" aria-hidden="true" tabindex="-1"></a>station_pred <span class="sc">%&gt;%</span></span>
 <span id="cb381-2"><a href="#cb381-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">group =</span> <span class="fu">ntile</span>(observed, <span class="dv">4</span>)) <span class="sc">%&gt;%</span></span>
@@ -5158,7 +5158,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 <div class="callout-body-container callout-body">
 <ul>
 <li>The estimated demand matches the observed trips starting far better than the HDB area in the 800m catchment, which section 4.9.2 compares. The correlation rises from 0.39 to 0.744. The median ratio of the estimated to the observed demand is 1.02, and 95 of the 184 stations fall between half and double the observed value.</li>
-<li>The estimate is poor where the residents do not live in HDB flats. The three stations on the Tuas section serve industrial areas with no HDB housing nearby, and the estimate for Tuas Link is 3 trips against 1,465 observed.</li>
+<li>The estimate is poor where the trips do not come from housing near the station. The three stations on the Tuas section serve industrial areas with no HDB housing nearby, and the estimate for Tuas Link is 3 trips against 1,465 observed.</li>
 <li>The estimate is also poor at interchanges that residents reach by another line rather than on foot. Newton is estimated at 450 against 9,304 observed, and Stevens at 224 against 2,116.</li>
 <li>Across the 213 stations, the 29 proposed stations are given 89,933 trips, with a median demand of 3,108 against 2,195 for the existing stations. The proposed stations sit in areas with more HDB housing than the average existing station.</li>
 </ul>
@@ -5195,12 +5195,12 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li>No existing station gains residential demand, since the largest ratio is 1.0000. A new station can only take assigned area from the stations around it.</li>
-<li>Half of the existing stations lose less than 1.5 per cent of their demand, with a median ratio of 0.9853. The most affected station keeps only a quarter of its demand, with a ratio of 0.2494.</li>
+<li>No existing station gains residential demand, since the largest ratio is 1.0000.</li>
+<li>Half of the existing stations lose less than 1.5% of their demand, with a median ratio of 0.9853. The most affected station keeps only a quarter of its demand, with a ratio of 0.2494.</li>
 </ul>
 </div>
 </div>
-<p>The trips starting at an existing station are the observed trips multiplied by this ratio, so the observed level is kept and only the change comes from the model. A proposed station takes its assigned demand. The total is then rescaled to the observed total, which holds the new lines to redistributing trips rather than generating them:</p>
+<p>The trips starting at an existing station are the observed trips multiplied by <code>factor</code>, the ratio of its residential demand after the new stations to its demand before. This keeps the observed level and takes only the change from the model. A proposed station takes its assigned demand instead. The total is then rescaled to the observed total, which holds the new lines to redistributing trips rather than generating them.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb399"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb399-1"><a href="#cb399-1" aria-hidden="true" tabindex="-1"></a>trips_start <span class="ot">&lt;-</span> origin_all <span class="sc">%&gt;%</span></span>
 <span id="cb399-2"><a href="#cb399-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">observed_from =</span> ridership<span class="sc">$</span>trips_from[<span class="fu">match</span>(station_code, ridership<span class="sc">$</span>station_code)],</span>
@@ -5233,14 +5233,14 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li>88,558 of the 570,993 trips start at the 29 proposed stations, which is about 16 per cent of the morning peak. The trips starting at the existing stations fall from 570,993 to 482,435.</li>
+<li>88,558 of the 570,993 trips start at the 29 proposed stations, which is approximately 15.5% of the morning peak. The trips starting at the existing stations fall from 570,993 to 482,435.</li>
 </ul>
 </div>
 </div>
 </section>
 <section id="predicted-ridership-of-the-proposed-stations" class="level3">
 <h3 class="anchored" data-anchor-id="predicted-ridership-of-the-proposed-stations">8.3 Predicted Ridership of the Proposed Stations</h3>
-<p>The chosen model of section 6.8 is applied to all 45,156 pairs of the 213 stations. The variables are prepared in the same way as for the existing stations:</p>
+<p>The chosen model of section 6.8 is applied to all 45,156 pairs of the 213 stations. The variables are prepared in the same way as for the existing stations.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb401"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb401-1"><a href="#cb401-1" aria-hidden="true" tabindex="-1"></a>si_all <span class="ot">&lt;-</span> si_all <span class="sc">%&gt;%</span></span>
 <span id="cb401-2"><a href="#cb401-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cbd_km =</span> destinations<span class="sc">$</span>cbd_km[<span class="fu">match</span>(destination, destinations<span class="sc">$</span>station_code)],</span>
@@ -5463,7 +5463,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 </section>
 <section id="impact-on-the-existing-stations" class="level2">
 <h2 class="anchored" data-anchor-id="impact-on-the-existing-stations">9 Impact on the Existing Stations</h2>
-<p>The predictions of section 8 are compared with the predictions for the network as it stands today. Both sides come from the same model, so the difference between them is the effect of the 29 new stations.</p>
+<p>The predictions of section 8 are compared with the predictions for the network as it stands today. Both sides come from the same model, and the difference between the two runs is the effect of the 29 new stations.</p>
 <section id="change-in-the-ridership-of-each-station" class="level3">
 <h3 class="anchored" data-anchor-id="change-in-the-ridership-of-each-station">9.1 Change in the Ridership of Each Station</h3>
 <p>The arrivals predicted for the 184 existing stations in section 7 are compared with the arrivals predicted for the same stations in the 213 station network.</p>
@@ -5507,7 +5507,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li>The arrivals at the 184 existing stations fall from 570,993 to 519,382, and their total ridership from 1,141,986 to 1,001,817. The median station loses 7.9 per cent of its ridership.</li>
+<li>The arrivals at the 184 existing stations fall from 570,993 to 519,382, and their total ridership from 1,141,986 to 1,001,817. The median station loses 7.9% of its ridership.</li>
 </ul>
 </div>
 </div>
@@ -5605,11 +5605,11 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li>The least affected stations are in the north, furthest from both new lines. Admiralty, Khatib and Sembawang each lose under 3 per cent of their ridership.</li>
+<li>The least affected stations are in the north, which are far away from both of the new lines. Admiralty, Khatib and Sembawang each lose under 3% of their ridership.</li>
 </ul>
 </div>
 </div>
-<p>The change is mapped. The proposed stations are drawn as crosses:</p>
+<p>The change is mapped. The proposed stations are drawn as crosses.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb423"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb423-1"><a href="#cb423-1" aria-hidden="true" tabindex="-1"></a>impact_map <span class="ot">&lt;-</span> stations_existing <span class="sc">%&gt;%</span></span>
 <span id="cb423-2"><a href="#cb423-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(impact <span class="sc">%&gt;%</span> <span class="fu">select</span>(station_code, change), <span class="at">by =</span> <span class="st">"station_code"</span>)</span>
@@ -5682,12 +5682,12 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li>Most HDB buildings are barely affected. The median building sends 1 per cent of its area to the proposed stations.</li>
+<li>Most HDB buildings are barely affected. The median building sends 1% of its area to the proposed stations.</li>
 <li>The effect is concentrated instead: 1,913 of the 13,436 buildings send more than half of their area to a proposed station, and 3,379 send more than a quarter.</li>
 </ul>
 </div>
 </div>
-<p>The buildings whose nearest station becomes one of the proposed stations are counted, together with their share of the total HDB area.</p>
+<p>The buildings whose nearest station becomes one of the proposed stations are counted, together with their share of the total HDB footprint area.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb426"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb426-1"><a href="#cb426-1" aria-hidden="true" tabindex="-1"></a>hdb_market <span class="sc">%&gt;%</span></span>
 <span id="cb426-2"><a href="#cb426-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
@@ -5711,7 +5711,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li>2,112 buildings are closer to a proposed station than to any existing one, and they hold 16.1 per cent of the total HDB floor area of the island.</li>
+<li>2,112 buildings are closer to a proposed station than to any existing one, and they hold 16.1% of the total HDB footprint area of the island.</li>
 </ul>
 </div>
 </div>
@@ -5825,7 +5825,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 </section>
 <section id="comparison-with-the-competing-destinations-model" class="level3">
 <h3 class="anchored" data-anchor-id="comparison-with-the-competing-destinations-model">9.3 Comparison with the Competing Destinations Model</h3>
-<p>Section 6.8 sets the competing destinations model aside for the predictions, because its access variable changes when stations are added. This section reports what it predicts, so the effect of that choice can be seen. The access of each station is recalculated over the 213 stations.</p>
+<p>The competing destinations model of section 6.5 fits better than the chosen model, but its access variable depends on which stations exist, which is why the model was not used for the predictions. Running it here shows how much that choice changes the results. The access of each station is first recalculated over all 213 stations.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb433"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb433-1"><a href="#cb433-1" aria-hidden="true" tabindex="-1"></a>si_all <span class="ot">&lt;-</span> si_all <span class="sc">%&gt;%</span></span>
 <span id="cb433-2"><a href="#cb433-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">attraction =</span> bus_stops <span class="sc">+</span> education <span class="sc">+</span> retail <span class="sc">+</span> health <span class="sc">+</span> <span class="dv">1</span>)</span>
@@ -5892,7 +5892,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 <div class="callout-body-container callout-body">
 <ul>
 <li>The two models agree closely on the proposed stations. The correlation between the two sets of predictions is 0.979 and the rank correlation is 0.975.</li>
-<li>The competing destinations model predicts 133,573 trips in total against 140,169, which is about 5 per cent lower.</li>
+<li>The competing destinations model predicts 133,573 trips in total against 140,169, which is about 5% lower.</li>
 </ul>
 </div>
 </div>
@@ -5923,7 +5923,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li>Almost every station lies close to the dashed line, so the choice between the two models changes little for most of the proposed stations.</li>
+<li>Almost every station lies close to the dashed line, which shows that the choice between the two models changes little for most of the proposed stations.</li>
 <li>The stations furthest from the line are the two Cross Island Line stations at the top right and the points at the bottom left, where the competing destinations model predicts more.</li>
 </ul>
 </div>
@@ -6004,7 +6004,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li>The two models disagree about the effect on the existing stations. The median station loses 4.3 per cent of its ridership under the competing destinations model against 7.9 per cent under the chosen model.</li>
+<li>The two models disagree about the effect on the existing stations. The median station loses 4.3% of its ridership under the competing destinations model against 7.9% under the chosen model.</li>
 <li>The losses are also more concentrated. 21 stations lose more than a quarter of their ridership against 16, and 38 stations gain ridership, where none gains under the chosen model.</li>
 </ul>
 </div>
@@ -6037,7 +6037,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li>Both models name the same stations in the west as the most affected, but the competing destinations model makes the losses deeper. Boon Lay falls by 68.5 per cent against 59.8 per cent, and Jurong East by 60.3 per cent against 37.5 per cent.</li>
+<li>Both models name the same stations in the west as the most affected, but the competing destinations model makes the losses deeper. Boon Lay falls by 68.5% against 59.8%, and Jurong East by 60.3% against 37.5%.</li>
 </ul>
 </div>
 </div>
@@ -6067,8 +6067,8 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 </div>
 <div class="callout-body-container callout-body">
 <ul>
-<li>The four stations that gain the most are all close to the city centre, and each gains between 5.5 and 7.1 per cent. The 29 new stations all lie away from the centre, so the access measure rises most at the stations on the edge of the network and the central stations become relatively more attractive.</li>
-<li>The two models therefore give the same answer to the second objective and different answers to the third. The predicted ridership of the proposed stations barely depends on which of the two is used, while the predicted effect on the existing stations does.</li>
+<li>The four stations that gain the most are all close to the city centre, and each gains between 5.5% and 7.1%. All 29 new stations are built away from the centre, which adds competition around the outlying stations while leaving the central ones untouched.</li>
+<li>The two models agree on how busy the new stations will be, but disagree on what happens to the existing stations. The ridership predictions are therefore the more reliable of the two results.</li>
 </ul>
 </div>
 </div>
@@ -6079,7 +6079,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 <ul>
 <li>The ridership data records how many trips run between each pair of stations. It holds no information about the travellers or their reasons for travelling. The study covers the weekday morning peak of three months only, and the findings do not extend to other parts of the day or to weekends.</li>
 <li>Nothing in the data counts jobs, which are what draws most trips in the morning peak. The attraction of a station is measured instead by the facilities around it and by its distance from the city centre. Both are rough substitutes.</li>
-<li>The residents around a station are measured by HDB building footprints. Private housing is left out, and the floor area of a building is unknown. Areas where people work rather than live are not represented at all.</li>
+<li>The residents around a station are measured by HDB building footprints. Private housing is left out. Only the ground area of a block is known, which gives a tall block the same weight as a low one of the same outline. Places of work are also not counted, which leaves stations in industrial areas with almost no measured residents.</li>
 <li>Distance is measured in straight lines between stations. The rail network, the travel time, and the need to change lines play no part in the model.</li>
 <li>The proposed stations have no observed ridership. Their residential demand and their attraction are both inferred from relationships fitted on the existing stations, and those relationships may not hold in areas that are still being built.</li>
 <li>The model explains part of the variation in station ridership, and its errors still follow a spatial pattern across the island. The predicted figures should be read as an indication of the scale of a station’s ridership, not as a forecast. The total number of trips is also held constant, which assumes that the new lines draw their riders from the existing stations and attract no additional travel.</li>
@@ -6091,7 +6091,7 @@ without_unstable  0.793 -0.507     0.173     0.355 -0.506        0.108</code></p
 <p>Applied to the proposed network, the model gives the 29 new stations 140,169 trips per weekday in the morning peak, about 12% of the ridership of the network as it stands. The 21 Jurong Region Line stations account for 88,333 of these and the 8 Cross Island Line stations for 51,835. Station for station the Cross Island Line is the busier of the two, with a median of 6,871 against 4,528. Tampines North, Pasir Ris East and Serangoon North are the three busiest.</p>
 <p>The new stations draw their riders from the stations around them. The ridership of the existing stations falls from 1,141,986 to 1,001,817 trips, with no station gaining. The losses concentrate in the west along the Jurong Region Line, where Lakeside, Pioneer and Boon Lay each lose about 60%. The market areas show how this happens: 2,112 HDB buildings, holding 16.1% of the island’s HDB footprint area, lie closer to a new station than to any existing one.</p>
 <p>The predictions and the impact estimates carry different weight. The predicted ridership of the proposed stations holds at a correlation of 0.979 between the two best models, while their estimates of the loss at the existing stations differ by nearly half. The predictions are best used to compare stations with one another and to show where the new lines overlap the network that already exists.</p>
-<p>Two implications follow for planning. Capacity should be considered first for Tampines North, Pasir Ris East and Serangoon North, the three busiest of the proposed stations, all at the eastern end of the Cross Island Line. Bus services in the west would also be worth reviewing, since they feed stations whose catchments the Jurong Region Line takes over.</p>
+<p>Two implications follow for planning. Capacity should be considered first for Tampines North, Pasir Ris East and Serangoon North, the three busiest of the proposed stations and all on the Cross Island Line. Bus services in the west would also be worth reviewing, since they carry residents to stations whose catchments the Jurong Region Line takes over.</p>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">12 References</h2>
